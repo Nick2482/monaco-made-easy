@@ -4,6 +4,7 @@
 (function () {
   "use strict";
   var D = window.MME;
+  var t = function (s, v) { return window.MMEI18N.t(s, v); };
   var SEARCH_URL = "https://photon.komoot.io/api/";
   var AREA = { minLng: 7.395, minLat: 43.718, maxLng: 7.455, maxLat: 43.760 }; // Monaco and Beausoleil
   var CENTRE = { lat: 43.7385, lng: 7.4240 };
@@ -20,7 +21,7 @@
     var out = [];
     Object.keys(D.places).forEach(function (id) {
       var p = D.places[id];
-      if ((p.name + " " + p.short + " " + p.area + (id === "station" ? " train gare railway" : "")).toLowerCase().indexOf(q) !== -1) out.push({ label: p.name, sub: id === "station" ? "We’ll pick the best exit for you" : p.area, lat: p.lat, lng: p.lng, kind: id === "station" ? "station" : "place", placeId: id });
+      if ((p.name + " " + p.short + " " + p.area + " " + t(p.name) + " " + t(p.short) + (id === "station" ? " train gare railway" : "")).toLowerCase().indexOf(q) !== -1) out.push({ label: p.name, sub: id === "station" ? t("We’ll pick the best exit for you") : t(p.area), lat: p.lat, lng: p.lng, kind: id === "station" ? "station" : "place", placeId: id });
     });
     D.lifts.forEach(function (l) {
       if ((l.name + " " + l.where).toLowerCase().indexOf(q) !== -1) out.push({ label: l.name, sub: l.where + ", " + l.area, lat: l.lat, lng: l.lng, kind: l.type });
@@ -41,7 +42,7 @@
         var street = [pr.housenumber, pr.street].filter(Boolean).join(" ");
         var name = pr.name || street;
         if (!name) return null;
-        return { label: name, sub: [KIND_LABEL[pr.osm_value] || "", pr.name ? street : "", pr.city || pr.locality || ""].filter(Boolean).join(", "), lat: c[1], lng: c[0], kind: pr.osm_value || "place" };
+        return { label: name, sub: [KIND_LABEL[pr.osm_value] ? t(KIND_LABEL[pr.osm_value]) : "", pr.name ? street : "", pr.city || pr.locality || ""].filter(Boolean).join(", "), lat: c[1], lng: c[0], kind: pr.osm_value || "place" };
       }).filter(function (x) { return x && inArea(x); });
     }).catch(function () { return []; });
   }
@@ -58,27 +59,29 @@
 
   // ---------- The planner box on the home screen ----------
   var POPULAR = ["casino", "palace", "port", "larvotto", "museum", "beausoleil", "fontvieille", "station", "exotic"];
-  function shortName(id) { var s = D.places[id].short; return s === "Museum" ? "Oceanographic Museum" : s === "Palace" ? "Prince’s Palace" : s; }
+  function shortName(id) { var s = D.places[id].short; return t(s === "Museum" ? "Oceanographic Museum" : s === "Palace" ? "Prince’s Palace" : s); }
+  // Labels are stored in English (or as the place's own name) and translated when shown.
+  function lbl(x) { return x ? t(x.label) : t("My location"); }
 
   function boxHtml() {
     var esc = ui().esc;
     function field(which, label, ph, val) {
       return '<div class="pl-field" data-field="' + which + '"><span class="pl-dot pl-' + which + '" aria-hidden="true"></span>' +
-        '<label for="pl-' + which + '">' + label + "</label>" +
-        '<input id="pl-' + which + '" type="search" autocomplete="off" enterkeyhint="search" placeholder="' + ph + '" value="' + (val ? esc(val.label) : "") + '" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="pl-' + which + '-list">' +
+        '<label for="pl-' + which + '">' + esc(label) + "</label>" +
+        '<input id="pl-' + which + '" type="search" autocomplete="off" enterkeyhint="search" placeholder="' + esc(ph) + '" value="' + (val ? esc(lbl(val)) : "") + '" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="pl-' + which + '-list">' +
         '<ul class="pl-sugg" id="pl-' + which + '-list" role="listbox" hidden></ul></div>';
     }
-    return '<div class="where planner"><p class="where-h">Where do you want to go?</p>' +
-      '<div class="pl-fields">' + field("from", "From", "My location", state.from) + field("to", "To", "Hotel, restaurant, place or address", state.to) + "</div>" +
-      '<p class="pl-popular">Popular:</p><div class="dests">' + POPULAR.map(function (id) {
+    return '<div class="where planner"><p class="where-h">' + esc(t("Where do you want to go?")) + "</p>" +
+      '<div class="pl-fields">' + field("from", t("From"), t("My location"), state.from) + field("to", t("To"), t("Hotel, restaurant, place or address"), state.to) + "</div>" +
+      '<p class="pl-popular">' + esc(t("Popular:")) + '</p><div class="dests">' + POPULAR.map(function (id) {
         return '<button type="button" class="dest" data-to-place="' + id + '">' + esc(shortName(id)) + "</button>";
       }).join("") + "</div>" +
       '<p class="pl-err" id="pl-err" role="alert" hidden></p>' +
-      '<button type="button" class="btn btn-red pl-go" id="pl-go">Show me the easiest way</button>' +
-      '<div class="meet"><button type="button" class="meet-btn" id="meet-open" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 16a3 3 0 0 0-2.4 1.2l-6.8-3.4a3 3 0 0 0 0-1.6l6.8-3.4A3 3 0 1 0 15 7a3 3 0 0 0 .1.8L8.3 11.2a3 3 0 1 0 0 3.6l6.8 3.4A3 3 0 1 0 18 16z"/></svg><span><strong>Meet me here</strong><small>Send a friend your spot. The app shows them the easiest way to you.</small></span></button>' +
-      '<div class="meet-panel" id="meet-panel" hidden><label for="meet-name">Your name (optional)</label><input id="meet-name" autocomplete="given-name" placeholder="e.g. Nick">' +
-      '<button type="button" class="btn btn-white" id="meet-share">Share my location</button><p class="meet-status" id="meet-status" role="status"></p></div></div>' +
-      '<a class="near-link" href="#/map/near">Or see the lifts near me on the map</a></div>';
+      '<button type="button" class="btn btn-red pl-go" id="pl-go">' + esc(t("Show me the easiest way")) + "</button>" +
+      '<div class="meet"><button type="button" class="meet-btn" id="meet-open" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 16a3 3 0 0 0-2.4 1.2l-6.8-3.4a3 3 0 0 0 0-1.6l6.8-3.4A3 3 0 1 0 15 7a3 3 0 0 0 .1.8L8.3 11.2a3 3 0 1 0 0 3.6l6.8 3.4A3 3 0 1 0 18 16z"/></svg><span><strong>' + esc(t("Meet me here")) + "</strong><small>" + esc(t("Send a friend your spot. The app shows them the easiest way to you.")) + "</small></span></button>" +
+      '<div class="meet-panel" id="meet-panel" hidden><label for="meet-name">' + esc(t("Your name (optional)")) + '</label><input id="meet-name" autocomplete="given-name" placeholder="' + esc(t("e.g. Nick")) + '">' +
+      '<button type="button" class="btn btn-white" id="meet-share">' + esc(t("Share my location")) + '</button><p class="meet-status" id="meet-status" role="status"></p></div></div>' +
+      '<a class="near-link" href="#/map/near">' + esc(t("Or see the lifts near me on the map")) + "</a></div>";
   }
 
   function mountBox(root) {
@@ -90,10 +93,10 @@
       var timer = null, items = [];
       function show(results) {
         items = results;
-        if (which === "from") items = [{ label: "My location", sub: "Use where I am now", kind: "me" }].concat(items);
+        if (which === "from") items = [{ label: "My location", sub: t("Use where I am now"), kind: "me" }].concat(items);
         list.innerHTML = items.map(function (it, i) {
-          return '<li role="option" id="pl-' + which + "-o" + i + '" data-i="' + i + '"><strong>' + esc(it.label) + "</strong>" + (it.sub ? "<small>" + esc(it.sub) + "</small>" : "") + "</li>";
-        }).join("") || '<li class="pl-none">No matches in Monaco or Beausoleil yet.</li>';
+          return '<li role="option" id="pl-' + which + "-o" + i + '" data-i="' + i + '"><strong>' + esc(t(it.label)) + "</strong>" + (it.sub ? "<small>" + esc(it.sub) + "</small>" : "") + "</li>";
+        }).join("") || '<li class="pl-none">' + esc(t("No matches in Monaco or Beausoleil yet.")) + "</li>";
         list.hidden = false; input.setAttribute("aria-expanded", "true");
       }
       function hide() { list.hidden = true; input.setAttribute("aria-expanded", "false"); }
@@ -104,7 +107,7 @@
         if (q.length < 2) { if (which === "from") show([]); else hide(); return; }
         var pinned = parseCoords(q);
         if (pinned) {
-          show([{ label: "Shared location", sub: (inArea(pinned) ? "" : "Outside Monaco, ") + pinned.lat.toFixed(5) + ", " + pinned.lng.toFixed(5), lat: pinned.lat, lng: pinned.lng, kind: "pin" }]);
+          show([{ label: "Shared location", sub: (inArea(pinned) ? "" : t("Outside Monaco") + ", ") + pinned.lat.toFixed(5) + ", " + pinned.lng.toFixed(5), lat: pinned.lat, lng: pinned.lng, kind: "pin" }]);
           return;
         }
         var local = localMatches(q);
@@ -123,8 +126,8 @@
       function pick(i) {
         var it = items[i];
         if (!it) return;
-        if (it.kind === "me") { state.from = null; input.value = ""; input.placeholder = "My location"; }
-        else { state[which] = it; input.value = it.label; }
+        if (it.kind === "me") { state.from = null; input.value = ""; input.placeholder = t("My location"); }
+        else { state[which] = it; input.value = t(it.label); }
         hide();
       }
       list.addEventListener("mousedown", function (e) { e.preventDefault(); });
@@ -135,7 +138,7 @@
       if (b) {
         var p = D.places[b.dataset.toPlace];
         state.to = { label: p.name, sub: p.area, lat: p.lat, lng: p.lng, kind: "place", placeId: b.dataset.toPlace };
-        box.querySelector("#pl-to").value = p.name;
+        box.querySelector("#pl-to").value = t(p.name);
         box.querySelectorAll("[data-to-place]").forEach(function (x) { x.classList.toggle("on", x === b); });
       }
     });
@@ -148,7 +151,7 @@
     box.querySelector("#meet-share").addEventListener("click", function () {
       var status = box.querySelector("#meet-status");
       var name = box.querySelector("#meet-name").value.trim();
-      status.textContent = "Finding where you are…";
+      status.textContent = t("Finding where you are…");
       var done = false;
       var stop = M().onLocation(function (pos) {
         if (done) return; done = true; setTimeout(function () { stop(); }, 0);
@@ -157,8 +160,8 @@
     });
     box.querySelector("#pl-go").addEventListener("click", function () {
       var err = box.querySelector("#pl-err");
-      if (!state.to) { err.textContent = box.querySelector("#pl-to").value.trim() ? "Pick a place from the list as you type." : "Choose where you want to go."; err.hidden = false; return; }
-      if (box.querySelector("#pl-from").value.trim() && !state.from) { err.textContent = "Pick your starting point from the list, or clear the box to use your location."; err.hidden = false; return; }
+      if (!state.to) { err.textContent = box.querySelector("#pl-to").value.trim() ? t("Pick a place from the list as you type.") : t("Choose where you want to go."); err.hidden = false; return; }
+      if (box.querySelector("#pl-from").value.trim() && !state.from) { err.textContent = t("Pick your starting point from the list, or clear the box to use your location."); err.hidden = false; return; }
       err.hidden = true;
       state.arrival = null;
       location.hash = "#/plan";
@@ -169,7 +172,7 @@
   var avoidSteps = true;
   var KIND = { walk: "walk", lift: "lift", escalator: "escalator", steps: "steps" };
   var LINE = { walk: { color: "#0b2545", weight: 5 }, lift: { color: "#ce1126", weight: 8 }, escalator: { color: "#1d6fa5", weight: 7 }, steps: { color: "#d9480f", weight: 6, dashArray: "4 6" } };
-  var STEP_LABEL = { walk: "Walk", lift: "Lift", escalator: "Escalator", steps: "Steps" };
+  var STEP_LABEL = { walk: "Walk", lift: "Lift", escalator: "Escalator", steps: "Steps", arrive: "Arrive" };
 
   function curatedFor(fromLbl, to) {
     // Extra tips we've written for popular journeys (e.g. Changing of the Guard).
@@ -179,14 +182,14 @@
   var screen = {
     html: function () {
       var esc = ui().esc;
-      if (!state.to) return '<section class="page"><h1>Plan a route</h1><p class="lede-dark">Choose where you want to go on the home screen.</p><p><a class="btn btn-red" href="#/">Back to the start</a></p></section>';
-      var fromLabel = state.from ? state.from.label : "My location";
+      if (!state.to) return '<section class="page"><h1>' + esc(t("Plan a route")) + '</h1><p class="lede-dark">' + esc(t("Choose where you want to go on the home screen.")) + '</p><p><a class="btn btn-red" href="#/">' + esc(t("Back to the start")) + "</a></p></section>";
+      var fromLabel = lbl(state.from);
       return '<section class="plan">' +
-        '<a class="back" href="#/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>Change</a>' +
-        '<ol class="pl-ends"><li><span class="pl-dot pl-from"></span><div><small>From</small><strong id="plan-from">' + esc(fromLabel) + "</strong></div></li>" +
-        '<li><span class="pl-dot pl-to"></span><div><small>To</small><strong>' + esc(state.to.label) + "</strong></div></li></ol>" +
+        '<a class="back" href="#/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + esc(t("Change")) + "</a>" +
+        '<ol class="pl-ends"><li><span class="pl-dot pl-from"></span><div><small>' + esc(t("From")) + '</small><strong id="plan-from">' + esc(fromLabel) + "</strong></div></li>" +
+        '<li><span class="pl-dot pl-to"></span><div><small>' + esc(t("To")) + "</small><strong>" + esc(lbl(state.to)) + "</strong></div></li></ol>" +
         '<div class="map plan-map" id="plan-map"></div>' +
-        '<div id="plan-body"><p class="lede-dark" role="status">' + (state.from ? "Working out the easiest way…" : "Finding where you are…") + "</p></div></section>";
+        '<div id="plan-body"><p class="lede-dark" role="status">' + esc(state.from ? t("Working out the easiest way…") : t("Finding where you are…")) + "</p></div></section>";
     },
     mount: function (root) {
       if (!state.to) return;
@@ -211,52 +214,55 @@
         var h = note ? '<p class="summary">' + note + "</p>" : "";
         var outside = r && (r.startGap > 300 || r.endGap > 300);
         if (!r) {
-          h += '<p class="summary">We couldn’t find a walking route between these two places on our Monaco map.</p>';
+          h += '<p class="summary">' + esc(t("We couldn’t find a walking route between these two places on our Monaco map.")) + "</p>";
           L.polyline([[from.lat, from.lng], [to.lat, to.lng]], { color: "#0b2545", weight: 3, dashArray: "6 8" }).addTo(layer);
         } else {
           r.lines.forEach(function (ln) { L.polyline(ln.pts, LINE[ln.kind]).addTo(layer); });
           if (r.startGap > 40) L.polyline([[from.lat, from.lng], r.start], { color: "#0b2545", weight: 3, dashArray: "2 8" }).addTo(layer);
           if (r.endGap > 40) L.polyline([r.end, [to.lat, to.lng]], { color: "#0b2545", weight: 3, dashArray: "2 8" }).addTo(layer);
           var vert = r.heights
-            ? "<li><strong>" + (r.climbed < 5 ? "Hardly any climb" : r.climbed + " m climb") + "</strong><span>" + (r.saved > 4 ? "lifts do " + r.saved + " m for you" : r.lifts ? r.lifts + " lift" + (r.lifts === 1 ? "" : "s") + " on the way" : "on foot") + "</span></li>"
-            : "<li><strong>" + r.lifts + " lift" + (r.lifts === 1 ? "" : "s") + "</strong><span>" + (r.escalators ? "and " + r.escalators + " escalator" + (r.escalators === 1 ? "" : "s") : "on the way") + "</span></li>";
-          h += '<ul class="facts"><li><strong>' + r.minutes + " min</strong><span>" + (r.metres >= 1000 ? (r.metres / 1000).toFixed(1) + " km" : r.metres + " m") + " on foot</span></li>" +
-            "<li><strong>" + (r.stepFree ? "No steps" : r.steps + " set" + (r.steps === 1 ? "" : "s") + " of steps") + "</strong><span>" + (r.stepFree ? "step-free" : "on this route") + "</span></li>" + vert + "</ul>";
+            ? "<li><strong>" + esc(r.climbed < 5 ? t("Hardly any climb") : t("{n} m climb", { n: r.climbed })) + "</strong><span>" + esc(r.saved > 4 ? t("lifts do {n} m for you", { n: r.saved }) : r.lifts ? t(r.lifts === 1 ? "1 lift on the way" : "{n} lifts on the way", { n: r.lifts }) : t("on foot")) + "</span></li>"
+            : "<li><strong>" + esc(t(r.lifts === 1 ? "1 lift" : "{n} lifts", { n: r.lifts })) + "</strong><span>" + esc(r.escalators ? t(r.escalators === 1 ? "and 1 escalator" : "and {n} escalators", { n: r.escalators }) : t("on the way")) + "</span></li>";
+          h += '<ul class="facts"><li><strong>' + esc(t("{n} min", { n: r.minutes })) + "</strong><span>" + esc(t("{d} on foot", { d: r.metres >= 1000 ? (r.metres / 1000).toFixed(1) + " km" : r.metres + " m" })) + "</span></li>" +
+            "<li><strong>" + esc(r.stepFree ? t("No steps") : t(r.steps === 1 ? "1 set of steps" : "{n} sets of steps", { n: r.steps })) + "</strong><span>" + esc(r.stepFree ? t("step-free") : t("on this route")) + "</span></li>" + vert + "</ul>";
           if (other && Math.abs(other.minutes - r.minutes) >= 3 && other.steps !== r.steps) {
             h += avoidSteps
-              ? '<button type="button" class="alt-btn" data-mode="steps">Happy with steps? There’s a quicker way: ' + other.minutes + " min with " + other.steps + " set" + (other.steps === 1 ? "" : "s") + " of steps</button>"
-              : '<button type="button" class="alt-btn" data-mode="easy">Show the easiest way instead: ' + other.minutes + " min" + (other.stepFree ? ", no steps" : "") + "</button>";
+              ? '<button type="button" class="alt-btn" data-mode="steps">' + esc(t(other.steps === 1 ? "Happy with steps? There’s a quicker way: {m} min with 1 set of steps" : "Happy with steps? There’s a quicker way: {m} min with {n} sets of steps", { m: other.minutes, n: other.steps })) + "</button>"
+              : '<button type="button" class="alt-btn" data-mode="easy">' + esc(t(other.stepFree ? "Show the easiest way instead: {m} min, no steps" : "Show the easiest way instead: {m} min", { m: other.minutes })) + "</button>";
           }
           var list = [];
-          if (exit) list.push({ kind: "walk", text: "Inside the station, follow the signs for the “" + exit.name + "” exit." });
-          if (r.startGap > 40) list.push({ kind: "walk", text: "Walk about " + Math.round(r.startGap / 10) * 10 + " m to the start of the route." });
+          if (exit) list.push({ kind: "walk", text: t("Inside the station, follow the signs for the “{exit}” exit.", { exit: exit.name }) });
+          if (r.startGap > 40) list.push({ kind: "walk", text: t("Walk about {n} m to the start of the route.", { n: Math.round(r.startGap / 10) * 10 }) });
           list = list.concat(r.directions);
-          list.push({ kind: "arrive", text: (outside && r.endGap > 300 ? "From here it’s about " + Math.round(r.endGap / 70) + " min further, outside our mapped area." : "Arrive at " + to.label + ".") });
-          h += '<h2 class="steps-h">Step by step</h2><ol class="steps">' + list.map(function (st) {
-            var t = st.kind === "steps" ? "steps" : st.kind;
-            return '<li class="step step-' + t + '"><span class="step-ico" style="--c:' + (t === "steps" ? "#d9480f" : ui().COLORS[t] || "#0b2545") + '">' + icon(t === "steps" ? "steps" : t) + "</span>" +
-              '<div><span class="step-type">' + (STEP_LABEL[t] || "Arrive") + "</span><p>" + esc(st.text) + "</p></div></li>";
+          list.push({ kind: "arrive", text: (outside && r.endGap > 300 ? t("From here it’s about {n} min further, outside our mapped area.", { n: Math.round(r.endGap / 70) }) : t("Arrive at {place}.", { place: lbl(to) })) });
+          h += '<h2 class="steps-h">' + esc(t("Step by step")) + '</h2><ol class="steps">' + list.map(function (st) {
+            var k = st.kind === "steps" ? "steps" : st.kind;
+            return '<li class="step step-' + k + '"><span class="step-ico" style="--c:' + (k === "steps" ? "#d9480f" : ui().COLORS[k] || "#0b2545") + '">' + icon(k === "steps" ? "steps" : k) + "</span>" +
+              '<div><span class="step-type">' + esc(t(STEP_LABEL[k] || "Arrive")) + "</span><p>" + esc(st.text) + "</p></div></li>";
           }).join("") + "</ol>";
-          if (!r.stepFree) h += '<aside class="note"><strong>Steps on this route</strong><p>This is the easiest way we can find, but it still has some steps. A taxi may be easier with heavy bags.</p></aside>';
-          if (outside) h += '<aside class="note"><strong>Beausoleil and beyond</strong><p>Part of this journey is outside Monaco’s mapped lifts. Beausoleil is coming soon. Use Google Maps for that part.</p></aside>';
+          if (!r.stepFree) h += '<aside class="note"><strong>' + esc(t("Steps on this route")) + "</strong><p>" + esc(t("This is the easiest way we can find, but it still has some steps. A taxi may be easier with heavy bags.")) + "</p></aside>";
+          if (outside) h += '<aside class="note"><strong>' + esc(t("Beausoleil and beyond")) + "</strong><p>" + esc(t("Part of this journey is outside Monaco’s mapped lifts. Beausoleil is coming soon. Use Google Maps for that part.")) + "</p></aside>";
           var T = window.MMETransit, bus = T && T.ready ? T.busOption(from, to) : null;
           if (bus && (bus.minutes + 2 < r.minutes || (r.climbed > 30 && bus.minutes < r.minutes + 8) || (!r.stepFree && bus.minutes < r.minutes + 8))) {
             var now = T.monacoNow();
-            h += '<div class="bus-opt"><div class="bus-opt-top">' + T.badge(bus.p.r) + "<span>Or take the bus: about " + bus.minutes + " min in total</span></div>" +
-              "<p>Walk " + (bus.walkTo <= 1 ? "1 minute" : bus.walkTo + " minutes") + " to <b>" + esc(T.stopName(bus.from)) + "</b>. Next bus towards " + esc(bus.p.h) + " at <b>" + T.hhmm(bus.dep) + "</b> (" + (bus.wait <= 0 ? "now" : "in " + bus.wait + " min") + "). Ride " + bus.ride + " min to <b>" + esc(T.stopName(bus.to)) + "</b>, then walk " + (bus.walkFrom <= 1 ? "1 minute" : bus.walkFrom + " minutes") + ".</p>" +
-              "<small>Times from the Monaco bus timetable" + (now.ymd > window.MMEBus.valid[1] ? " (may have changed)" : "") + ".</small></div>";
+            var B_ = function (x) { return "<b>" + esc(x) + "</b>"; };
+            h += '<div class="bus-opt"><div class="bus-opt-top">' + T.badge(bus.p.r) + "<span>" + esc(t("Or take the bus: about {n} min in total", { n: bus.minutes })) + "</span></div>" +
+              "<p>" + esc(t("Walk {a} min to {stop}.", { a: Math.max(1, bus.walkTo), stop: "\u0001" })).replace("\u0001", B_(T.stopName(bus.from))) + " " +
+              esc(t("Next bus towards {dest} at {time} ({wait}).", { dest: bus.p.h, time: "\u0002", wait: bus.wait <= 0 ? t("now") : t("in {n} min", { n: bus.wait }) })).replace("\u0002", B_(T.hhmm(bus.dep))) + " " +
+              esc(t("Ride {r} min to {stop}, then walk {w} min.", { r: bus.ride, stop: "\u0003", w: Math.max(1, bus.walkFrom) })).replace("\u0003", B_(T.stopName(bus.to))) + "</p>" +
+              "<small>" + esc(now.ymd > window.MMEBus.valid[1] ? t("Times from the Monaco bus timetable (may have changed).") : t("Times from the Monaco bus timetable.")) + "</small></div>";
             var a = T.stopPt(bus.from), z = T.stopPt(bus.to);
             [a, z].forEach(function (p) { L.circleMarker([p.lat, p.lng], { radius: 9, color: "#fff", weight: 3, fillColor: window.MMEBus.routes[bus.p.r].c, fillOpacity: 1 }).addTo(layer); });
           }
-          if (state.arrival) h = '<aside class="note note-welcome"><strong>Welcome to Monaco</strong><p>' + esc(arrivalTip()) + (r.minutes > 20 || !r.stepFree ? " With heavy bags, a taxi may be easier for this one." : "") + "</p></aside>" + h;
+          if (state.arrival) h = '<aside class="note note-welcome"><strong>' + esc(t("Welcome to Monaco")) + "</strong><p>" + esc(t(arrivalTip())) + (r.minutes > 20 || !r.stepFree ? " " + esc(t("With heavy bags, a taxi may be easier for this one.")) : "") + "</p></aside>" + h;
           var cur = curatedFor(state.from, to);
-          if (cur && cur.tip) h += '<aside class="note"><strong>Tip</strong><p>' + esc(cur.tip) + "</p></aside>";
+          if (cur && cur.tip) h += '<aside class="note"><strong>' + esc(t("Tip")) + "</strong><p>" + esc(t(cur.tip)) + "</p></aside>";
           var b = L.latLngBounds([[from.lat, from.lng], [to.lat, to.lng]]);
           r.lines.forEach(function (ln) { ln.pts.forEach(function (p) { b.extend(p); }); });
           map.fitBounds(b.pad(0.12));
         }
-        h += '<div class="actions"><a class="btn btn-line" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=' + from.lat + "," + from.lng + "&destination=" + to.lat + "," + to.lng + '">Compare in Google Maps</a></div>' +
-          '<p class="unchecked">Routes are worked out from OpenStreetMap. Lifts can be closed for repairs, so follow the blue “Ascenseur public” signs on the day.</p>';
+        h += '<div class="actions"><a class="btn btn-line" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=' + from.lat + "," + from.lng + "&destination=" + to.lat + "," + to.lng + '">' + esc(t("Compare in Google Maps")) + "</a></div>" +
+          '<p class="unchecked">' + esc(t("Routes are worked out from OpenStreetMap. Lifts can be closed for repairs, so follow the blue “Ascenseur public” signs on the day.")) + "</p>";
         var body = root.querySelector("#plan-body");
         body.innerHTML = h;
         var alt = body.querySelector(".alt-btn");
@@ -270,14 +276,14 @@
       draw = function (f, n) { heightsReady.then(function () { draw0(f, n); }); };
       if (state.from) draw(state.from);
       else {
-        M().startLocating(function (msg) { root.querySelector("#plan-body").innerHTML = '<p class="loc-error">' + esc(msg) + '</p><p><a class="btn btn-line" href="#/">Choose a starting point instead</a></p>'; });
+        M().startLocating(function (msg) { root.querySelector("#plan-body").innerHTML = '<p class="loc-error">' + esc(msg) + '</p><p><a class="btn btn-line" href="#/">' + esc(t("Choose a starting point instead")) + "</a></p>"; });
         var done = false;
         var stop = M().onLocation(function (pos) {
           if (done) return; done = true; setTimeout(function () { stop(); }, 0);
           if (!inArea(pos)) {
-            root.querySelector("#plan-from").textContent = "Monaco station (you’re not in Monaco yet)";
+            root.querySelector("#plan-from").textContent = t("Monaco station (you’re not in Monaco yet)");
             state.from = { label: "Monaco Monte-Carlo station", lat: D.places.station.lat, lng: D.places.station.lng, kind: "station" };
-            draw(state.from, "You’re not in Monaco or Beausoleil right now, so we’ve started from the train station. When you’re here, we’ll use where you are.");
+            draw(state.from, esc(t("You’re not in Monaco or Beausoleil right now, so we’ve started from the train station. When you’re here, we’ll use where you are.")));
             state.from = null;
             return;
           }
@@ -301,23 +307,23 @@
   var arriveScreen = {
     html: function () {
       var esc = ui().esc;
-      return '<section class="arrive"><a class="back" href="#/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>Home</a>' +
-        "<h1>Welcome to Monaco</h1><p class=\"lede-dark\">Two quick questions, and we’ll show you the easiest way to where you’re staying, with as few steps as possible.</p>" +
-        '<a class="ar-airport" href="#/airport">Still at Nice airport? See the best way to Monaco</a>' +
-        '<fieldset class="ar-q"><legend>How did you arrive?</legend><div class="ar-opts">' + ARRIVALS.map(function (a, i) {
-          return '<label class="ar-opt"><input type="radio" name="arrival" value="' + a.id + '"' + (i === 0 ? " checked" : "") + '><span><strong>' + esc(a.label) + "</strong><small>" + esc(a.sub) + "</small></span></label>";
+      return '<section class="arrive"><a class="back" href="#/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + esc(t("Home")) + "</a>" +
+        "<h1>" + esc(t("Welcome to Monaco")) + '</h1><p class="lede-dark">' + esc(t("Two quick questions, and we’ll show you the easiest way to where you’re staying, with as few steps as possible.")) + "</p>" +
+        '<a class="ar-airport" href="#/airport">' + esc(t("Still at Nice airport? See the best way to Monaco")) + "</a>" +
+        '<fieldset class="ar-q"><legend>' + esc(t("How did you arrive?")) + '</legend><div class="ar-opts">' + ARRIVALS.map(function (a, i) {
+          return '<label class="ar-opt"><input type="radio" name="arrival" value="' + a.id + '"' + (i === 0 ? " checked" : "") + '><span><strong>' + esc(t(a.label)) + "</strong><small>" + esc(t(a.sub)) + "</small></span></label>";
         }).join("") + "</div></fieldset>" +
-        '<div class="ar-q"><label class="ar-legend" for="ar-stay">Where are you staying?</label>' +
-        '<div class="ar-search"><input id="ar-stay" type="search" autocomplete="off" placeholder="Hotel name or address" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="ar-list"><ul class="pl-sugg" id="ar-list" role="listbox" hidden></ul></div>' +
-        '<p class="ar-hint">Type the hotel name or the apartment address from your booking. You can also paste the location link your host sent you.</p></div>' +
+        '<div class="ar-q"><label class="ar-legend" for="ar-stay">' + esc(t("Where are you staying?")) + "</label>" +
+        '<div class="ar-search"><input id="ar-stay" type="search" autocomplete="off" placeholder="' + esc(t("Hotel name or address")) + '" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="ar-list"><ul class="pl-sugg" id="ar-list" role="listbox" hidden></ul></div>' +
+        '<p class="ar-hint">' + esc(t("Type the hotel name or the apartment address from your booking. You can also paste the location link your host sent you.")) + "</p></div>" +
         '<p class="form-err" id="ar-err" role="alert" hidden></p>' +
-        '<button type="button" class="btn btn-red ar-go" id="ar-go">Show me the way</button></section>';
+        '<button type="button" class="btn btn-red ar-go" id="ar-go">' + esc(t("Show me the way")) + "</button></section>";
     },
     mount: function (root) {
       var esc = ui().esc, input = root.querySelector("#ar-stay"), list = root.querySelector("#ar-list"), items = [], picked = null, timer = null;
       function show(res) {
         items = res;
-        list.innerHTML = res.map(function (it, i) { return '<li role="option" data-i="' + i + '"><strong>' + esc(it.label) + "</strong>" + (it.sub ? "<small>" + esc(it.sub) + "</small>" : "") + "</li>"; }).join("") || '<li class="pl-none">No matches in Monaco or Beausoleil yet.</li>';
+        list.innerHTML = res.map(function (it, i) { return '<li role="option" data-i="' + i + '"><strong>' + esc(t(it.label)) + "</strong>" + (it.sub ? "<small>" + esc(it.sub) + "</small>" : "") + "</li>"; }).join("") || '<li class="pl-none">' + esc(t("No matches in Monaco or Beausoleil yet.")) + "</li>";
         list.hidden = false; input.setAttribute("aria-expanded", "true");
       }
       function hide() { list.hidden = true; input.setAttribute("aria-expanded", "false"); }
@@ -330,10 +336,10 @@
       });
       input.addEventListener("blur", function () { setTimeout(hide, 180); });
       list.addEventListener("mousedown", function (e) { e.preventDefault(); });
-      list.addEventListener("click", function (e) { var li = e.target.closest("[data-i]"); if (!li) return; picked = items[+li.dataset.i]; input.value = picked.label; hide(); });
+      list.addEventListener("click", function (e) { var li = e.target.closest("[data-i]"); if (!li) return; picked = items[+li.dataset.i]; input.value = t(picked.label); hide(); });
       root.querySelector("#ar-go").addEventListener("click", function () {
         var err = root.querySelector("#ar-err");
-        if (!picked) { err.textContent = input.value.trim() ? "Pick your accommodation from the list as you type." : "Tell us where you’re staying."; err.hidden = false; return; }
+        if (!picked) { err.textContent = input.value.trim() ? t("Pick your accommodation from the list as you type.") : t("Tell us where you’re staying."); err.hidden = false; return; }
         var how = root.querySelector("input[name=arrival]:checked").value;
         state.to = picked;
         state.arrival = how;
@@ -346,19 +352,19 @@
   function arrivalTip() { var a = ARRIVALS.filter(function (x) { return x.id === state.arrival; })[0]; return a ? a.tip : ""; }
 
   // ---------- Meet me here ----------
+  // The link carries just the name, so your friend sees "Meet Nick here" in their own language.
   function spotLink(pos, name) {
-    var label = name ? "Meet " + name + " here" : "Meeting point";
-    return location.origin + location.pathname + "#/to?name=" + encodeURIComponent(label) + "&lat=" + pos.lat.toFixed(6) + "&lng=" + pos.lng.toFixed(6);
+    return location.origin + location.pathname + "#/to?" + (name ? "who=" + encodeURIComponent(name) + "&" : "") + "lat=" + pos.lat.toFixed(6) + "&lng=" + pos.lng.toFixed(6);
   }
   function shareSpot(pos, name, status) {
     var url = spotLink(pos, name);
-    var text = (name ? name + " is here" : "Meet me here") + ". Tap for the easiest way, using Monaco’s free lifts and escalators:";
-    var note = pos.acc > 40 ? " Your location is only accurate to about " + Math.round(pos.acc) + " m, so you may want to add a landmark." : "";
+    var text = name ? t("{name} is here. Tap for the easiest way, using Monaco’s free lifts and escalators:", { name: name }) : t("Meet me here. Tap for the easiest way, using Monaco’s free lifts and escalators:");
+    var note = pos.acc > 40 ? " " + t("Your location is only accurate to about {n} m, so you may want to add a landmark.", { n: Math.round(pos.acc) }) : "";
     if (navigator.share) {
-      navigator.share({ title: "Meet me here", text: text, url: url }).then(function () { status.textContent = "Sent." + note; })
+      navigator.share({ title: t("Meet me here"), text: text, url: url }).then(function () { status.textContent = t("Sent.") + note; })
         .catch(function () { status.textContent = ""; });
     } else if (navigator.clipboard) {
-      navigator.clipboard.writeText(text + " " + url).then(function () { status.textContent = "Link copied. Paste it into WhatsApp or a text." + note; });
+      navigator.clipboard.writeText(text + " " + url).then(function () { status.textContent = t("Link copied. Paste it into WhatsApp or a text.") + note; });
     } else {
       status.textContent = url;
     }
@@ -369,7 +375,7 @@
     var q = params(hash);
     var lat = parseFloat(q.lat), lng = parseFloat(q.lng);
     if (!isFinite(lat) || !isFinite(lng)) return false;
-    state.to = { label: q.name || "Meeting point", lat: lat, lng: lng, kind: "meet" };
+    state.to = { label: q.who ? t("Meet {name} here", { name: q.who }) : (q.name || t("Meeting point")), lat: lat, lng: lng, kind: "meet" };
     state.arrival = null;
     state.from = null;
     return true;

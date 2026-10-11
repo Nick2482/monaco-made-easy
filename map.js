@@ -2,17 +2,28 @@
 (function () {
   "use strict";
   var D = window.MME;
+  function t(s, v) { return window.MMEI18N.t(s, v); }
+  // Lift names and descriptions: generic English parts are translated, real names are kept.
+  function liftName(l) {
+    var m = /^Public (lift|escalator)(, (.*))?$/.exec(l.name);
+    return m ? t(m[1] === "lift" ? "Public lift" : "Public escalator") + (m[3] ? ", " + m[3] : "") : l.name;
+  }
+  function liftLinks(l) {
+    var m = /^Levels (.+) and (.+)$/.exec(l.links);
+    if (m) return t("Levels {a} and {b}", { a: m[1], b: m[2] });
+    return t(l.links);
+  }
 
   // One location watcher shared by the map and survey screens.
   var here = null, watchers = [], watchId = null;
   function startLocating(onError) {
-    if (!("geolocation" in navigator)) { if (onError) onError("This phone can’t share its location."); return; }
+    if (!("geolocation" in navigator)) { if (onError) onError(t("This phone can’t share its location.")); return; }
     if (watchId !== null) return;
     watchId = navigator.geolocation.watchPosition(function (pos) {
       here = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy, t: pos.timestamp };
       watchers.forEach(function (fn) { fn(here); });
     }, function (err) {
-      if (onError) onError(err.code === 1 ? "Location is switched off for this app. Turn it on in your phone’s settings to see lifts near you." : "We couldn’t find your location just now.");
+      if (onError) onError(err.code === 1 ? t("Location is switched off for this app. Turn it on in your phone’s settings to see lifts near you.") : t("We couldn’t find your location just now."));
     }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
   }
   function onLocation(fn) { watchers.push(fn); if (here) fn(here); return function () { watchers = watchers.filter(function (f) { return f !== fn; }); }; }
@@ -50,7 +61,7 @@
     });
   }
   function placeIcon(p) {
-    return L.divIcon({ className: "", html: '<span class="mk-place"><i></i>' + window.MMEUI.esc(p.short) + "</span>", iconSize: null, iconAnchor: [7, 7] });
+    return L.divIcon({ className: "", html: '<span class="mk-place"><i></i>' + window.MMEUI.esc(t(p.short)) + "</span>", iconSize: null, iconAnchor: [7, 7] });
   }
   var meIcon = L.divIcon({ className: "", html: '<span class="mk-me"></span>', iconSize: [22, 22], iconAnchor: [11, 11] });
 
@@ -60,27 +71,28 @@
 
   function liftPopup(l) {
     var esc = window.MMEUI.esc;
-    return "<strong>" + esc(l.name) + "</strong><br>" + esc(l.links) +
-      (l.approx ? '<br><em class="pop-approx">Position approximate, being checked</em>' : "") +
-      '<br><a href="' + directions(l.lat, l.lng) + '" target="_blank" rel="noopener">Walking directions</a>';
+    return "<strong>" + esc(liftName(l)) + "</strong><br>" + esc(liftLinks(l)) +
+      (l.approx ? '<br><em class="pop-approx">' + esc(t("Position approximate, being checked")) + "</em>" : "") +
+      '<br><a href="' + directions(l.lat, l.lng) + '" target="_blank" rel="noopener">' + esc(t("Walking directions")) + "</a>";
   }
 
   // ---------- The map screen ----------
   var screen = {
     html: function () {
+      var esc = window.MMEUI.esc;
       return '<section class="mapscreen">' +
-        '<div class="map-wrap"><div id="map" class="map" role="application" aria-label="Map of Monaco lifts and escalators"></div>' +
-        '<button type="button" class="find-me" id="find-me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-1-7h2v3.06A8 8 0 0 1 19.94 11H23v2h-3.06A8 8 0 0 1 13 19.94V23h-2v-3.06A8 8 0 0 1 4.06 13H1v-2h3.06A8 8 0 0 1 11 4.06zm1 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>Lifts near me</button>' +
-        '<div class="map-key"><span><i class="mk-k mk-lift"></i>Lift</span><span><i class="mk-k mk-escalator"></i>Escalator</span><span><i class="mk-k mk-approx-k"></i>Being checked</span></div></div>' +
-        '<div class="near"><h1 id="near-h">Lifts and escalators</h1><p class="lede-dark" id="near-sub">Tap “Lifts near me” to sort them by distance, or tap anywhere on the map to get there.</p><p class="loc-error" id="loc-error" hidden></p><ul class="lifts" id="near-list"></ul>' +
-        '<p class="unchecked">Map positions are approximate until we’ve pinned and photographed each entrance on the ground.</p></div></section>';
+        '<div class="map-wrap"><div id="map" class="map" role="application" aria-label="' + esc(t("Map of Monaco lifts and escalators")) + '"></div>' +
+        '<button type="button" class="find-me" id="find-me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-1-7h2v3.06A8 8 0 0 1 19.94 11H23v2h-3.06A8 8 0 0 1 13 19.94V23h-2v-3.06A8 8 0 0 1 4.06 13H1v-2h3.06A8 8 0 0 1 11 4.06zm1 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>' + esc(t("Lifts near me")) + "</button>" +
+        '<div class="map-key"><span><i class="mk-k mk-lift"></i>' + esc(t("Lift")) + '</span><span><i class="mk-k mk-escalator"></i>' + esc(t("Escalator")) + '</span><span><i class="mk-k mk-approx-k"></i>' + esc(t("Being checked")) + "</span></div></div>" +
+        '<div class="near"><h1 id="near-h">' + esc(t("Lifts and escalators")) + '</h1><p class="lede-dark" id="near-sub">' + esc(t("Tap “Lifts near me” to sort them by distance, or tap anywhere on the map to get there.")) + '</p><p class="loc-error" id="loc-error" hidden></p><ul class="lifts" id="near-list"></ul>' +
+        '<p class="unchecked">' + esc(t("Lift positions come from OpenStreetMap and are being checked on the ground.")) + "</p></div></section>";
     },
     mount: function (root) {
       var ui = window.MMEUI;
       var map = makeMap(root.querySelector("#map"));
       var markers = {};
       D.lifts.forEach(function (l) {
-        markers[l.id] = L.marker([l.lat, l.lng], { icon: liftIcon(l), title: l.name, keyboard: true }).addTo(map).bindPopup(liftPopup(l));
+        markers[l.id] = L.marker([l.lat, l.lng], { icon: liftIcon(l), title: liftName(l), keyboard: true }).addTo(map).bindPopup(liftPopup(l));
       });
       Object.keys(D.places).forEach(function (id) {
         var p = D.places[id];
@@ -97,10 +109,10 @@
         items = items.slice(0, pos ? 15 : 20);
         list.innerHTML = items.map(function (it) {
           var l = it.l;
-          return '<li><span class="step-ico" style="--c:' + ui.COLORS[l.type] + '">' + ui.icon(l.type) + "</span><div><strong>" + ui.esc(l.name) + "</strong>" +
-            "<span>" + ui.esc(l.links) + "</span><small>" + (it.d !== null ? niceDistance(it.d) + " away, about " + walkMinutes(it.d) + " min walk" : ui.esc(l.where) + ", " + l.area) + "</small></div>" +
-            '<button type="button" class="map-mini" data-show="' + l.id + '">Show</button></li>';
-        }).join("") + '<li class="more-note">' + (pos ? "The 15 closest of " : "20 of ") + total + " lifts and escalators. All of them are on the map.</li>";
+          return '<li><span class="step-ico" style="--c:' + ui.COLORS[l.type] + '">' + ui.icon(l.type) + "</span><div><strong>" + ui.esc(liftName(l)) + "</strong>" +
+            "<span>" + ui.esc(liftLinks(l)) + "</span><small>" + ui.esc(it.d !== null ? t("{d} away, about {n} min walk", { d: niceDistance(it.d), n: walkMinutes(it.d) }) : l.where + ", " + l.area) + "</small></div>" +
+            '<button type="button" class="map-mini" data-show="' + l.id + '">' + ui.esc(t("Show")) + "</button></li>";
+        }).join("") + '<li class="more-note">' + ui.esc(t(pos ? "The 15 closest of {n} lifts and escalators. All of them are on the map." : "20 of {n} lifts and escalators. All of them are on the map.", { n: total })) + "</li>";
       }
       drawList(null);
 
@@ -124,8 +136,8 @@
           // Only jump to the person if they're actually in or near Monaco.
           var inArea = distance(pos, { lat: 43.7375, lng: 7.4235 }) < 6000;
           if (!centred && inArea) { map.setView([pos.lat, pos.lng], 17); centred = true; }
-          root.querySelector("#near-h").textContent = "Nearest to you";
-          root.querySelector("#near-sub").textContent = inArea ? "Sorted by distance from where you are now." : "You’re not in Monaco yet. When you are, this list sorts itself by what’s closest.";
+          root.querySelector("#near-h").textContent = t("Nearest to you");
+          root.querySelector("#near-sub").textContent = inArea ? t("Sorted by distance from where you are now.") : t("You’re not in Monaco yet. When you are, this list sorts itself by what’s closest.");
           drawList(inArea ? pos : null);
         });
       }
@@ -133,7 +145,7 @@
 
       // Tap anywhere on the map to plan a route there.
       map.on("click", function (e) {
-        L.popup().setLatLng(e.latlng).setContent('<button type="button" class="pop-go" data-goto="' + e.latlng.lat.toFixed(6) + "," + e.latlng.lng.toFixed(6) + '">Get me here</button>').openOn(map);
+        L.popup().setLatLng(e.latlng).setContent('<button type="button" class="pop-go" data-goto="' + e.latlng.lat.toFixed(6) + "," + e.latlng.lng.toFixed(6) + '">' + window.MMEUI.esc(t("Get me here")) + "</button>").openOn(map);
       });
       root.addEventListener("click", function (e) {
         var b = e.target.closest("[data-goto]");

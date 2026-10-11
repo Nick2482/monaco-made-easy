@@ -20,7 +20,7 @@
   --gold: #6fbfe3;        /* Riva light blue (kept the old name so older rules follow) */
   --riva: #6fbfe3;
   --riva-pale: #eaf6fc;
-  --blush: #ffe5e8;       /* soft white on Monaco red */
+  --blush: #c9d6e5;       /* pale blue-grey on navy */
   --serif: "DM Serif", Georgia, serif;
   --sans: "Atkinson", "Segoe UI", Arial, sans-serif;
   --col: 600px;
@@ -413,3 +413,45 @@ button.map-mini { background: #fff; cursor: pointer; }
 .note-rule { margin-top: 18px; }
 .rule-list, .info-list { margin: 8px 0 0; padding-left: 20px; }
 .rule-list li, .info-list li { margin-top: 6px; }
+
+/* Language picker */
+.lang-wrap { position: relative; }
+.lang-btn { display: flex; align-items: center; gap: 6px; background: #fff; color: var(--red); border: 0; border-radius: 999px; padding: 6px 12px 6px 9px; font: inherit; font-weight: 700; font-size: 15px; cursor: pointer; }
+.lang-btn svg { width: 20px; height: 20px; fill: currentColor; }
+.lang-sheet { position: absolute; right: 0; top: calc(100% + 8px); z-index: 40; list-style: none; margin: 0; padding: 6px; background: #fff; border-radius: 14px; box-shadow: 0 12px 32px rgba(11, 37, 69, 0.3); min-width: 180px; }
+.lang-sheet button { display: block; width: 100%; text-align: left; background: none; border: 0; border-radius: 10px; padding: 11px 14px; font: inherit; font-size: 17px; color: var(--ink); cursor: pointer; }
+.lang-sheet button:hover { background: var(--stone); }
+.lang-sheet button.on { background: var(--riva-pale); font-weight: 700; box-shadow: inset 4px 0 0 var(--red); }
+/* Chinese, Japanese and Korean: phone system fonts, a touch more line height */
+.cjk body, html.cjk body { font-family: var(--sans), "PingFang SC", "Hiragino Sans", "Noto Sans CJK SC", "Noto Sans JP", "Noto Sans KR", "Apple SD Gothic Neo", "Microsoft YaHei", sans-serif; line-height: 1.65; }
+html.cjk h1, html.cjk h2, html.cjk .rc-title, html.cjk .where-h, html.cjk .arrive-btn strong, html.cjk .tr-card strong, html.cjk .way-top strong, html.cjk .info dt, html.cjk .sponsor strong, html.cjk .pl-route strong, html.cjk .ar-q legend, html.cjk .ar-legend { font-family: "PingFang SC", "Hiragino Mincho ProN", "Noto Serif CJK SC", "Noto Serif JP", "Noto Serif KR", serif; font-weight: 700; letter-spacing: 0; }
+html:lang(ja) h1, html:lang(ja) h2, html:lang(ja) .arrive-btn strong { word-break: auto-phrase; }
+html:lang(ko) body { word-break: keep-all; overflow-wrap: anywhere; }
+
+/* ---------- v10 "Riviera": white and deep Riva navy, Monaco red kept for the Grimaldi lozenges and the main action ---------- */
+:root { --navy: #0a1f3c; --navy-2: #12305a; --ink: #0a1f3c; --red: #c8102e; --red-deep: #a00d25; --hair: #e3e7ec;
+  --fusil: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='14'%3E%3Crect width='10' height='14' fill='%23fff'/%3E%3Cpath d='M5 0L10 7 5 14 0 7z' fill='%23c8102e'/%3E%3C/svg%3E"); }
+/* Header: the red-and-white lozenges of the Grimaldi arms run across the very top, then a quiet white bar */
+.bar { background: #fff; color: var(--navy); padding-top: calc(24px + env(safe-area-inset-top)); padding-bottom: 12px; border-bottom: 1px solid var(--hair); }
+.bar::before { content: ""; position: absolute; left: 0; right: 0; top: env(safe-area-inset-top); height: 14px; background: var(--fusil) center 0 / 10px 14px repeat-x; }
+.mark { background: var(--navy); border-radius: 50%; }
+.mark svg { fill: #fff; }
+.brand-name { font-size: 22px; letter-spacing: 0.01em; }
+.lang-btn { background: #fff; color: var(--navy); border: 1px solid var(--hair); }
+.lang-btn:hover { border-color: var(--navy); }
+/* Home: a deep navy hero, like a Riva hull at night, with a fine light-blue waterline */
+.hero { background: linear-gradient(180deg, var(--navy) 0%, var(--navy-2) 100%); box-shadow: inset 0 -3px 0 var(--riva); padding-top: 26px; }
+.preview { background: transparent; color: var(--riva); border: 1px solid rgba(111, 191, 227, 0.55); font-weight: 700; }
+.lede { color: #c9d6e5; }
+.arrive-btn { box-shadow: inset 5px 0 0 var(--red), 0 10px 30px rgba(0, 0, 0, 0.25); }
+.where { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.16); }
+.pl-go { background: var(--red); box-shadow: 0 8px 22px rgba(200, 16, 46, 0.35); }
+.pl-go:hover { background: var(--red-deep); }
+.meet-btn { background: transparent; border-color: rgba(255, 255, 255, 0.3); }
+.meet-btn small, .meet-panel label { color: #c9d6e5; }
+.near-btn:hover { background: var(--navy-2); }
+/* Tabs: navy, with a small red mark over the current one */
+.tabs a { position: relative; color: #7a8694; }
+.tabs a[aria-current="page"] { color: var(--navy); }
+.tabs a[aria-current="page"]::before { content: ""; position: absolute; top: 0; left: 50%; width: 28px; height: 3px; margin-left: -14px; background: var(--red); border-radius: 0 0 3px 3px; }
+.lang-sheet button.on { background: var(--stone); }

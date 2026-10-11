@@ -211,20 +211,27 @@
     // Drop tiny walks between two vertical pieces (under 15 m) into "then".
     var out = merged.filter(function (st) { return !(st.kind === "walk" && st.m < 12); });
 
+    var T = function (x, v) { return window.MMEI18N ? window.MMEI18N.t(x, v) : x; };
     var text = out.map(function (st) {
       if (st.kind === "walk") {
         var top = Object.keys(st.names).sort(function (a, b) { return st.names[b] - st.names[a]; }).slice(0, 2);
         var m = Math.max(10, Math.round(st.m / 10) * 10);
-        var hill = st.rise > 12 ? " uphill (about " + Math.round(st.rise / 5) * 5 + " m up)" : st.rise < -12 ? " downhill" : "";
-        return { kind: "walk", text: "Walk " + m + " m" + hill + (top.length ? " along " + top.join(", then ") : " along the footpath") + ".", m: st.m };
+        var streets = top.length === 2 ? T("{a}, then {b}", { a: top[0], b: top[1] }) : top[0];
+        var up = Math.round(st.rise / 5) * 5;
+        var key = st.rise > 12 ? (streets ? "Walk {m} m uphill (about {h} m up) along {streets}." : "Walk {m} m uphill (about {h} m up) along the footpath.")
+          : st.rise < -12 ? (streets ? "Walk {m} m downhill along {streets}." : "Walk {m} m downhill along the footpath.")
+          : (streets ? "Walk {m} m along {streets}." : "Walk {m} m along the footpath.");
+        return { kind: "walk", text: T(key, { m: m, h: up, streets: streets }), m: st.m };
       }
       if (st.kind === "lift") {
         var l = st.lift || {};
-        var nm = l.name ? "the public lift “" + l.name + "”" : "the public lift";
-        return { kind: "lift", text: "Take " + nm + (st.up > 0 ? " up" : st.up < 0 ? " down" : "") + (l.desc ? " (" + l.desc + ")" : "") + "." };
+        var dir = st.up > 0 ? " up" : st.up < 0 ? " down" : "";
+        var line = l.name ? T("Take the public lift “{name}”" + dir + ".", { name: l.name }) : T("Take the public lift" + dir + ".");
+        return { kind: "lift", text: line + (l.desc ? " (" + l.desc + ")" : "") };
       }
-      if (st.kind === "escalator") return { kind: "escalator", text: "Take the escalator" + (st.up > 0 ? " up" : st.up < 0 ? " down" : "") + "." };
-      return { kind: "steps", text: (st.count ? st.count + " steps" : "Steps") + (st.up > 0 ? " going up" : st.up < 0 ? " going down" : "") + "." };
+      if (st.kind === "escalator") return { kind: "escalator", text: T("Take the escalator" + (st.up > 0 ? " up" : st.up < 0 ? " down" : "") + ".") };
+      var sd = st.up > 0 ? " going up" : st.up < 0 ? " going down" : "";
+      return { kind: "steps", text: st.count ? T("{n} steps" + sd + ".", { n: st.count }) : T("Steps" + sd + ".") };
     });
 
     var pre = s.d > 40 ? Math.round(s.d) : 0, post = g.d > 40 ? Math.round(g.d) : 0;
