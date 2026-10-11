@@ -1,6 +1,6 @@
 // Keeps the app working with no signal: everything is saved on the phone the first time it opens.
 // Change VERSION whenever the app is updated so phones pick up the new files.
-var VERSION = "mme-preview-14";
+var VERSION = "mme-preview-15";
 var TILES = "mme-map-tiles";
 var FILES = [
   "./", "index.html", "styles.css", "app.js", "data.js", "graph.js", "lifts-osm.js", "router.js", "bus.js", "border.js", "transit.js", "map.js", "survey.js", "planner.js", "manifest.webmanifest",
