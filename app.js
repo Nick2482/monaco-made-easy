@@ -21,6 +21,8 @@
   function esc(s) {
     return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; });
   }
+  window.MMEUI = { esc: esc, icon: icon, COLORS: COLORS };
+
   function mapsLink(q) {
     return "https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=" + encodeURIComponent(q);
   }
@@ -118,13 +120,19 @@
   }
 
   function routeCard(r) {
-    return '<li><a class="rcard" href="#/route/' + r.id + '">' +
-      '<span class="rc-text"><span class="rc-title">' + esc(r.title) + "</span>" +
+    var from = D.places[r.from], to = D.places[r.to];
+    var art = r.photo
+      ? '<img class="rc-photo" src="' + esc(r.photo) + '" alt="" loading="lazy">'
+      : '<span class="rc-art">' + profile(r, true) + '<span class="rc-ends"><span>' + esc(from.short) + "</span><span>" + esc(to.short) + "</span></span></span>";
+    return '<li><a class="rcard" href="#/route/' + r.id + '">' + art +
+      '<span class="rc-body"><span class="rc-title">' + esc(r.title) + "</span>" +
       '<span class="rc-meta"><span>' + r.minutes + " min</span>" +
       (r.stepFree ? '<span class="sf-pill">Step-free</span>' : '<span class="some-steps">Some steps</span>') +
-      "<span>" + heightText(r).line + "</span></span></span>" +
-      profile(r, false) + "</a></li>";
+      "<span>" + heightText(r).line + "</span></span></span></a></li>";
   }
+
+  // Destinations people most often ask for, in the order they ask.
+  var DESTS = ["casino", "palace", "port", "larvotto", "museum", "beausoleil", "fontvieille", "station", "exotic"];
 
   // ---------- Screens ----------
   function home() {
@@ -134,17 +142,22 @@
     return '<section class="hero">' +
       '<p class="preview">Preview: routes are being checked on the ground</p>' +
       "<h1>Monaco, without the climb.</h1>" +
-      '<p class="lede">Around 80 free public lifts, 37 escalators and 8 moving walkways link Monaco and Beausoleil. Here’s how to use them.</p>' +
-      '<figure class="chart-card"><figcaption><span>Monaco, side on</span><span class="key"><i class="k-sf"></i>Step-free route <i class="k-st"></i>Some steps</span></figcaption>' + heightChart() + '<p class="chart-hint">Tap a place to see its routes.</p></figure>' +
+      '<p class="lede">Around 80 free public lifts, 37 escalators and 8 moving walkways link Monaco and Beausoleil. We show you how to use them.</p>' +
+      '<div class="where"><p class="where-h">Where do you want to go?</p><div class="dests">' + DESTS.map(function (id) {
+        return '<button type="button" class="dest' + (placeFilter === id ? " on" : "") + '" data-dest="' + id + '" aria-pressed="' + (placeFilter === id) + '">' + esc(D.places[id].short === "Museum" ? "Oceanographic Museum" : D.places[id].short === "Palace" ? "Prince’s Palace" : D.places[id].short) + "</button>";
+      }).join("") + "</div>" +
+      '<a class="near-btn" href="#/map/near"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-1-7h2v3.06A8 8 0 0 1 19.94 11H23v2h-3.06A8 8 0 0 1 13 19.94V23h-2v-3.06A8 8 0 0 1 4.06 13H1v-2h3.06A8 8 0 0 1 11 4.06zm1 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg><span><strong>Lifts near me</strong><small>See the closest lifts and escalators on a map</small></span></a></div>' +
       "</section>" +
-      '<section class="block" aria-labelledby="routes-h">' +
+      '<section class="block" id="routes" aria-labelledby="routes-h">' +
       '<div class="block-head"><h2 id="routes-h">' + (pf ? "Routes for " + esc(pf.short) : "Popular routes") + "</h2>" +
       (pf ? '<button type="button" class="link-btn" data-clear>Show all</button>' : "") + "</div>" +
       '<div class="chips" role="group" aria-label="Filter routes">' + chips.map(function (c) {
         return '<button type="button" class="chip' + (filter === c[0] ? " on" : "") + '" data-filter="' + c[0] + '" aria-pressed="' + (filter === c[0]) + '">' + c[1] + "</button>";
       }).join("") + "</div>" +
-      (list.length ? '<ul class="rlist">' + list.map(routeCard).join("") + "</ul>" : '<p class="empty">No routes match yet. Try “All routes”.</p>') +
-      "</section>";
+      (list.length ? '<ul class="rlist">' + list.map(routeCard).join("") + "</ul>" :
+        '<p class="empty">We haven’t written a route ' + (pf ? "for " + esc(pf.short) + " " : "") + "with that filter yet. " + (pf ? '<a href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=' + pf.lat + "," + pf.lng + '" target="_blank" rel="noopener">Walking directions in Google Maps</a>' : "") + "</p>") +
+      "</section>" +
+      '<section class="side-on"><figure class="chart-card"><figcaption><span>Monaco, side on</span><span class="key"><i class="k-sf"></i>Step-free <i class="k-st"></i>Some steps</span></figcaption>' + heightChart() + '<p class="chart-hint">Monaco climbs 100 m from the sea. Tap a place to see its routes.</p></figure></section>';
   }
 
   function routePage(id) {
@@ -175,21 +188,6 @@
       "</article>";
   }
 
-  function liftsPage() {
-    var areas = ["Monaco", "Beausoleil"];
-    return '<section class="page"><h1>Lift finder</h1>' +
-      '<p class="lede-dark">Look for glass doors in walls and car parks, signed “Ascenseur public”. All lifts and escalators are free.</p>' +
-      areas.map(function (a) {
-        var items = D.lifts.filter(function (l) { return l.area === a; });
-        return '<h2 class="area-h">' + a + (a === "Beausoleil" ? " <span>(France)</span>" : "") + '</h2><ul class="lifts">' + items.map(function (l) {
-          return '<li><span class="step-ico" style="--c:' + COLORS[l.type] + '">' + icon(l.type) + "</span><div><strong>" + esc(l.name) + "</strong>" +
-            "<span>" + esc(l.links) + "</span><small>" + esc(l.where) + "</small></div>" +
-            '<a class="map-mini" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(l.where + ", " + a) + '" target="_blank" rel="noopener" aria-label="Open ' + esc(l.name) + ' in Google Maps">Map</a></li>';
-        }).join("") + "</ul>";
-      }).join("") +
-      '<p class="unchecked">Lift details are being checked on the ground and will get photos of each entrance.</p></section>';
-  }
-
   function infoPage() {
     var items = [
       ["Free to use", "Every public lift, escalator and moving walkway in Monaco is free."],
@@ -210,12 +208,15 @@
   function render() {
     var h = location.hash.replace(/^#\/?/, "");
     var parts = h.split("/");
-    var tab = "routes", html;
+    var tab = "routes", html, screen = null;
     if (parts[0] === "route") html = routePage(parts[1]);
-    else if (parts[0] === "lifts") { html = liftsPage(); tab = "lifts"; }
+    else if (parts[0] === "map" || parts[0] === "lifts") { screen = window.MMEMap.screen; tab = "map"; }
+    else if (parts[0] === "survey") { screen = window.MMESurvey.screen; tab = ""; }
     else if (parts[0] === "info") { html = infoPage(); tab = "info"; }
     else html = home();
-    main.innerHTML = html;
+    main.innerHTML = screen ? screen.html() : html;
+    document.body.classList.toggle("is-map", tab === "map");
+    if (screen) screen.mount(main.firstElementChild);
     document.querySelectorAll(".tabs a").forEach(function (a) {
       if (a.dataset.tab === tab) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
@@ -226,6 +227,13 @@
     if (f) { filter = f.dataset.filter; render(); return; }
     var p = e.target.closest("[data-place]");
     if (p) { placeFilter = placeFilter === p.dataset.place ? null : p.dataset.place; render(); return; }
+    var d = e.target.closest("[data-dest]");
+    if (d) {
+      placeFilter = placeFilter === d.dataset.dest ? null : d.dataset.dest;
+      render();
+      if (placeFilter) document.getElementById("routes").scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
     if (e.target.closest("[data-clear]")) { placeFilter = null; render(); }
   });
   main.addEventListener("keydown", function (e) {

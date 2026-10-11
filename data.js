@@ -6,15 +6,15 @@
 window.MME = {
   // Districts, with rough height above sea level in metres (approximate, for the height chart).
   places: {
-    station:   { name: "Monaco Monte-Carlo station", short: "Station", area: "Monaco", height: 35, x: 38, label: "r" },
-    casino:    { name: "Casino Square", short: "Casino", area: "Monte-Carlo", height: 40, x: 66, label: "b" },
-    port:      { name: "Port Hercule", short: "Port", area: "La Condamine", height: 2, x: 44, label: "b" },
-    palace:    { name: "Prince's Palace", short: "Palace", area: "Monaco-Ville (the Rock)", height: 60, x: 21, label: "a" },
-    museum:    { name: "Oceanographic Museum", short: "Museum", area: "Monaco-Ville (the Rock)", height: 55, x: 29, label: "r" },
-    larvotto:  { name: "Larvotto Beach", short: "Larvotto", area: "Larvotto", height: 2, x: 91, label: "b" },
-    exotic:    { name: "Exotic Garden", short: "Exotic Garden", area: "Moneghetti", height: 100, x: 5, label: "r" },
-    fontvieille:{ name: "Fontvieille", short: "Fontvieille", area: "Fontvieille", height: 4, x: 13, label: "r" },
-    beausoleil:{ name: "Beausoleil, Place de la Libération", short: "Beausoleil", area: "Beausoleil (France)", height: 80, x: 62, label: "r" }
+    station:   { name: "Monaco Monte-Carlo station", short: "Station", area: "Monaco", height: 35, x: 38, label: "r", lat: 43.7393, lng: 7.4199 },
+    casino:    { name: "Casino Square", short: "Casino", area: "Monte-Carlo", height: 40, x: 66, label: "b", lat: 43.7397, lng: 7.4277 },
+    port:      { name: "Port Hercule", short: "Port", area: "La Condamine", height: 2, x: 44, label: "b", lat: 43.7347, lng: 7.4219 },
+    palace:    { name: "Prince's Palace", short: "Palace", area: "Monaco-Ville (the Rock)", height: 60, x: 21, label: "a", lat: 43.7313, lng: 7.4199 },
+    museum:    { name: "Oceanographic Museum", short: "Museum", area: "Monaco-Ville (the Rock)", height: 55, x: 29, label: "r", lat: 43.7307, lng: 7.4253 },
+    larvotto:  { name: "Larvotto Beach", short: "Larvotto", area: "Larvotto", height: 2, x: 91, label: "b", lat: 43.7449, lng: 7.4344 },
+    exotic:    { name: "Exotic Garden", short: "Exotic Garden", area: "Moneghetti", height: 100, x: 5, label: "r", lat: 43.7311, lng: 7.4108 },
+    fontvieille:{ name: "Fontvieille", short: "Fontvieille", area: "Fontvieille", height: 4, x: 13, label: "r", lat: 43.7286, lng: 7.4162 },
+    beausoleil:{ name: "Beausoleil, Place de la Libération", short: "Beausoleil", area: "Beausoleil (France)", height: 80, x: 62, label: "r", lat: 43.7428, lng: 7.4228 }
   },
 
   routes: [
@@ -113,17 +113,18 @@ window.MME = {
     }
   ],
 
+  // Map positions are APPROXIMATE until pinned on the ground (approx: true draws a dashed marker).
   lifts: [
-    { name: "Station lifts", where: "Monaco Monte-Carlo station", links: "Station platforms ↔ Boulevard Princesse Charlotte", area: "Monaco", type: "lift" },
-    { name: "Rainier III Auditorium lifts", where: "Boulevard Louis II", links: "Port Hercule ↔ Casino terraces", area: "Monaco", type: "lift" },
-    { name: "Parking des Pêcheurs lifts", where: "Foot of the Rock", links: "Harbour ↔ Monaco-Ville, by the Oceanographic Museum", area: "Monaco", type: "lift" },
-    { name: "Condamine Market lifts", where: "Place d'Armes", links: "La Condamine market ↔ upper streets", area: "Monaco", type: "lift" },
-    { name: "Place des Moulins escalators", where: "Monte-Carlo", links: "Shopping streets ↔ Larvotto", area: "Monaco", type: "escalator" },
-    { name: "Exotic Garden lift", where: "Boulevard du Jardin Exotique", links: "Exotic Garden ↔ Avenue Hector Otto", area: "Monaco", type: "lift" },
-    { name: "Rex lift", where: "Square Kraemer", links: "Lower Beausoleil ↔ upper Beausoleil", area: "Beausoleil", type: "lift" },
-    { name: "Libération lift", where: "Indigo car park, Place de la Libération", links: "Car park levels ↔ Place de la Libération", area: "Beausoleil", type: "lift" },
-    { name: "Palais Joséphine lift", where: "Palais Joséphine", links: "Street levels in central Beausoleil", area: "Beausoleil", type: "lift" },
-    { name: "Jardins d'Elisa lifts (2)", where: "Jardins d'Elisa", links: "Street levels in Beausoleil", area: "Beausoleil", type: "lift" },
-    { name: "Chemin de la Noix lift", where: "Chemin de la Noix", links: "Vallon de la Noix area", area: "Beausoleil", type: "lift" }
+    { id: "station", name: "Station lifts", where: "Monaco Monte-Carlo station", links: "Station platforms ↔ Boulevard Princesse Charlotte", area: "Monaco", type: "lift", lat: 43.7400, lng: 7.4207, approx: true },
+    { id: "auditorium", name: "Rainier III Auditorium lifts", where: "Boulevard Louis II", links: "Port Hercule ↔ Casino terraces", area: "Monaco", type: "lift", lat: 43.7376, lng: 7.4256, approx: true },
+    { id: "pecheurs", name: "Parking des Pêcheurs lifts", where: "Foot of the Rock", links: "Harbour ↔ Monaco-Ville, by the Oceanographic Museum", area: "Monaco", type: "lift", lat: 43.7318, lng: 7.4243, approx: true },
+    { id: "condamine", name: "Condamine Market lifts", where: "Place d'Armes", links: "La Condamine market ↔ upper streets", area: "Monaco", type: "lift", lat: 43.7336, lng: 7.4187, approx: true },
+    { id: "moulins", name: "Place des Moulins escalators", where: "Monte-Carlo", links: "Shopping streets ↔ Larvotto", area: "Monaco", type: "escalator", lat: 43.7428, lng: 7.4298, approx: true },
+    { id: "exotic", name: "Exotic Garden lift", where: "Boulevard du Jardin Exotique", links: "Exotic Garden ↔ Avenue Hector Otto", area: "Monaco", type: "lift", lat: 43.7317, lng: 7.4119, approx: true },
+    { id: "rex", name: "Rex lift", where: "Square Kraemer", links: "Lower Beausoleil ↔ upper Beausoleil", area: "Beausoleil", type: "lift", lat: 43.7420, lng: 7.4245, approx: true },
+    { id: "liberation", name: "Libération lift", where: "Indigo car park, Place de la Libération", links: "Car park levels ↔ Place de la Libération", area: "Beausoleil", type: "lift", lat: 43.7430, lng: 7.4231, approx: true },
+    { id: "josephine", name: "Palais Joséphine lift", where: "Palais Joséphine", links: "Street levels in central Beausoleil", area: "Beausoleil", type: "lift", lat: 43.7436, lng: 7.4214, approx: true },
+    { id: "elisa", name: "Jardins d'Elisa lifts (2)", where: "Jardins d'Elisa", links: "Street levels in Beausoleil", area: "Beausoleil", type: "lift", lat: 43.7443, lng: 7.4252, approx: true },
+    { id: "noix", name: "Chemin de la Noix lift", where: "Chemin de la Noix", links: "Vallon de la Noix area", area: "Beausoleil", type: "lift", lat: 43.7452, lng: 7.4196, approx: true }
   ]
 };
