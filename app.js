@@ -217,6 +217,13 @@
     else if (parts[0] === "info") { html = infoPage(); tab = "info"; }
     else if (parts[0] === "plan") { screen = window.MMEPlanner.screen; }
     else if (parts[0] === "arrive") { screen = window.MMEPlanner.arriveScreen; }
+    else if (parts[0] === "transport" && window.MMETransit.ready) { screen = window.MMETransit.transportScreen; tab = "transport"; }
+    else if (parts[0] === "airport") { screen = window.MMETransit.airportScreen; tab = "transport"; }
+    else if (parts[0] === "bus" && window.MMETransit.ready) {
+      var lid = parts[1];
+      screen = { html: function () { return window.MMETransit.lineScreen.html(lid); }, mount: function (el) { window.MMETransit.lineScreen.mount(el, lid); } };
+      tab = "transport";
+    }
     else if (parts[0] === "go") { location.replace(window.MMEPlanner.go(parts[1]) ? "#/plan" : "#/"); return; }
     else if (/^to(\?|$)/.test(parts[0])) { location.replace(window.MMEPlanner.toLink(location.hash) ? "#/plan" : "#/"); return; }
     else if (parts[0].indexOf("from") === 0) { window.MMEPlanner.fromLink(location.hash); location.replace("#/"); return; }

@@ -150,7 +150,7 @@ main { max-width: var(--col); margin: 0 auto; outline: none; }
 .info dd { margin: 4px 0 0; color: #2d3a47; }
 
 /* Bottom tabs */
-.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; display: grid; grid-template-columns: repeat(3, 1fr); background: #fff; border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
+.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; display: grid; grid-template-columns: repeat(4, 1fr); background: #fff; border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom); }
 .tabs a { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 9px 4px 10px; text-decoration: none; font-size: 13.5px; font-weight: 700; color: #6c7884; }
 .tabs svg { width: 26px; height: 26px; fill: currentColor; }
 .tabs a[aria-current="page"] { color: var(--red); }
@@ -354,3 +354,42 @@ button.map-mini { background: #fff; cursor: pointer; }
 .alt-btn { display: block; width: 100%; margin-top: 12px; text-align: left; background: #fff; border: 1.5px dashed #9aa5b1; border-radius: 12px; padding: 12px 14px; font: inherit; font-weight: 700; color: var(--navy); cursor: pointer; }
 .step-steps p { font-weight: 700; }
 .more-note { display: block !important; color: var(--grey); font-size: 15px; }
+
+/* Transport */
+.tr-card { display: block; margin-top: 18px; padding: 18px; border-radius: 16px; background: var(--navy); color: #fff; text-decoration: none; }
+.tr-card strong { display: block; font-family: var(--serif); font-weight: 400; font-size: 26px; }
+.tr-card span { display: block; color: #cfdaea; margin-top: 2px; }
+.bus-badge { display: inline-grid; place-items: center; min-width: 34px; height: 30px; padding: 0 7px; border-radius: 8px; font-family: var(--sans); font-weight: 700; font-size: 16px; vertical-align: middle; }
+.lines { list-style: none; margin: 12px 0 0; padding: 0; border-top: 1px solid var(--line); }
+.lines a { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); text-decoration: none; }
+.stop-card { border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; margin-top: 12px; }
+.stop-name { font-weight: 700; font-size: 18px; }
+.stop-name small { font-weight: 400; color: var(--grey); font-size: 14.5px; }
+.deps { list-style: none; margin: 8px 0 0; padding: 0; }
+.deps li { display: grid; grid-template-columns: auto 1fr auto; grid-template-rows: auto auto; column-gap: 10px; align-items: center; padding: 8px 0; border-top: 1px solid var(--stone); }
+.deps li .bus-badge { grid-row: span 2; }
+.deps span { font-size: 16px; }
+.deps strong { font-size: 18px; text-align: right; }
+.deps small { grid-column: 2 / 4; text-align: right; color: var(--red-deep); font-weight: 700; font-size: 14px; margin-top: -4px; }
+.line h1 { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: clamp(28px, 7vw, 36px); }
+.line h1 .bus-badge { font-size: 22px; height: 40px; min-width: 46px; }
+.line-map { height: 40vh; min-height: 240px; border-radius: 14px; margin-top: 14px; }
+.line-stops { list-style: none; margin: 10px 0 0; padding: 0 0 0 18px; border-left: 4px solid var(--line); }
+.line-stops li { position: relative; display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; }
+.line-stops li::before { content: ""; position: absolute; left: -26px; top: 13px; width: 12px; height: 12px; border-radius: 50%; background: #fff; border: 3px solid var(--navy); }
+.line-stops small { color: var(--grey); white-space: nowrap; }
+.ways { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 12px; }
+.way { border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; }
+.way-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.way-top strong { font-family: var(--serif); font-weight: 400; font-size: 24px; }
+.way-tag { font-size: 13.5px; font-weight: 700; background: var(--stone); border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
+.way p { margin-top: 8px; }
+.way-tip { color: var(--grey); font-size: 15.5px; }
+.way-next { background: #eef3f9; border-radius: 10px; padding: 8px 12px; }
+.bus-opt { display: block; margin-top: 14px; padding: 14px 16px; border-radius: 14px; border: 2px solid var(--navy); }
+.bus-opt-top { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; }
+.bus-opt p { margin-top: 6px; }
+.bus-opt small { display: block; color: var(--grey); margin-top: 6px; font-size: 14.5px; }
+.ar-airport { display: block; margin-top: 14px; font-weight: 700; color: var(--red); text-underline-offset: 3px; }
+.tr-train { background: #eef3f9; color: var(--ink); }
+.tr-train span { color: var(--ink); }

@@ -239,6 +239,15 @@
           }).join("") + "</ol>";
           if (!r.stepFree) h += '<aside class="note"><strong>Steps on this route</strong><p>This is the easiest way we can find, but it still has some steps. A taxi may be easier with heavy bags.</p></aside>';
           if (outside) h += '<aside class="note"><strong>Beausoleil and beyond</strong><p>Part of this journey is outside Monaco’s mapped lifts. Beausoleil is coming soon. Use Google Maps for that part.</p></aside>';
+          var T = window.MMETransit, bus = T && T.ready ? T.busOption(from, to) : null;
+          if (bus && (bus.minutes + 2 < r.minutes || (r.climbed > 30 && bus.minutes < r.minutes + 8) || (!r.stepFree && bus.minutes < r.minutes + 8))) {
+            var now = T.monacoNow();
+            h += '<div class="bus-opt"><div class="bus-opt-top">' + T.badge(bus.p.r) + "<span>Or take the bus: about " + bus.minutes + " min in total</span></div>" +
+              "<p>Walk " + (bus.walkTo <= 1 ? "1 minute" : bus.walkTo + " minutes") + " to <b>" + esc(T.stopName(bus.from)) + "</b>. Next bus towards " + esc(bus.p.h) + " at <b>" + T.hhmm(bus.dep) + "</b> (" + (bus.wait <= 0 ? "now" : "in " + bus.wait + " min") + "). Ride " + bus.ride + " min to <b>" + esc(T.stopName(bus.to)) + "</b>, then walk " + (bus.walkFrom <= 1 ? "1 minute" : bus.walkFrom + " minutes") + ".</p>" +
+              "<small>Times from the Monaco bus timetable" + (now.ymd > window.MMEBus.valid[1] ? " (may have changed)" : "") + ".</small></div>";
+            var a = T.stopPt(bus.from), z = T.stopPt(bus.to);
+            [a, z].forEach(function (p) { L.circleMarker([p.lat, p.lng], { radius: 9, color: "#fff", weight: 3, fillColor: window.MMEBus.routes[bus.p.r].c, fillOpacity: 1 }).addTo(layer); });
+          }
           if (state.arrival) h = '<aside class="note note-welcome"><strong>Welcome to Monaco</strong><p>' + esc(arrivalTip()) + (r.minutes > 20 || !r.stepFree ? " With heavy bags, a taxi may be easier for this one." : "") + "</p></aside>" + h;
           var cur = curatedFor(state.from, to);
           if (cur && cur.tip) h += '<aside class="note"><strong>Tip</strong><p>' + esc(cur.tip) + "</p></aside>";
@@ -282,7 +291,7 @@
   // ---------- Just arrived ----------
   var ARRIVALS = [
     { id: "train", label: "By train", sub: "Monaco Monte-Carlo station", tip: "Monaco’s station is underground, with exits that come out at different heights. Using the right exit can save you a climb, so we’ve picked the best one for you." },
-    { id: "bus", label: "By bus from Nice airport", sub: "We’ll start from where you get off", tip: "The airport bus stops in several places in Monaco. We’ve started from where you are now." },
+    { id: "bus", label: "By bus from Nice airport", sub: "ZOU! line 80, we’ll start from where you get off", tip: "The ZOU! 80 airport bus stops at Place d’Armes, the Casino and Larvotto. We’ve started from where you are now." },
     { id: "ship", label: "From a cruise ship", sub: "Port Hercule", tip: "Cruise passengers come ashore at Port Hercule, right in the middle of Monaco. We’ve started from where you are now." },
     { id: "heli", label: "By helicopter", sub: "Monaco Heliport, Fontvieille", tip: "The heliport is in Fontvieille, at the far western edge of Monaco. With luggage, most people take a taxi or a hotel car from here." },
     { id: "car", label: "By car or taxi", sub: "Being dropped off", tip: "Give your driver the full address. Once you’re dropped off, this shows the last bit on foot." }
@@ -294,6 +303,7 @@
       var esc = ui().esc;
       return '<section class="arrive"><a class="back" href="#/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>Home</a>' +
         "<h1>Welcome to Monaco</h1><p class=\"lede-dark\">Two quick questions, and we’ll show you the easiest way to where you’re staying, with as few steps as possible.</p>" +
+        '<a class="ar-airport" href="#/airport">Still at Nice airport? See the best way to Monaco</a>' +
         '<fieldset class="ar-q"><legend>How did you arrive?</legend><div class="ar-opts">' + ARRIVALS.map(function (a, i) {
           return '<label class="ar-opt"><input type="radio" name="arrival" value="' + a.id + '"' + (i === 0 ? " checked" : "") + '><span><strong>' + esc(a.label) + "</strong><small>" + esc(a.sub) + "</small></span></label>";
         }).join("") + "</div></fieldset>" +
