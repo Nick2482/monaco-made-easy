@@ -143,10 +143,7 @@
       '<p class="preview">Preview: routes are being checked on the ground</p>' +
       "<h1>Monaco, without the climb.</h1>" +
       '<p class="lede">Around 80 free public lifts, 37 escalators and 8 moving walkways link Monaco and Beausoleil. We show you how to use them.</p>' +
-      '<div class="where"><p class="where-h">Where do you want to go?</p><div class="dests">' + DESTS.map(function (id) {
-        return '<button type="button" class="dest' + (placeFilter === id ? " on" : "") + '" data-dest="' + id + '" aria-pressed="' + (placeFilter === id) + '">' + esc(D.places[id].short === "Museum" ? "Oceanographic Museum" : D.places[id].short === "Palace" ? "Prince’s Palace" : D.places[id].short) + "</button>";
-      }).join("") + "</div>" +
-      '<a class="near-btn" href="#/map/near"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-1-7h2v3.06A8 8 0 0 1 19.94 11H23v2h-3.06A8 8 0 0 1 13 19.94V23h-2v-3.06A8 8 0 0 1 4.06 13H1v-2h3.06A8 8 0 0 1 11 4.06zm1 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg><span><strong>Lifts near me</strong><small>See the closest lifts and escalators on a map</small></span></a></div>' +
+      window.MMEPlanner.boxHtml() +
       "</section>" +
       '<section class="block" id="routes" aria-labelledby="routes-h">' +
       '<div class="block-head"><h2 id="routes-h">' + (pf ? "Routes for " + esc(pf.short) : "Popular routes") + "</h2>" +
@@ -183,7 +180,7 @@
       (r.back ? '<aside class="note"><strong>The way back</strong><p>' + esc(r.back) + "</p></aside>" : "") +
       (r.sponsor ? '<aside class="sponsor"><span class="sp-label">Sponsored</span><strong>Your Beausoleil hotel or restaurant here</strong><p>A space for a partner business, seen by every visitor taking this route.</p></aside>' : "") +
       '<div class="actions"><a class="btn btn-red" href="' + mapsLink(r.maps) + '" target="_blank" rel="noopener">Open in Google Maps</a>' +
-      '<a class="btn btn-line" href="mailto:hello@example.com?subject=' + encodeURIComponent("Problem on route: " + r.title) + '">Report a problem</a></div>' +
+      '<a class="btn btn-line" href="mailto:nickhutton840@gmail.com?subject=' + encodeURIComponent("Problem on route: " + r.title) + '">Report a problem</a></div>' +
       (r.checked ? "" : '<p class="unchecked">Being checked: our team hasn’t walked this route yet. Follow the blue “Ascenseur public” signs on the day.</p>') +
       "</article>";
   }
@@ -213,10 +210,13 @@
     else if (parts[0] === "map" || parts[0] === "lifts") { screen = window.MMEMap.screen; tab = "map"; }
     else if (parts[0] === "survey") { screen = window.MMESurvey.screen; tab = ""; }
     else if (parts[0] === "info") { html = infoPage(); tab = "info"; }
+    else if (parts[0] === "plan") { screen = window.MMEPlanner.screen; }
+    else if (parts[0].indexOf("from") === 0) { window.MMEPlanner.fromLink(location.hash); location.replace("#/"); return; }
     else html = home();
     main.innerHTML = screen ? screen.html() : html;
     document.body.classList.toggle("is-map", tab === "map");
     if (screen) screen.mount(main.firstElementChild);
+    else if (!parts[0]) window.MMEPlanner.mountBox(main);
     document.querySelectorAll(".tabs a").forEach(function (a) {
       if (a.dataset.tab === tab) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });

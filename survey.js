@@ -65,7 +65,7 @@
     }
   }
 
-  var TYPES = [["lift", "Lift"], ["escalator", "Escalator"], ["walkway", "Moving walkway"], ["entrance", "Lift entrance"], ["steps", "Steps"], ["ramp", "Ramp"], ["toilet", "Toilet"], ["bus", "Bus stop"], ["photo", "View or photo"], ["other", "Other"]];
+  var TYPES = [["lift", "Lift"], ["escalator", "Escalator"], ["walkway", "Moving walkway"], ["entrance", "Lift entrance"], ["steps", "Steps"], ["ramp", "Ramp"], ["toilet", "Toilet"], ["bus", "Bus stop"], ["hotel", "Hotel entrance"], ["restaurant", "Restaurant or café"], ["photo", "View or photo"], ["other", "Other"]];
   var MARKS = ["Lift in", "Lift out", "Escalator", "Steps", "Steep bit", "Turn here", "Sign"];
 
   // ---------- Walk recording ----------
@@ -208,6 +208,7 @@
           '<fieldset><legend>What is it?</legend><div class="sv-chips">' + TYPES.map(function (t, i) { return '<label class="sv-chip"><input type="radio" name="type" value="' + t[0] + '"' + (i === 0 ? " checked" : "") + "><span>" + t[1] + "</span></label>"; }).join("") + "</div></fieldset>" +
           '<label class="sv-field">Which one is it?<select name="lift"><option value="">New, or not in our list</option>' + D.lifts.map(function (l) { return '<option value="' + l.id + '">' + ui.esc(l.name) + "</option>"; }).join("") + "</select></label>" +
           '<label class="sv-field">Name or what the sign says<input name="name" placeholder="e.g. Ascenseur public Sainte-Dévote"></label>' +
+          '<fieldset><legend>Which end are you at?</legend><div class="sv-chips">' + [["bottom", "Bottom"], ["top", "Top"], ["middle", "A middle level"], ["na", "Not a lift"]].map(function (o, i) { return '<label class="sv-chip"><input type="radio" name="end" value="' + o[0] + '"' + (i === 0 ? " checked" : "") + "><span>" + o[1] + "</span></label>"; }).join("") + "</div></fieldset>" +
           '<fieldset><legend>Working today?</legend><div class="sv-chips">' + [["yes", "Yes"], ["no", "No"], ["unsure", "Not sure"]].map(function (o, i) { return '<label class="sv-chip"><input type="radio" name="working" value="' + o[0] + '"' + (i === 0 ? " checked" : "") + "><span>" + o[1] + "</span></label>"; }).join("") + "</div></fieldset>" +
           '<fieldset><legend>Step-free to reach it?</legend><div class="sv-chips">' + [["yes", "Yes"], ["no", "No, steps"], ["unsure", "Not sure"]].map(function (o, i) { return '<label class="sv-chip"><input type="radio" name="stepfree" value="' + o[0] + '"' + (i === 0 ? " checked" : "") + "><span>" + o[1] + "</span></label>"; }).join("") + "</div></fieldset>" +
           '<label class="sv-field">Opening hours on the sign<input name="hours" placeholder="e.g. 24 hours, or 6:00–00:30"></label>' +
@@ -242,7 +243,7 @@
           var pin = {
             id: uid(), created: Date.now(), lat: +pos.lat.toFixed(6), lng: +pos.lng.toFixed(6), acc: Math.round(pos.acc),
             type: type, typeLabel: TYPES.filter(function (t) { return t[0] === type; })[0][1],
-            liftId: f.elements["lift"].value || null, name: f.elements["name"].value.trim(), working: f.elements["working"].value, stepFree: f.elements["stepfree"].value,
+            liftId: f.elements["lift"].value || null, end: f.elements["end"].value, name: f.elements["name"].value.trim(), working: f.elements["working"].value, stepFree: f.elements["stepfree"].value,
             hours: f.elements["hours"].value.trim(), links: f.elements["links"].value.trim(), notes: f.elements["notes"].value.trim()
           };
           put("pins", pin).then(function () {
