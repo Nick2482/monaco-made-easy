@@ -198,19 +198,30 @@
       var to = state.to, layer = L.layerGroup().addTo(map), fromPt = null;
       L.marker([to.lat, to.lng], { icon: L.divIcon({ className: "", html: '<span class="mk-end mk-to"></span>', iconSize: [26, 26], iconAnchor: [13, 13] }) }).addTo(map);
 
+      var lastNote = null, blockedKey = "";
       function draw(from, note) {
-        fromPt = from;
+        fromPt = from; lastNote = note;
         layer.clearLayers();
         var isStation = !!(from && from.kind === "station");
-        var R0 = window.MMERouter, exit0 = isStation && R0 ? R0.fromStation(to, { avoidSteps: avoidSteps }) : null;
+        var X = window.MMEExtras, blocked = X ? X.Reports.blockedPoints() : [];
+        blockedKey = blocked.map(function (b) { return b.id; }).join(",");
+        var R0 = window.MMERouter, exit0 = isStation && R0 ? R0.fromStation(to, { avoidSteps: avoidSteps, blocked: blocked }) : null;
         if (exit0) from = { lat: exit0.exit.lat, lng: exit0.exit.lng };
         L.marker([from.lat, from.lng], { icon: L.divIcon({ className: "", html: '<span class="mk-end mk-from"></span>', iconSize: [26, 26], iconAnchor: [13, 13] }) }).addTo(layer);
         var R = window.MMERouter, exit = null, r = null;
         if (R) {
           if (isStation) { var best = exit0; if (best) { exit = best.exit; r = best.r; } }
-          else r = R.route(from, to, { avoidSteps: avoidSteps });
+          else r = R.route(from, to, { avoidSteps: avoidSteps, blocked: blocked });
         }
-        var other = R && !exit ? R.route(from, to, { avoidSteps: !avoidSteps }) : null;
+        var other = R && !exit ? R.route(from, to, { avoidSteps: !avoidSteps, blocked: blocked }) : null;
+        // Which reported lifts would the usual route have used? Those are the ones we've steered round.
+        var avoided = [];
+        if (R && r && blocked.length) {
+          var plain = exit ? R.route({ lat: exit.lat, lng: exit.lng }, to, { avoidSteps: avoidSteps }) : R.route(from, to, { avoidSteps: avoidSteps });
+          if (plain) avoided = blocked.filter(function (b) {
+            return plain.liftPts.some(function (pt) { return M().distance(pt, b) < 45; });
+          });
+        }
         var h = note ? '<p class="summary">' + note + "</p>" : "";
         var outside = r && (r.startGap > 300 || r.endGap > 300);
         if (!r) {
@@ -254,22 +265,38 @@
             var a = T.stopPt(bus.from), z = T.stopPt(bus.to);
             [a, z].forEach(function (p) { L.circleMarker([p.lat, p.lng], { radius: 9, color: "#fff", weight: 3, fillColor: window.MMEBus.routes[bus.p.r].c, fillOpacity: 1 }).addTo(layer); });
           }
-          if (state.arrival) h = '<aside class="note note-welcome"><strong>' + esc(t("Welcome to Monaco")) + "</strong><p>" + esc(t(arrivalTip())) + (r.minutes > 20 || !r.stepFree ? " " + esc(t("With heavy bags, a taxi may be easier for this one.")) : "") + "</p></aside>" + h;
+          if (X) h = X.routeReportNote(avoided) + X.routeEventNote(r) + h;
+          if (state.arrival) h = '<aside class="note note-welcome"><strong>' + esc(t("Welcome to Monaco")) + "</strong><p>" + esc(t(arrivalTip())) + (r.minutes > 20 || !r.stepFree ? " " + esc(t("With heavy bags, a taxi may be easier for this one.")) : "") + "</p>" + (state.arrival === "ship" ? '<a class="btn btn-navy ship-link" href="#/cruise">' + esc(t("Set your all-aboard time")) + "</a>" : "") + "</aside>" + h;
           var cur = curatedFor(state.from, to);
           if (cur && cur.tip) h += '<aside class="note"><strong>' + esc(t("Tip")) + "</strong><p>" + esc(t(cur.tip)) + "</p></aside>";
           var b = L.latLngBounds([[from.lat, from.lng], [to.lat, to.lng]]);
           r.lines.forEach(function (ln) { ln.pts.forEach(function (p) { b.extend(p); }); });
           map.fitBounds(b.pad(0.12));
         }
-        h += '<div class="actions"><a class="btn btn-line" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=' + from.lat + "," + from.lng + "&destination=" + to.lat + "," + to.lng + '">' + esc(t("Compare in Google Maps")) + "</a></div>" +
+        var canSave = window.MMEExtras && to.kind !== "ship" && to.kind !== "home" && !window.MMEExtras.Home.is(to);
+        h += '<div class="actions">' + (canSave ? '<button type="button" class="btn btn-line save-home" id="save-home">' + esc(t("Save as where I’m staying")) + "</button>" : "") + '<a class="btn btn-line" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=' + from.lat + "," + from.lng + "&destination=" + to.lat + "," + to.lng + '">' + esc(t("Compare in Google Maps")) + "</a></div>" +
           '<p class="unchecked">' + esc(t("Routes are worked out from OpenStreetMap. Lifts can be closed for repairs, so follow the blue “Ascenseur public” signs on the day.")) + "</p>";
         var body = root.querySelector("#plan-body");
         body.innerHTML = h;
+        var sh = body.querySelector("#save-home");
+        if (sh) sh.addEventListener("click", function () {
+          window.MMEExtras.Home.set(to);
+          var ok = document.createElement("p"); ok.className = "off-ok"; ok.setAttribute("role", "status");
+          ok.textContent = t("Saved. Tap “Back to {name}” on the home screen any time.", { name: lbl(to) });
+          sh.replaceWith(ok);
+        });
         var alt = body.querySelector(".alt-btn");
         if (alt) alt.addEventListener("click", function () { avoidSteps = alt.dataset.mode === "easy"; draw0(fromPt, note); });
         if (!r) map.fitBounds(L.latLngBounds([[from.lat, from.lng], [to.lat, to.lng]]).pad(0.3));
       }
 
+      // Lift reports can arrive after the route is drawn (slow signal): redraw if they change it.
+      function onReports() {
+        if (!document.body.contains(root)) { window.removeEventListener("mme-reports", onReports); return; }
+        var X = window.MMEExtras, key = X ? X.Reports.blockedPoints().map(function (b) { return b.id; }).join(",") : "";
+        if (fromPt && key !== blockedKey) draw0(fromPt, lastNote);
+      }
+      window.addEventListener("mme-reports", onReports);
       avoidSteps = true;
       var heightsReady = window.MMERouter ? window.MMERouter.ready : Promise.resolve(false);
       var draw0 = draw;
@@ -343,6 +370,7 @@
         var how = root.querySelector("input[name=arrival]:checked").value;
         state.to = picked;
         state.arrival = how;
+        if (window.MMEExtras) window.MMEExtras.Home.set(picked);
         state.from = how === "train" ? { label: "Monaco Monte-Carlo station", lat: D.places.station.lat, lng: D.places.station.lng, kind: "station" }
           : how === "heli" ? HELIPORT : null;
         location.hash = "#/plan";
@@ -400,5 +428,16 @@
     return true;
   }
 
-  window.MMEPlanner = { arriveScreen: arriveScreen, placeRef: placeRef, go: go, boxHtml: boxHtml, mountBox: mountBox, screen: screen, fromLink: fromLink, toLink: toLink, state: state };
+  function homeRoute() {
+    var h = window.MMEExtras && window.MMEExtras.Home.get();
+    if (!h) return false;
+    state.to = h; state.from = null; state.arrival = null; return true;
+  }
+  function shipRoute() {
+    var c = window.MMEExtras && window.MMEExtras.cruise();
+    if (!c) return false;
+    state.to = window.MMEExtras.shipPoint(c); state.from = null; state.arrival = null; return true;
+  }
+
+  window.MMEPlanner = { homeRoute: homeRoute, shipRoute: shipRoute, arriveScreen: arriveScreen, placeRef: placeRef, go: go, boxHtml: boxHtml, mountBox: mountBox, screen: screen, fromLink: fromLink, toLink: toLink, state: state };
 })();

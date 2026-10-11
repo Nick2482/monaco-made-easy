@@ -44,8 +44,9 @@
   function makeMap(el, opts) {
     var map = L.map(el, { zoomControl: false, attributionControl: true, tap: true }).setView([43.7375, 7.4235], opts && opts.zoom || 15);
     map.attributionControl.setPrefix('<a href="https://leafletjs.com">Leaflet</a>');
+    // With no signal, zoom into the saved map tiles rather than showing blank squares.
     L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
-      maxZoom: 20, subdomains: "abcd",
+      maxZoom: 20, subdomains: "abcd", maxNativeZoom: navigator.onLine === false ? 17 : 20,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
     }).addTo(map);
     L.control.zoom({ position: "bottomright" }).addTo(map);
@@ -56,7 +57,7 @@
     var ui = window.MMEUI;
     return L.divIcon({
       className: "",
-      html: '<span class="mk mk-' + l.type + (l.approx ? " mk-approx" : "") + '">' + ui.icon(l.type) + "</span>",
+      html: '<span class="mk mk-' + l.type + (l.approx ? " mk-approx" : "") + (X() && X().Reports.status(l.id) ? " mk-down" : "") + '">' + ui.icon(l.type) + "</span>",
       iconSize: [34, 34], iconAnchor: [17, 17], popupAnchor: [0, -16]
     });
   }
@@ -69,11 +70,12 @@
     return "https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=" + lat + "," + lng;
   }
 
+  function X() { return window.MMEExtras; }
   function liftPopup(l) {
     var esc = window.MMEUI.esc;
-    return "<strong>" + esc(liftName(l)) + "</strong><br>" + esc(liftLinks(l)) +
+    return '<div class="lift-pop">' + "<strong>" + esc(liftName(l)) + "</strong><br>" + esc(liftLinks(l)) +
       (l.approx ? '<br><em class="pop-approx">' + esc(t("Position approximate, being checked")) + "</em>" : "") +
-      '<br><a href="' + directions(l.lat, l.lng) + '" target="_blank" rel="noopener">' + esc(t("Walking directions")) + "</a>";
+      '<br><a href="' + directions(l.lat, l.lng) + '" target="_blank" rel="noopener">' + esc(t("Walking directions")) + "</a>" + (X() ? X().reportBox(l) : "") + "</div>";
   }
 
   // ---------- The map screen ----------
@@ -109,12 +111,22 @@
         items = items.slice(0, pos ? 15 : 20);
         list.innerHTML = items.map(function (it) {
           var l = it.l;
-          return '<li><span class="step-ico" style="--c:' + ui.COLORS[l.type] + '">' + ui.icon(l.type) + "</span><div><strong>" + ui.esc(liftName(l)) + "</strong>" +
+          var down = X() && X().Reports.status(l.id);
+          return '<li' + (down ? ' class="is-down"' : "") + '><span class="step-ico" style="--c:' + (down ? "#7a8694" : ui.COLORS[l.type]) + '">' + ui.icon(l.type) + "</span><div><strong>" + ui.esc(liftName(l)) + "</strong>" +
+            (down ? '<span class="rep-down">' + ui.esc(X().Reports.label(down)) + "</span>" : "") +
             "<span>" + ui.esc(liftLinks(l)) + "</span><small>" + ui.esc(it.d !== null ? t("{d} away, about {n} min walk", { d: niceDistance(it.d), n: walkMinutes(it.d) }) : l.where + ", " + l.area) + "</small></div>" +
             '<button type="button" class="map-mini" data-show="' + l.id + '">' + ui.esc(t("Show")) + "</button></li>";
         }).join("") + '<li class="more-note">' + ui.esc(t(pos ? "The 15 closest of {n} lifts and escalators. All of them are on the map." : "20 of {n} lifts and escalators. All of them are on the map.", { n: total })) + "</li>";
       }
+      var lastPos = null;
       drawList(null);
+      // When reports arrive (or you make one), grey out those lifts on the map and in the list.
+      function onReports() {
+        if (!document.body.contains(root)) { window.removeEventListener("mme-reports", onReports); return; }
+        D.lifts.forEach(function (l) { markers[l.id].setIcon(liftIcon(l)); if (!markers[l.id].isPopupOpen()) markers[l.id].setPopupContent(liftPopup(l)); });
+        drawList(lastPos);
+      }
+      window.addEventListener("mme-reports", onReports);
 
       list.addEventListener("click", function (e) {
         var b = e.target.closest("[data-show]");
@@ -138,7 +150,8 @@
           if (!centred && inArea) { map.setView([pos.lat, pos.lng], 17); centred = true; }
           root.querySelector("#near-h").textContent = t("Nearest to you");
           root.querySelector("#near-sub").textContent = inArea ? t("Sorted by distance from where you are now.") : t("You’re not in Monaco yet. When you are, this list sorts itself by what’s closest.");
-          drawList(inArea ? pos : null);
+          lastPos = inArea ? pos : null;
+          drawList(lastPos);
         });
       }
       root.querySelector("#find-me").addEventListener("click", locate);
@@ -161,5 +174,5 @@
     }
   };
 
-  window.MMEMap = { screen: screen, makeMap: makeMap, liftIcon: liftIcon, meIcon: meIcon, startLocating: startLocating, onLocation: onLocation, distance: distance, niceDistance: niceDistance };
+  window.MMEMap = { liftName: liftName, here: function () { return here; }, screen: screen, makeMap: makeMap, liftIcon: liftIcon, meIcon: meIcon, startLocating: startLocating, onLocation: onLocation, distance: distance, niceDistance: niceDistance };
 })();

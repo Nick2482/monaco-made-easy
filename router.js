@@ -119,12 +119,21 @@
     return { secs: secs, cost: cost };
   }
   var LIFT_WAIT = 45;
+  function fw0(k) { return k >= 0 ? k : -k - 1; }
 
   function route(from, to, opts) {
     opts = opts || {};
     var avoid = opts.avoidSteps !== false;
     var s = nearest(from), g = nearest(to);
     if (!s || !g) return null;
+    // Lifts and escalators that visitors have reported out of order are left out.
+    var blockN = null, blockE = null;
+    if (opts.blocked && opts.blocked.length) {
+      blockN = {}; blockE = {};
+      var near = function (n) { return opts.blocked.some(function (b) { return metres(b.lat, b.lng, lat[n], lng[n]) < 40; }); };
+      Object.keys(liftAt).forEach(function (n) { if (near(+n)) blockN[n] = 1; });
+      G.e.forEach(function (e, k) { if ((e[3] === 3 || e[3] === 4) && (near(e[0]) || near(e[1]))) blockE[k] = 1; });
+    }
     var dist = new Float64Array(N).fill(Infinity), prev = new Int32Array(N).fill(0), seen = new Uint8Array(N);
     dist[s.node] = 0;
     // Binary heap of [cost, node]
@@ -141,6 +150,7 @@
         var k = list[j], fwd = k >= 0, e = G.e[fwd ? k : -k - 1];
         var v = fwd ? e[1] : e[0];
         if (seen[v]) continue;
+        if (blockN && (blockN[v] || blockE[fw0(k)])) continue;
         var c = legCost(e, fwd, avoid).cost + (liftAt[v] ? LIFT_WAIT : 0);
         // Climbing on foot (not by lift or escalator) costs about 10 seconds a metre for an easy walker.
         if (e[3] !== 3 && e[3] !== 4) { var up = climb(u, v); if (up > 0) c += up * (avoid ? 12 : 7); }
@@ -156,7 +166,18 @@
       n = fw ? ed[0] : ed[1];
     }
     legs.reverse();
-    return describe(legs, s, g, from, to);
+    var out = describe(legs, s, g, from, to);
+    // Street names used, e.g. to warn when a route crosses the Grand Prix circuit.
+    var used = {};
+    legs.forEach(function (lg) { var nm = G.names[lg.e[4]]; if (nm) used[nm] = 1; });
+    out.streets = Object.keys(used);
+    // Where the route rides a lift or escalator (to spot ones that have been reported out of order).
+    out.liftPts = [];
+    legs.forEach(function (lg) {
+      if (liftAt[lg.to]) out.liftPts.push({ lat: lat[lg.to], lng: lng[lg.to] });
+      if (lg.e[3] === 3 || lg.e[3] === 4) out.liftPts.push({ lat: lat[lg.from], lng: lng[lg.from] }, { lat: lat[lg.to], lng: lng[lg.to] });
+    });
+    return out;
   }
 
   function edgePoints(leg) {

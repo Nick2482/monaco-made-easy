@@ -455,3 +455,68 @@ html:lang(ko) body { word-break: keep-all; overflow-wrap: anywhere; }
 .tabs a[aria-current="page"] { color: var(--navy); }
 .tabs a[aria-current="page"]::before { content: ""; position: absolute; top: 0; left: 50%; width: 28px; height: 3px; margin-left: -14px; background: var(--red); border-radius: 0 0 3px 3px; }
 .lang-sheet button.on { background: var(--stone); }
+
+/* ---------- v11: home, events, cruise, offline, lift reports ---------- */
+.home-btn, .cruise-card { display: flex; align-items: center; gap: 14px; margin-top: 16px; padding: 16px 18px; border-radius: 16px; text-decoration: none; }
+.home-btn { background: var(--riva-pale); color: var(--navy); box-shadow: inset 5px 0 0 var(--riva); }
+.home-btn .home-ico { width: 30px; height: 30px; fill: var(--navy); flex: none; }
+.home-btn span { flex: 1; min-width: 0; }
+.home-btn strong { display: block; font-family: var(--serif); font-weight: 400; font-size: 24px; line-height: 1.12; overflow-wrap: anywhere; }
+.home-btn small { display: block; font-size: 15px; font-weight: 700; margin-top: 2px; }
+.home-btn > svg:last-child, .cr-go svg { width: 26px; height: 26px; fill: currentColor; flex: none; }
+.cruise-card { flex-direction: column; align-items: stretch; gap: 2px; background: #fff; color: var(--navy); border-top: 5px solid var(--red); }
+.cr-top { font-size: 15px; font-weight: 700; color: var(--grey); }
+.cr-head { font-family: var(--serif); font-weight: 400; font-size: 30px; line-height: 1.1; }
+.cr-head.cr-urgent { color: var(--red); }
+.cruise-card small { font-size: 15.5px; color: var(--grey); }
+.cr-go { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--hair); font-weight: 700; color: var(--red); }
+.event-banner { display: grid; gap: 2px; margin-top: 16px; padding: 14px 16px; border-radius: 14px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.22); color: #fff; }
+.event-banner::before { content: ""; height: 8px; margin: -14px -16px 8px; border-radius: 14px 14px 0 0; background: var(--fusil) center 0 / 6px 8px repeat-x; }
+.ev-tag { font-size: 13.5px; font-weight: 700; color: var(--riva); }
+.event-banner strong { font-family: var(--serif); font-weight: 400; font-size: 22px; line-height: 1.15; }
+.ev-date { font-weight: 700; font-size: 15px; }
+.event-banner p { margin-top: 4px; color: #c9d6e5; font-size: 16px; }
+.events-info { margin-top: 26px; }
+.events-info h2 { font-size: 28px; }
+.ev-list { list-style: none; margin: 10px 0 0; padding: 0; }
+.ev-list li { padding: 14px 0 14px 14px; border-bottom: 1px solid var(--line); box-shadow: inset 3px 0 0 var(--red); }
+.ev-list strong { display: block; font-size: 18px; }
+.ev-list .ev-date { display: block; color: var(--red); }
+.ev-list p { color: #2d3a47; margin-top: 4px; }
+.note-event { border-left-color: var(--red); background: #fff4f5; }
+.note-report { border-left-color: #7a8694; }
+.ship-link { margin-top: 12px; min-height: 46px; font-size: 16px; }
+.actions { display: grid; gap: 10px; }
+.save-home { width: 100%; background: #fff; cursor: pointer; font-family: inherit; }
+.off-ok { margin-top: 10px; padding: 10px 14px; border-radius: 10px; background: #e8f6ef; color: #0d5c3c; font-weight: 700; }
+/* Good to know: save for offline */
+.offline-card { margin: 18px 0 8px; padding: 18px; border-radius: 16px; background: var(--navy); color: #fff; box-shadow: inset 0 -4px 0 var(--riva); }
+.offline-card h2 { font-size: 26px; }
+.offline-card p { color: #c9d6e5; margin-top: 6px; }
+.offline-card .off-ok { background: rgba(255, 255, 255, 0.12); color: #fff; }
+.offline-card .off-status { color: #fff; font-weight: 700; min-height: 0; }
+.offline-card .form-err { color: #ffd5da; font-weight: 700; }
+.offline-card .btn { width: 100%; margin-top: 14px; border: 0; cursor: pointer; font-family: inherit; }
+.offline-card .btn-navy { background: var(--red); }
+.offline-card .btn-line { background: transparent; color: #fff; border: 2px solid rgba(255, 255, 255, 0.6); }
+.offline-card .btn:disabled { opacity: 0.6; }
+.off-bar { height: 6px; margin-top: 10px; border-radius: 3px; background: rgba(255, 255, 255, 0.18); overflow: hidden; }
+.off-bar i { display: block; height: 100%; width: 0; background: var(--riva); transition: width 0.2s; }
+/* Cruise screen */
+.cr-time { font: inherit; font-size: 28px; font-weight: 700; padding: 10px 14px; border: 1.5px solid var(--line); border-radius: 12px; color: var(--navy); background: #fff; }
+.cr-end { width: 100%; margin-top: 10px; background: #fff; cursor: pointer; font-family: inherit; }
+.tr-card.tr-cruise { background: #fff; color: var(--navy); border: 1.5px solid var(--hair); box-shadow: inset 0 5px 0 var(--red); }
+.tr-card.tr-cruise span { color: var(--grey); }
+/* Lift reports */
+.lift-pop { min-width: 190px; }
+.rep { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--hair); }
+.rep-open { background: none; border: 0; padding: 4px 0; color: var(--red); font: inherit; font-weight: 700; font-size: 14.5px; cursor: pointer; text-decoration: underline; }
+.rep-opts { display: grid; gap: 6px; margin-top: 6px; }
+.rep-opts button { font: inherit; font-size: 14.5px; font-weight: 700; padding: 8px 10px; border-radius: 8px; border: 1.5px solid var(--navy); background: #fff; color: var(--navy); cursor: pointer; text-align: left; }
+.rep-thanks { font-size: 14px; font-weight: 700; color: #0d5c3c; margin-top: 4px; }
+.rep-thanks:empty { display: none; }
+.rep-down { display: block; color: var(--red); font-weight: 700; font-size: 14.5px; }
+.mk.mk-down { background: #7a8694 !important; opacity: 0.85; position: relative; }
+.mk.mk-down::after { content: ""; position: absolute; left: 50%; top: 4px; bottom: 4px; width: 3px; margin-left: -1.5px; background: #fff; transform: rotate(45deg); border-radius: 2px; }
+.lifts li.is-down strong { text-decoration: line-through; text-decoration-color: rgba(200, 16, 46, 0.6); }
+html.cjk .home-btn strong, html.cjk .cr-head, html.cjk .event-banner strong, html.cjk .offline-card h2, html.cjk .events-info h2 { font-family: "PingFang SC", "Hiragino Mincho ProN", "Noto Serif CJK SC", "Noto Serif JP", "Noto Serif KR", serif; font-weight: 700; letter-spacing: 0; }

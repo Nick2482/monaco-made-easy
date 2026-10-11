@@ -131,6 +131,7 @@
   }
 
   // ---------- Screens ----------
+  var X = window.MMEExtras;
   function home() {
     var list = D.routes.filter(routeMatches);
     var chips = [["all", t("All routes")], ["stepfree", t("Step-free only")], ["beausoleil", t("Beausoleil")]];
@@ -138,6 +139,7 @@
     return '<section class="hero">' +
       '<p class="preview">' + esc(t("Preview: routes are being checked on the ground")) + "</p>" +
       "<h1>" + esc(t("Monaco, without the climb.")) + "</h1>" +
+      (X ? X.eventBanner() + X.cruiseCard() + X.homeCard() : "") +
       '<a class="arrive-btn" href="#/arrive"><span><strong>' + esc(t("Just arrived?")) + "</strong><small>" + esc(t("The easiest way to where you’re staying, with your bags")) + '</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.6 5.4 10 4l8 8-8 8-1.4-1.4 6.6-6.6z"/></svg></a>' +
       '<p class="lede">' + esc(t("Around 80 free public lifts, 37 escalators and 8 moving walkways link Monaco and Beausoleil. We show you how to use them.")) + "</p>" +
       window.MMEPlanner.boxHtml() +
@@ -166,9 +168,9 @@
       [t("Emergencies"), t("Call 112 from any phone.")],
       [t("Where our data comes from"), t("Streets, paths, lifts and escalators: © OpenStreetMap contributors (ODbL). Heights: Terrain Tiles from AWS Open Data (Mapzen and others). Map style: © CARTO. Buses: Compagnie des Autobus de Monaco open data.")]
     ];
-    return '<section class="page"><h1>' + esc(t("Good to know")) + '</h1><dl class="info">' + items.map(function (i) {
+    return '<section class="page"><h1>' + esc(t("Good to know")) + "</h1>" + (X ? X.offlineCard() : "") + '<dl class="info">' + items.map(function (i) {
       return "<div><dt>" + esc(i[0]) + "</dt><dd>" + esc(i[1]) + "</dd></div>";
-    }).join("") + '</dl><p class="unchecked">' + esc(t("This is a preview. Details are gathered from published sources and are being checked on the ground before launch.")) + "</p></section>";
+    }).join("") + "</dl>" + (X ? X.eventsInfo() : "") + '<p class="unchecked">' + esc(t("This is a preview. Details are gathered from published sources and are being checked on the ground before launch.")) + "</p></section>";
   }
 
   // ---------- Router ----------
@@ -180,6 +182,9 @@
     else if (parts[0] === "map" || parts[0] === "lifts") { screen = window.MMEMap.screen; tab = "map"; }
     else if (parts[0] === "survey") { screen = window.MMESurvey.screen; tab = ""; }
     else if (parts[0] === "info") { html = infoPage(); tab = "info"; }
+    else if (parts[0] === "cruise") { screen = X.cruiseScreen; tab = "transport"; }
+    else if (parts[0] === "home-route") { location.replace(window.MMEPlanner.homeRoute() ? "#/plan" : "#/arrive"); return; }
+    else if (parts[0] === "ship") { location.replace(window.MMEPlanner.shipRoute() ? "#/plan" : "#/cruise"); return; }
     else if (parts[0] === "plan") { screen = window.MMEPlanner.screen; }
     else if (parts[0] === "arrive") { screen = window.MMEPlanner.arriveScreen; }
     else if (parts[0] === "transport" && window.MMETransit.ready) { screen = window.MMETransit.transportScreen; tab = "transport"; }
@@ -197,7 +202,8 @@
     main.innerHTML = screen ? screen.html() : html;
     document.body.classList.toggle("is-map", tab === "map");
     if (screen) screen.mount(main.firstElementChild);
-    else if (!parts[0]) window.MMEPlanner.mountBox(main);
+    else if (!parts[0]) { window.MMEPlanner.mountBox(main); if (X) X.mountHome(main); }
+    else if (parts[0] === "info" && X) X.mountOffline(main);
     document.querySelectorAll(".tabs a").forEach(function (a) {
       if (a.dataset.tab === tab) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
