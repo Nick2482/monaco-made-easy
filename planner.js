@@ -10,6 +10,9 @@
   var CENTRE = { lat: 43.7385, lng: 7.4240 };
 
   var state = { from: null, to: null }; // null "from" means "my location"
+  // Travelling with a wheelchair or pushchair: remembered on this phone.
+  function wheelchairOn() { try { return localStorage.getItem("mme-wheelchair") === "1"; } catch (e) { return false; } }
+  function setWheelchair(on) { try { localStorage.setItem("mme-wheelchair", on ? "1" : "0"); } catch (e) {} }
 
   function ui() { return window.MMEUI; }
   function M() { return window.MMEMap; }
@@ -205,27 +208,29 @@
         var isStation = !!(from && from.kind === "station");
         var X = window.MMEExtras, blocked = X ? X.Reports.blockedPoints() : [];
         blockedKey = blocked.map(function (b) { return b.id; }).join(",");
-        var R0 = window.MMERouter, exit0 = isStation && R0 ? R0.fromStation(to, { avoidSteps: avoidSteps, blocked: blocked }) : null;
+        var wc = wheelchairOn();
+        var R0 = window.MMERouter, exit0 = isStation && R0 ? R0.fromStation(to, { avoidSteps: avoidSteps, blocked: blocked, wheelchair: wc }) : null;
         if (exit0) from = { lat: exit0.exit.lat, lng: exit0.exit.lng };
         L.marker([from.lat, from.lng], { icon: L.divIcon({ className: "", html: '<span class="mk-end mk-from"></span>', iconSize: [26, 26], iconAnchor: [13, 13] }) }).addTo(layer);
         var R = window.MMERouter, exit = null, r = null;
         if (R) {
           if (isStation) { var best = exit0; if (best) { exit = best.exit; r = best.r; } }
-          else r = R.route(from, to, { avoidSteps: avoidSteps, blocked: blocked });
+          else r = R.route(from, to, { avoidSteps: avoidSteps, blocked: blocked, wheelchair: wc });
         }
-        var other = R && !exit ? R.route(from, to, { avoidSteps: !avoidSteps, blocked: blocked }) : null;
+        var other = R && !exit && !wc ? R.route(from, to, { avoidSteps: !avoidSteps, blocked: blocked }) : null;
         // Which reported lifts would the usual route have used? Those are the ones we've steered round.
         var avoided = [];
         if (R && r && blocked.length) {
-          var plain = exit ? R.route({ lat: exit.lat, lng: exit.lng }, to, { avoidSteps: avoidSteps }) : R.route(from, to, { avoidSteps: avoidSteps });
+          var plain = exit ? R.route({ lat: exit.lat, lng: exit.lng }, to, { avoidSteps: avoidSteps, wheelchair: wc }) : R.route(from, to, { avoidSteps: avoidSteps, wheelchair: wc });
           if (plain) avoided = blocked.filter(function (b) {
             return plain.liftPts.some(function (pt) { return M().distance(pt, b) < 45; });
           });
         }
         var h = note ? '<p class="summary">' + note + "</p>" : "";
+        h += '<label class="wc-toggle"><input type="checkbox" id="wc-on"' + (wc ? " checked" : "") + '><span class="wc-sw" aria-hidden="true"></span><span>' + esc(t("Wheelchair or pushchair")) + "<small>" + esc(t("Lifts and level paths only: no steps or escalators")) + "</small></span></label>";
         var outside = r && (r.startGap > 300 || r.endGap > 300);
         if (!r) {
-          h += '<p class="summary">' + esc(t("We couldn’t find a walking route between these two places on our Monaco map.")) + "</p>";
+          h += '<p class="summary">' + esc(wc ? t("We couldn’t find a way between these two places without steps or escalators. A taxi is the easiest option.") : t("We couldn’t find a walking route between these two places on our Monaco map.")) + "</p>";
           L.polyline([[from.lat, from.lng], [to.lat, to.lng]], { color: "#0b2545", weight: 3, dashArray: "6 8" }).addTo(layer);
         } else {
           r.lines.forEach(function (ln) { L.polyline(ln.pts, LINE[ln.kind]).addTo(layer); });
@@ -235,7 +240,8 @@
             ? "<li><strong>" + esc(r.climbed < 5 ? t("Hardly any climb") : t("{n} m climb", { n: r.climbed })) + "</strong><span>" + esc(r.saved > 4 ? t("lifts do {n} m for you", { n: r.saved }) : r.lifts ? t(r.lifts === 1 ? "1 lift on the way" : "{n} lifts on the way", { n: r.lifts }) : t("on foot")) + "</span></li>"
             : "<li><strong>" + esc(t(r.lifts === 1 ? "1 lift" : "{n} lifts", { n: r.lifts })) + "</strong><span>" + esc(r.escalators ? t(r.escalators === 1 ? "and 1 escalator" : "and {n} escalators", { n: r.escalators }) : t("on the way")) + "</span></li>";
           h += '<ul class="facts"><li><strong>' + esc(t("{n} min", { n: r.minutes })) + "</strong><span>" + esc(t("{d} on foot", { d: r.metres >= 1000 ? (r.metres / 1000).toFixed(1) + " km" : r.metres + " m" })) + "</span></li>" +
-            "<li><strong>" + esc(r.stepFree ? t("No steps") : t(r.steps === 1 ? "1 set of steps" : "{n} sets of steps", { n: r.steps })) + "</strong><span>" + esc(r.stepFree ? t("step-free") : t("on this route")) + "</span></li>" + vert + "</ul>";
+            "<li><strong>" + esc(r.stepFree ? t("No steps") : t(r.steps === 1 ? "1 set of steps" : "{n} sets of steps", { n: r.steps })) + "</strong><span>" + esc(r.stepFree ? (wc ? t("no escalators") : r.escalators ? t("but uses escalators") : t("step-free")) : t("on this route")) + "</span></li>" + vert + "</ul>";
+          if (wc) h += '<aside class="note note-wc"><strong>' + esc(t("Wheelchair or pushchair")) + "</strong><p>" + esc(t("Some of Monaco’s streets are steep even without steps. Lift access comes from OpenStreetMap and is being checked on the ground.")) + "</p></aside>";
           if (other && Math.abs(other.minutes - r.minutes) >= 3 && other.steps !== r.steps) {
             h += avoidSteps
               ? '<button type="button" class="alt-btn" data-mode="steps">' + esc(t(other.steps === 1 ? "Happy with steps? There’s a quicker way: {m} min with 1 set of steps" : "Happy with steps? There’s a quicker way: {m} min with {n} sets of steps", { m: other.minutes, n: other.steps })) + "</button>"
@@ -252,7 +258,7 @@
               '<div><span class="step-type">' + esc(t(STEP_LABEL[k] || "Arrive")) + "</span><p>" + esc(st.text) + "</p></div></li>";
           }).join("") + "</ol>";
           if (!r.stepFree) h += '<aside class="note"><strong>' + esc(t("Steps on this route")) + "</strong><p>" + esc(t("This is the easiest way we can find, but it still has some steps. A taxi may be easier with heavy bags.")) + "</p></aside>";
-          if (outside) h += '<aside class="note"><strong>' + esc(t("Beausoleil and beyond")) + "</strong><p>" + esc(t("Part of this journey is outside Monaco’s mapped lifts. Beausoleil is coming soon. Use Google Maps for that part.")) + "</p></aside>";
+          if (outside) h += '<aside class="note"><strong>' + esc(t("Beyond our map")) + "</strong><p>" + esc(t("Part of this journey is outside the area we cover (Monaco and Beausoleil). Use Google Maps for that part.")) + "</p></aside>";
           var T = window.MMETransit, bus = T && T.ready ? T.busOption(from, to) : null;
           if (bus && (bus.minutes + 2 < r.minutes || (r.climbed > 30 && bus.minutes < r.minutes + 8) || (!r.stepFree && bus.minutes < r.minutes + 8))) {
             var now = T.monacoNow();
@@ -278,6 +284,8 @@
           '<p class="unchecked">' + esc(t("Routes are worked out from OpenStreetMap. Lifts can be closed for repairs, so follow the blue “Ascenseur public” signs on the day.")) + "</p>";
         var body = root.querySelector("#plan-body");
         body.innerHTML = h;
+        var wcBox = body.querySelector("#wc-on");
+        if (wcBox) wcBox.addEventListener("change", function () { setWheelchair(wcBox.checked); avoidSteps = true; draw0(fromPt, lastNote); });
         var sh = body.querySelector("#save-home");
         if (sh) sh.addEventListener("click", function () {
           window.MMEExtras.Home.set(to);
@@ -343,6 +351,7 @@
         '<div class="ar-q"><label class="ar-legend" for="ar-stay">' + esc(t("Where are you staying?")) + "</label>" +
         '<div class="ar-search"><input id="ar-stay" type="search" autocomplete="off" placeholder="' + esc(t("Hotel name or address")) + '" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="ar-list"><ul class="pl-sugg" id="ar-list" role="listbox" hidden></ul></div>' +
         '<p class="ar-hint">' + esc(t("Type the hotel name or the apartment address from your booking. You can also paste the location link your host sent you.")) + "</p></div>" +
+        '<label class="wc-toggle wc-arrive"><input type="checkbox" id="ar-wc"' + (wheelchairOn() ? " checked" : "") + '><span class="wc-sw" aria-hidden="true"></span><span>' + esc(t("Travelling with a wheelchair or pushchair?")) + "<small>" + esc(t("We’ll only use lifts and level paths.")) + "</small></span></label>" +
         '<p class="form-err" id="ar-err" role="alert" hidden></p>' +
         '<button type="button" class="btn btn-red ar-go" id="ar-go">' + esc(t("Show me the way")) + "</button></section>";
     },
@@ -368,6 +377,7 @@
         var err = root.querySelector("#ar-err");
         if (!picked) { err.textContent = input.value.trim() ? t("Pick your accommodation from the list as you type.") : t("Tell us where you’re staying."); err.hidden = false; return; }
         var how = root.querySelector("input[name=arrival]:checked").value;
+        setWheelchair(root.querySelector("#ar-wc").checked);
         state.to = picked;
         state.arrival = how;
         if (window.MMEExtras) window.MMEExtras.Home.set(picked);

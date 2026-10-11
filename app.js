@@ -141,7 +141,7 @@
       "<h1>" + esc(t("Monaco, without the climb.")) + "</h1>" +
       (X ? X.eventBanner() + X.cruiseCard() + X.homeCard() : "") +
       '<a class="arrive-btn" href="#/arrive"><span><strong>' + esc(t("Just arrived?")) + "</strong><small>" + esc(t("The easiest way to where you’re staying, with your bags")) + '</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.6 5.4 10 4l8 8-8 8-1.4-1.4 6.6-6.6z"/></svg></a>' +
-      '<p class="lede">' + esc(t("Around 80 free public lifts, 37 escalators and 8 moving walkways link Monaco and Beausoleil. We show you how to use them.")) + "</p>" +
+      '<p class="lede">' + esc(t("Around 80 free public lifts, 37 escalators and 8 moving walkways link Monaco and Beausoleil. We show you how to use them.")) + "</p>" + (X ? X.knowLink() : "") +
       window.MMEPlanner.boxHtml() +
       "</section>" +
       '<section class="block" id="routes" aria-labelledby="routes-h">' +
@@ -168,7 +168,7 @@
       [t("Emergencies"), t("Call 112 from any phone.")],
       [t("Where our data comes from"), t("Streets, paths, lifts and escalators: © OpenStreetMap contributors (ODbL). Heights: Terrain Tiles from AWS Open Data (Mapzen and others). Map style: © CARTO. Buses: Compagnie des Autobus de Monaco open data.")]
     ];
-    return '<section class="page"><h1>' + esc(t("Good to know")) + "</h1>" + (X ? X.offlineCard() : "") + '<dl class="info">' + items.map(function (i) {
+    return '<section class="page"><h1>' + esc(t("Good to know")) + "</h1>" + (X ? X.knowCard() + X.offlineCard() : "") + '<dl class="info">' + items.map(function (i) {
       return "<div><dt>" + esc(i[0]) + "</dt><dd>" + esc(i[1]) + "</dd></div>";
     }).join("") + "</dl>" + (X ? X.eventsInfo() : "") + '<p class="unchecked">' + esc(t("This is a preview. Details are gathered from published sources and are being checked on the ground before launch.")) + "</p></section>";
   }
@@ -223,6 +223,8 @@
   window.addEventListener("hashchange", function () { render(); window.scrollTo(0, 0); });
   // Changing language redraws the current screen in the new language.
   window.addEventListener("mme-lang", function () { render(); });
+  // A newer bus timetable arrived: redraw the transport screens.
+  window.addEventListener("mme-bus", function () { if (/^#\/(transport|bus)/.test(location.hash)) render(); });
   render();
 
   // Works offline once opened: cache the app on the phone.

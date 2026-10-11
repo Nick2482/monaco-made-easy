@@ -339,7 +339,28 @@
   flush();
   setInterval(refresh, 10 * 60000);
 
-  window.MMEExtras = {
+  // ---------------------------------------------------------------------------
+  // 6. Know before you go: the things visitors usually learn the hard way
+  // ---------------------------------------------------------------------------
+  var KNOW = [
+    ["Phone roaming", "Monaco isn’t in the EU, so free EU roaming doesn’t apply here. Your phone may switch to a Monaco network and charge roaming rates, even on EU and UK plans. Check with your provider before you arrive, or save our map below so it works with roaming switched off."],
+    ["Dress in town", "Swimwear and bare chests are for the beach. In the streets, shops and on buses, cover up: the police can ask you to."],
+    ["The Casino", "To go into the gaming rooms of the Casino de Monte-Carlo you must be 18 or over and show a passport or national ID card. There’s an entry charge, and smart dress is expected: no sportswear or flip-flops."],
+    ["Changing of the Guard", "Every day at 11:55 in front of the Prince’s Palace. Arrive by 11:30 for a good spot. The easiest way up is in the app: plan a route to the Palace."],
+    ["Drones", "Flying a drone in Monaco needs permission from the authorities, so leave it in your bag."],
+    ["Paying", "Monaco uses the euro and cards are accepted almost everywhere, but some taxis take cash only."],
+    ["Water", "Tap water is safe to drink."]
+  ];
+  function knowCard() {
+    return '<section class="know" id="know"><h2>' + esc(t("Know before you go")) + '</h2><dl class="know-list">' + KNOW.map(function (k) {
+      return "<div><dt>" + esc(t(k[0])) + "</dt><dd>" + esc(t(k[1])) + "</dd></div>";
+    }).join("") + "</dl></section>";
+  }
+  function knowLink() {
+    return '<a class="know-link" href="#/info">' + esc(t("Know before you go: phone roaming, dress rules and the Casino")) + ARROW + "</a>";
+  }
+
+  window.MMEExtras = { knowCard: knowCard, knowLink: knowLink,
     Home: Home, homeCard: homeCard,
     eventBanner: eventBanner, eventsInfo: eventsInfo, routeEventNote: routeEventNote, EVENTS: EVENTS,
     cruise: cruise, shipPoint: shipPoint, cruiseCard: cruiseCard, cruiseScreen: cruiseScreen, mountHome: mountHome,

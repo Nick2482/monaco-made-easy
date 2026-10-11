@@ -285,5 +285,18 @@
     }
   };
 
-  window.MMETransit = { inMonaco: inMonaco, taxiScreen: taxiScreen, busOption: busOption, departures: departures, monacoNow: monacoNow, hhmm: hhmm, badge: badge, stopName: function (i) { return B.stops[i][0]; }, stopPt: stopPt, transportScreen: transportScreen, lineScreen: lineScreen, airportScreen: airportScreen, ready: !!B };
+  // A fresh timetable: our server fetches the latest one from the open data portal every day.
+  // If that fails (or there's no signal), the timetable bundled with the app is used instead.
+  function refreshBus() {
+    if (!window.fetch || location.protocol === "file:") return;
+    fetch("/api/bus").then(function (r) { return r.ok ? r.json() : null; }).then(function (nb) {
+      if (!nb || !nb.valid || !nb.patterns || !nb.patterns.length) return;
+      if (B && nb.valid[1] < B.valid[1]) return;
+      B = nb; window.MMEBus = nb; window.MMETransit.ready = true;
+      window.dispatchEvent(new Event("mme-bus"));
+    }).catch(function () {});
+  }
+  setTimeout(refreshBus, 300);
+
+  window.MMETransit = { refreshBus: refreshBus, inMonaco: inMonaco, taxiScreen: taxiScreen, busOption: busOption, departures: departures, monacoNow: monacoNow, hhmm: hhmm, badge: badge, stopName: function (i) { return B.stops[i][0]; }, stopPt: stopPt, transportScreen: transportScreen, lineScreen: lineScreen, airportScreen: airportScreen, ready: !!B };
 })();

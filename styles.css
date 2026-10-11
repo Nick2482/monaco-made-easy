@@ -520,3 +520,26 @@ html:lang(ko) body { word-break: keep-all; overflow-wrap: anywhere; }
 .mk.mk-down::after { content: ""; position: absolute; left: 50%; top: 4px; bottom: 4px; width: 3px; margin-left: -1.5px; background: #fff; transform: rotate(45deg); border-radius: 2px; }
 .lifts li.is-down strong { text-decoration: line-through; text-decoration-color: rgba(200, 16, 46, 0.6); }
 html.cjk .home-btn strong, html.cjk .cr-head, html.cjk .event-banner strong, html.cjk .offline-card h2, html.cjk .events-info h2 { font-family: "PingFang SC", "Hiragino Mincho ProN", "Noto Serif CJK SC", "Noto Serif JP", "Noto Serif KR", serif; font-weight: 700; letter-spacing: 0; }
+
+/* ---------- v12: know before you go, wheelchair mode ---------- */
+.know-link { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 14px; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(111, 191, 227, 0.45); color: #fff; text-decoration: none; font-weight: 700; font-size: 16px; }
+.know-link svg { width: 22px; height: 22px; fill: var(--riva); flex: none; }
+.know { margin-top: 18px; padding: 18px 18px 6px; border-radius: 16px; border: 1.5px solid var(--hair); box-shadow: inset 0 5px 0 var(--red); }
+.know h2 { font-size: 26px; }
+.know-list { margin: 8px 0 0; }
+.know-list div { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.know-list div:last-child { border-bottom: 0; }
+.know-list dt { font-weight: 700; font-size: 18px; }
+.know-list dd { margin: 3px 0 0; color: #2d3a47; }
+.wc-toggle { display: flex; align-items: flex-start; gap: 12px; margin: 14px 0 4px; padding: 12px 14px; border-radius: 12px; background: var(--stone); cursor: pointer; }
+.wc-toggle input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.wc-sw { flex: none; position: relative; width: 46px; height: 28px; margin-top: 1px; border-radius: 14px; background: #b9c2cc; transition: background 0.15s; }
+.wc-sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); transition: transform 0.15s; }
+.wc-toggle input:checked + .wc-sw { background: var(--navy); }
+.wc-toggle input:checked + .wc-sw::after { transform: translateX(18px); }
+.wc-toggle input:focus-visible + .wc-sw { outline: 3px solid var(--navy); outline-offset: 2px; }
+.wc-toggle > span:last-child { font-weight: 700; }
+.wc-toggle small { display: block; font-weight: 400; font-size: 15px; color: var(--grey); }
+.wc-arrive { margin-top: 22px; }
+.note-wc { border-left-color: var(--riva); }
+html.cjk .know h2 { font-family: "PingFang SC", "Hiragino Mincho ProN", "Noto Serif CJK SC", "Noto Serif JP", "Noto Serif KR", serif; font-weight: 700; }

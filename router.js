@@ -151,6 +151,8 @@
         var v = fwd ? e[1] : e[0];
         if (seen[v]) continue;
         if (blockN && (blockN[v] || blockE[fw0(k)])) continue;
+        // Wheelchair or pushchair: no steps, no escalators, no lifts marked as not wheelchair-accessible.
+        if (opts.wheelchair && (e[3] === 2 || e[3] === 3 || (liftAt[v] && liftAt[v].wheelchair === "no"))) continue;
         var c = legCost(e, fwd, avoid).cost + (liftAt[v] ? LIFT_WAIT : 0);
         // Climbing on foot (not by lift or escalator) costs about 10 seconds a metre for an easy walker.
         if (e[3] !== 3 && e[3] !== 4) { var up = climb(u, v); if (up > 0) c += up * (avoid ? 12 : 7); }
