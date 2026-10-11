@@ -218,6 +218,7 @@
     else if (parts[0] === "plan") { screen = window.MMEPlanner.screen; }
     else if (parts[0] === "arrive") { screen = window.MMEPlanner.arriveScreen; }
     else if (parts[0] === "transport" && window.MMETransit.ready) { screen = window.MMETransit.transportScreen; tab = "transport"; }
+    else if (parts[0] === "taxis") { screen = window.MMETransit.taxiScreen; tab = "transport"; }
     else if (parts[0] === "airport") { screen = window.MMETransit.airportScreen; tab = "transport"; }
     else if (parts[0] === "bus" && window.MMETransit.ready) {
       var lid = parts[1];

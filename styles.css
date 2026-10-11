@@ -393,3 +393,18 @@ button.map-mini { background: #fff; cursor: pointer; }
 .ar-airport { display: block; margin-top: 14px; font-weight: 700; color: var(--red); text-underline-offset: 3px; }
 .tr-train { background: #eef3f9; color: var(--ink); }
 .tr-train span { color: var(--ink); }
+
+/* Taxis */
+.tr-taxi { background: var(--red); }
+.tr-taxi span { color: #ffe3e6; }
+.taxi-here { margin-top: 16px; }
+.taxi-here .btn { width: 100%; }
+.taxi-verdict { padding: 14px 16px; border-radius: 12px; background: var(--stone); }
+.taxi-verdict.ok { background: #e6f5ec; }
+.taxi-verdict.fr { background: #fbf5dc; }
+.taxi-call { margin-top: 16px; }
+.taxi-call .btn { width: 100%; }
+.taxi-call p { margin-top: 8px; color: var(--grey); }
+.note-rule { margin-top: 18px; }
+.rule-list, .info-list { margin: 8px 0 0; padding-left: 20px; }
+.rule-list li, .info-list li { margin-top: 6px; }

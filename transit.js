@@ -126,6 +126,8 @@
       var esc = ui().esc, now = monacoNow();
       return '<section class="page transport"><h1>Getting around</h1>' +
         '<a class="tr-card tr-airport" href="#/airport"><strong>From Nice airport</strong><span>Train, bus, taxi or helicopter, and how long each takes</span></a>' +
+        '<a class="tr-card tr-taxi" href="#/taxis"><strong>Taxis</strong><span>Numbers, ranks, fixed fares, and the border rule for Beausoleil and Cap d’Ail</span></a>' +
+        '<div class="tr-card tr-train"><strong>Bus 600: Nice, Monaco, Menton</strong><span>The coastal bus, about every 10 to 15 minutes (every 20 at weekends). It runs from Nice (Square Normandie-Niemen) through Villefranche, Beaulieu, Èze-sur-Mer and Cap d’Ail into Monaco, then on to Roquebrune and Menton. In Monaco it stops near the station (Sainte-Dévote), the Casino and Place des Moulins. €2.10 if you tap your card or phone on board, €2.50 in cash. Live times are in the ZOU! app. Night bus 601 runs Thursday to Saturday.</span></div>' +
         '<div class="tr-card tr-train"><strong>Trains from Monaco</strong><span>Usually every 15 minutes through the day: about 26 minutes to Nice-Ville and about 35 minutes to Nice Saint-Augustin for the airport. Trains also run east to Menton and Ventimiglia in Italy. For live times and platforms, use the SNCF Connect app.</span></div>' +
         '<h2 class="area-h">Next buses near you</h2><div id="tr-near"><button type="button" class="btn btn-red" id="tr-find">Show buses near me</button></div>' +
         '<h2 class="area-h">Monaco bus lines</h2><p class="lede-dark">Buses cover almost all of Monaco and climb the hills for you. Tickets cost a couple of euros and can be bought on board. Check the price on the day.</p>' +
@@ -227,5 +229,53 @@
     mount: function () {}
   };
 
-  window.MMETransit = { busOption: busOption, departures: departures, monacoNow: monacoNow, hhmm: hhmm, badge: badge, stopName: function (i) { return B.stops[i][0]; }, stopPt: stopPt, transportScreen: transportScreen, lineScreen: lineScreen, airportScreen: airportScreen, ready: !!B };
+  // ---------- Monaco or France? ----------
+  function inMonaco(p) {
+    var rings = window.MMEBorder || [], inside = false;
+    rings.forEach(function (r) {
+      for (var i = 0, j = r.length - 1; i < r.length; j = i++) {
+        var a = r[i], b = r[j];
+        if (((a[0] > p.lat) !== (b[0] > p.lat)) && (p.lng < (b[1] - a[1]) * (p.lat - a[0]) / (b[0] - a[0]) + a[1])) inside = !inside;
+      }
+    });
+    return inside;
+  }
+
+  // ---------- Taxis ----------
+  var TAXI_TEL = "+37793150101";
+  var taxiScreen = {
+    html: function () {
+      return '<section class="page taxis"><a class="back" href="#/transport"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>Getting around</a>' +
+        "<h1>Taxis</h1>" +
+        '<div id="taxi-here" class="taxi-here"><button type="button" class="btn btn-line" id="taxi-where">Which taxi can I use where I am?</button></div>' +
+        '<div class="taxi-call"><a class="btn btn-red" href="tel:' + TAXI_TEL + '">Call Taxi Monaco: +377 93 15 01 01</a><p>Day and night. There’s also the official <b>TAXI MONACO</b> app for Android and iPhone, with card payment and live tracking.</p></div>' +
+        '<aside class="note note-rule"><strong>The border rule</strong><p>Monaco taxis can only pick you up in Monaco. French taxis, Uber and Bolt can drop you off in Monaco but can’t collect you there. So:</p>' +
+        '<ul class="rule-list"><li><b>In Monaco:</b> use a Monaco taxi, from a rank or by phone or app.</li><li><b>In Beausoleil, Cap d’Ail or Roquebrune (France):</b> book a French taxi, or use Uber or Bolt, though cars can be scarce. A Monaco taxi can take you <i>to</i> these towns, but not collect you from them.</li><li><b>From Nice airport to Monaco:</b> take a French taxi from the airport rank, which has a flat fare of about €95. <b>Going back to the airport</b> from Monaco, use a Monaco taxi.</li></ul></aside>' +
+        '<h2 class="area-h">Taxi ranks in Monaco</h2><ul class="info-list">' +
+        "<li><b>Casino Square</b> (Avenue de Monte-Carlo), 24 hours</li><li><b>Monaco Monte-Carlo station</b>, 24 hours</li><li><b>Place des Moulins</b></li><li><b>Avenue de la Costa</b></li><li><b>Fontvieille</b></li><li><b>Larvotto</b>, by the Méridien Beach Plaza</li></ul>" +
+        '<h2 class="area-h">What it costs</h2><ul class="info-list">' +
+        "<li>Monaco taxis use <b>fixed fares</b>, not a meter.</li><li>Within Monaco: about <b>€18</b> if you hail one, about <b>€28</b> if you book ahead.</li><li>To the towns next door, such as Beausoleil or Cap d’Ail: about <b>€25</b>.</li><li>To Nice airport: about <b>€95 to €100</b>.</li><li>Waiting or slow traffic: about €1.33 a minute after the first 3 minutes.</li><li>Some taxis take cash only, so carry some euros.</li></ul>" +
+        '<p class="unchecked">Fares were published in 2025 and 2026. Confirm the price with the driver before you set off.</p></section>';
+    },
+    mount: function (root) {
+      var M = window.MMEMap;
+      root.querySelector("#taxi-where").addEventListener("click", function () {
+        var box = root.querySelector("#taxi-here");
+        box.innerHTML = '<p class="lede-dark">Finding where you are…</p>';
+        M.startLocating(function (msg) { box.innerHTML = '<p class="loc-error">' + ui().esc(msg) + "</p>"; });
+        var done = false;
+        var stop = M.onLocation(function (pos) {
+          if (done) return; done = true; setTimeout(function () { stop(); }, 0);
+          var near = metres(pos, { lat: 43.7385, lng: 7.4240 }) < 5000;
+          box.innerHTML = !near
+            ? '<p class="taxi-verdict">You’re not near Monaco right now. When you are, this tells you which taxi can collect you.</p>'
+            : inMonaco(pos)
+              ? '<p class="taxi-verdict ok"><b>You’re in Monaco.</b> Call a Monaco taxi or go to a rank. Uber and Bolt can’t collect you here.</p>'
+              : '<p class="taxi-verdict fr"><b>You’re in France</b>, just outside Monaco. Monaco taxis can’t collect you here. Book a French taxi or try Uber or Bolt, or walk into Monaco and use a Monaco taxi.</p>';
+        });
+      });
+    }
+  };
+
+  window.MMETransit = { inMonaco: inMonaco, taxiScreen: taxiScreen, busOption: busOption, departures: departures, monacoNow: monacoNow, hhmm: hhmm, badge: badge, stopName: function (i) { return B.stops[i][0]; }, stopPt: stopPt, transportScreen: transportScreen, lineScreen: lineScreen, airportScreen: airportScreen, ready: !!B };
 })();
