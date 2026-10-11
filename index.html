@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Monaco Made Easy | Lifts, escalators and step-free routes</title>
+  <meta name="description" content="Get around Monaco and Beausoleil without the climb. Step-by-step routes using the free public lifts, escalators and walkways.">
+  <meta name="theme-color" content="#0b2545">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Monaco Easy">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="preload" href="fonts/atkinson-hyperlegible-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/dm-serif-display-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="bar">
+    <a class="brand" href="#/" aria-label="Monaco Made Easy, home">
+      <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4l6 7h-4v9h-4v-9H6z"/></svg></span>
+      <span class="brand-name">Monaco Made Easy</span>
+    </a>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" class="on" aria-pressed="true">EN</button>
+      <button type="button" disabled title="French coming soon">FR</button>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1"></main>
+
+  <nav class="tabs" aria-label="Main">
+    <a href="#/" data-tab="routes">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm12 12a3 3 0 1 1 0 6 3 3 0 0 1 0-6zM6 9v4a3 3 0 0 0 3 3h6v-2H9a1 1 0 0 1-1-1V9z"/></svg>
+      <span>Routes</span>
+    </a>
+    <a href="#/lifts" data-tab="lifts">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 2h14a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm1 2v16h12V4zm6 2l3.5 4h-7zm0 12l-3.5-4h7z"/></svg>
+      <span>Lifts</span>
+    </a>
+    <a href="#/info" data-tab="info">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm-1 8v7h2v-7zm1-4a1.3 1.3 0 1 0 0 2.6A1.3 1.3 0 0 0 12 6z"/></svg>
+      <span>Good to know</span>
+    </a>
+  </nav>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
