@@ -72,7 +72,7 @@
         '<div class="map-wrap"><div id="map" class="map" role="application" aria-label="Map of Monaco lifts and escalators"></div>' +
         '<button type="button" class="find-me" id="find-me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-1-7h2v3.06A8 8 0 0 1 19.94 11H23v2h-3.06A8 8 0 0 1 13 19.94V23h-2v-3.06A8 8 0 0 1 4.06 13H1v-2h3.06A8 8 0 0 1 11 4.06zm1 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>Lifts near me</button>' +
         '<div class="map-key"><span><i class="mk-k mk-lift"></i>Lift</span><span><i class="mk-k mk-escalator"></i>Escalator</span><span><i class="mk-k mk-approx-k"></i>Being checked</span></div></div>' +
-        '<div class="near"><h1 id="near-h">Lifts and escalators</h1><p class="lede-dark" id="near-sub">Tap “Lifts near me” to sort them by distance.</p><p class="loc-error" id="loc-error" hidden></p><ul class="lifts" id="near-list"></ul>' +
+        '<div class="near"><h1 id="near-h">Lifts and escalators</h1><p class="lede-dark" id="near-sub">Tap “Lifts near me” to sort them by distance, or tap anywhere on the map to get there.</p><p class="loc-error" id="loc-error" hidden></p><ul class="lifts" id="near-list"></ul>' +
         '<p class="unchecked">Map positions are approximate until we’ve pinned and photographed each entrance on the ground.</p></div></section>';
     },
     mount: function (root) {
@@ -92,12 +92,15 @@
       function drawList(pos) {
         var items = D.lifts.map(function (l) { return { l: l, d: pos ? distance(pos, l) : null }; });
         if (pos) items.sort(function (a, b) { return a.d - b.d; });
+        else items.sort(function (a, b) { return (a.l.name.indexOf("Public") === 0) - (b.l.name.indexOf("Public") === 0); });
+        var total = items.length;
+        items = items.slice(0, pos ? 15 : 20);
         list.innerHTML = items.map(function (it) {
           var l = it.l;
           return '<li><span class="step-ico" style="--c:' + ui.COLORS[l.type] + '">' + ui.icon(l.type) + "</span><div><strong>" + ui.esc(l.name) + "</strong>" +
             "<span>" + ui.esc(l.links) + "</span><small>" + (it.d !== null ? niceDistance(it.d) + " away, about " + walkMinutes(it.d) + " min walk" : ui.esc(l.where) + ", " + l.area) + "</small></div>" +
             '<button type="button" class="map-mini" data-show="' + l.id + '">Show</button></li>';
-        }).join("");
+        }).join("") + '<li class="more-note">' + (pos ? "The 15 closest of " : "20 of ") + total + " lifts and escalators. All of them are on the map.</li>";
       }
       drawList(null);
 
@@ -127,6 +130,20 @@
         });
       }
       root.querySelector("#find-me").addEventListener("click", locate);
+
+      // Tap anywhere on the map to plan a route there.
+      map.on("click", function (e) {
+        L.popup().setLatLng(e.latlng).setContent('<button type="button" class="pop-go" data-goto="' + e.latlng.lat.toFixed(6) + "," + e.latlng.lng.toFixed(6) + '">Get me here</button>').openOn(map);
+      });
+      root.addEventListener("click", function (e) {
+        var b = e.target.closest("[data-goto]");
+        if (!b) return;
+        var ll = b.dataset.goto.split(",");
+        window.MMEPlanner.state.to = { label: "Pinned spot on the map", lat: +ll[0], lng: +ll[1], kind: "pin" };
+        window.MMEPlanner.state.from = null;
+        window.MMEPlanner.state.arrival = null;
+        location.hash = "#/plan";
+      });
       if (/near/.test(location.hash)) locate();
       setTimeout(function () { map.invalidateSize(); }, 50);
     }

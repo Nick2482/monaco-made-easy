@@ -1,11 +1,13 @@
 (function () {
   "use strict";
   var D = window.MME;
+  // Real lift and escalator positions from OpenStreetMap, plus Beausoleil's (approximate until checked).
+  if (window.MMEOsmLifts) D.lifts = window.MMEOsmLifts.concat(D.lifts.filter(function (l) { return l.area === "Beausoleil"; }));
   var main = document.getElementById("main");
   var filter = "all";      // all | stepfree | beausoleil
   var placeFilter = null;  // a place id from the height chart
 
-  var COLORS = { lift: "#ce1126", escalator: "#1d6fa5", walk: "#8a96a3", bus: "#0f8b6e", arrive: "#0b2545" };
+  var COLORS = { lift: "#ce1126", escalator: "#1d6fa5", walk: "#8a96a3", bus: "#0f8b6e", arrive: "#0b2545", steps: "#d9480f" };
   var LABELS = { lift: "Lift", escalator: "Escalator", walk: "Walk", bus: "Bus", arrive: "Arrive" };
 
   var ICONS = {
@@ -13,6 +15,7 @@
     escalator: '<path d="M3 19h4l9-11h5V5h-6.4l-9 11H3z"/>',
     walk: '<path d="M13.5 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM10 8.5l3-1 2 .6 2.4 3.4-1.6 1.1-1.8-2.4-.9 3.4 2.4 2.8V22h-2v-5.6l-2.3-2.4-1 3.7L7.3 22l-1.9-.9 2.6-4.6L10 8.5zm-1.4 1.2L7 14.2l-1.9-.6 1.8-5 1.7 1.1z"/>',
     bus: '<path d="M6 3h12a2 2 0 0 1 2 2v12a2 2 0 0 1-1 1.7V21h-3v-2H8v2H5v-2.3A2 2 0 0 1 4 17V5a2 2 0 0 1 2-2zm0 3v5h12V6zm1.5 8a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm9 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>',
+    steps: '<path d="M3 20v-3h4v-4h4V9h4V5h6v3h-3v4h-4v4h-4v4z"/>',
     arrive: '<path d="M12 2a7 7 0 0 1 7 7c0 5.2-7 13-7 13S5 14.2 5 9a7 7 0 0 1 7-7zm0 4.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z"/>'
   };
   function icon(type, cls) {
@@ -124,7 +127,7 @@
     var art = r.photo
       ? '<img class="rc-photo" src="' + esc(r.photo) + '" alt="" loading="lazy">'
       : '<span class="rc-art">' + profile(r, true) + '<span class="rc-ends"><span>' + esc(from.short) + "</span><span>" + esc(to.short) + "</span></span></span>";
-    return '<li><a class="rcard" href="#/route/' + r.id + '">' + art +
+    return '<li><a class="rcard" href="#/go/' + r.id + '">' + art +
       '<span class="rc-body"><span class="rc-title">' + esc(r.title) + "</span>" +
       '<span class="rc-meta"><span>' + r.minutes + " min</span>" +
       (r.stepFree ? '<span class="sf-pill">Step-free</span>' : '<span class="some-steps">Some steps</span>') +
@@ -142,6 +145,7 @@
     return '<section class="hero">' +
       '<p class="preview">Preview: routes are being checked on the ground</p>' +
       "<h1>Monaco, without the climb.</h1>" +
+      '<a class="arrive-btn" href="#/arrive"><span><strong>Just arrived?</strong><small>The easiest way to where you’re staying, with your bags</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.6 5.4 10 4l8 8-8 8-1.4-1.4 6.6-6.6z"/></svg></a>' +
       '<p class="lede">Around 80 free public lifts, 37 escalators and 8 moving walkways link Monaco and Beausoleil. We show you how to use them.</p>' +
       window.MMEPlanner.boxHtml() +
       "</section>" +
@@ -194,7 +198,8 @@
       ["Across the harbour", "The small electric Bateau-Bus ferry crosses Port Hercule and has a boarding ramp."],
       ["Accessible toilets", "There are accessible toilets at the Casino Square tourist office, the Oceanographic Museum, the Grimaldi Forum, Larvotto Beach and Port Hercule."],
       ["Beausoleil", "Beausoleil is in France, right behind Monte-Carlo. The border is just a street, with no checks. It’s steep, so plan to use the lifts on the way back up."],
-      ["Emergencies", "Call 112 from any phone."]
+      ["Emergencies", "Call 112 from any phone."],
+      ["Where our data comes from", "Streets, paths, lifts and escalators: © OpenStreetMap contributors (ODbL). Heights: Terrain Tiles from AWS Open Data (Mapzen and others). Map style: © CARTO."]
     ];
     return '<section class="page"><h1>Good to know</h1><dl class="info">' + items.map(function (i) {
       return "<div><dt>" + i[0] + "</dt><dd>" + esc(i[1]) + "</dd></div>";
@@ -211,6 +216,9 @@
     else if (parts[0] === "survey") { screen = window.MMESurvey.screen; tab = ""; }
     else if (parts[0] === "info") { html = infoPage(); tab = "info"; }
     else if (parts[0] === "plan") { screen = window.MMEPlanner.screen; }
+    else if (parts[0] === "arrive") { screen = window.MMEPlanner.arriveScreen; }
+    else if (parts[0] === "go") { location.replace(window.MMEPlanner.go(parts[1]) ? "#/plan" : "#/"); return; }
+    else if (/^to(\?|$)/.test(parts[0])) { location.replace(window.MMEPlanner.toLink(location.hash) ? "#/plan" : "#/"); return; }
     else if (parts[0].indexOf("from") === 0) { window.MMEPlanner.fromLink(location.hash); location.replace("#/"); return; }
     else html = home();
     main.innerHTML = screen ? screen.html() : html;
