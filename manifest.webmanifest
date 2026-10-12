@@ -1,7 +1,7 @@
 {
   "name": "Monaco Made Easy",
   "short_name": "Monaco Easy",
-  "description": "Get around Monaco and Beausoleil without the climb, using the free public lifts, escalators and walkways.",
+  "description": "Get around Monaco and Beausoleil without the climb: step-by-step routes using the free public lifts, escalators and walkways, plus buses, taxis and trains, in 9 languages.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -9,8 +9,86 @@
   "theme_color": "#ffffff",
   "lang": "en-GB",
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "id": "/",
+  "orientation": "portrait",
+  "categories": [
+    "travel",
+    "navigation"
+  ],
+  "dir": "ltr",
+  "shortcuts": [
+    {
+      "name": "Just arrived?",
+      "short_name": "Just arrived",
+      "url": "./#/arrive",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Lifts near me",
+      "short_name": "Lifts near me",
+      "url": "./#/map/near",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Transport",
+      "short_name": "Transport",
+      "url": "./#/transport",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/home.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Plan the easiest way around Monaco"
+    },
+    {
+      "src": "screenshots/route.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Step-by-step routes using the free lifts"
+    },
+    {
+      "src": "screenshots/buses.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Next buses near you"
+    }
   ]
 }

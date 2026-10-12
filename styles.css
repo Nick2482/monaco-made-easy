@@ -543,3 +543,22 @@ html.cjk .home-btn strong, html.cjk .cr-head, html.cjk .event-banner strong, htm
 .wc-arrive { margin-top: 22px; }
 .note-wc { border-left-color: var(--riva); }
 html.cjk .know h2 { font-family: "PingFang SC", "Hiragino Mincho ProN", "Noto Serif CJK SC", "Noto Serif JP", "Noto Serif KR", serif; font-weight: 700; }
+.legal-links { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 18px; font-size: 15.5px; }
+.legal-links a { color: var(--navy); font-weight: 700; }
+
+/* ---------- v15: the harbour photo at the top of the home screen (photo by Nick Hutton) ---------- */
+/* The photo is 750 x 671, so at full width it is about 0.9 x the width tall; the fade finishes before it ends. */
+.hero {
+  background:
+    linear-gradient(180deg, rgba(10, 31, 60, 0.12) 0, rgba(10, 31, 60, 0.36) 26vw, rgba(10, 31, 60, 0.82) 58vw, var(--navy) 82vw, var(--navy-2) 100%),
+    url(img/harbour-hero.jpg) center top / 100% auto no-repeat,
+    var(--navy);
+}
+.hero h1 { text-shadow: 0 2px 16px rgba(0, 0, 0, 0.5); }
+.hero .preview { background: rgba(10, 31, 60, 0.55); border-color: rgba(255, 255, 255, 0.5); color: #fff; }
+@media (min-width: 600px) {
+  .hero { background:
+    linear-gradient(180deg, rgba(10, 31, 60, 0.25) 0, rgba(10, 31, 60, 0.45) 160px, rgba(10, 31, 60, 0.82) 340px, var(--navy) 480px, var(--navy-2) 100%),
+    url(img/harbour-hero.jpg) center top / 100% auto no-repeat,
+    var(--navy); }
+}
