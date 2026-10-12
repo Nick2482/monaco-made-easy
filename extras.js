@@ -202,7 +202,7 @@
     function ty(lat, z) { var s = Math.sin(lat * Math.PI / 180); return Math.floor((0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * Math.pow(2, z)); }
     for (var z = 13; z <= 17; z++) {
       for (var x = tx(BOX.w, z); x <= tx(BOX.e, z); x++) for (var y = ty(BOX.n, z); y <= ty(BOX.s, z); y++) {
-        out.push("https://" + "abcd"[Math.abs(x + y) % 4] + ".basemaps.cartocdn.com/rastertiles/voyager/" + z + "/" + x + "/" + y + r + ".png");
+        out.push("https://" + "abcd"[Math.abs(x + y) % 4] + ".basemaps.cartocdn.com/rastertiles/voyager/" + z + "/" + x + "/" + y + r + ".png?key=" + window.MMEMap.CARTO_KEY);
       }
     }
     [8529, 8530].forEach(function (x) { [5972, 5973, 5974, 5975].forEach(function (y) { out.push("https://s3.amazonaws.com/elevation-tiles-prod/terrarium/14/" + x + "/" + y + ".png"); }); });

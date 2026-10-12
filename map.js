@@ -40,12 +40,14 @@
   }
   function walkMinutes(m) { return Math.max(1, Math.round(m / 70)); } // a gentle 70 m a minute
 
+  var CARTO_KEY = "cb1_4i7l_1_06eb2a6dadbe6d5079442b67";
   // A Monaco map with a calm, light style so the red lift markers stand out.
   function makeMap(el, opts) {
     var map = L.map(el, { zoomControl: false, attributionControl: true, tap: true }).setView([43.7375, 7.4235], opts && opts.zoom || 15);
     map.attributionControl.setPrefix('<a href="https://leafletjs.com">Leaflet</a>');
     // With no signal, zoom into the saved map tiles rather than showing blank squares.
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
+    // CARTO basemap key: public by design (it's in every tile request). Restrict it to the app's address in the CARTO dashboard.
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=" + CARTO_KEY, {
       maxZoom: 20, subdomains: "abcd", maxNativeZoom: navigator.onLine === false ? 17 : 20,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
     }).addTo(map);
@@ -174,5 +176,5 @@
     }
   };
 
-  window.MMEMap = { liftName: liftName, here: function () { return here; }, screen: screen, makeMap: makeMap, liftIcon: liftIcon, meIcon: meIcon, startLocating: startLocating, onLocation: onLocation, distance: distance, niceDistance: niceDistance };
+  window.MMEMap = { CARTO_KEY: CARTO_KEY, liftName: liftName, here: function () { return here; }, screen: screen, makeMap: makeMap, liftIcon: liftIcon, meIcon: meIcon, startLocating: startLocating, onLocation: onLocation, distance: distance, niceDistance: niceDistance };
 })();
