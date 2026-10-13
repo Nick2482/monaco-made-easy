@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.monacomadeeasy.www.twa",
+        "sha256_cert_fingerprints": ["93:91:06:37:D7:DF:76:56:D1:6F:D8:B4:6A:43:CC:9C:BC:2F:C4:45:C3:BD:3F:DD:FA:64:B0:20:CB:6C:89:46"]
+      }
+    }]
