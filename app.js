@@ -274,8 +274,7 @@
   render();
 
   // Works offline once opened: cache the app on the phone.
-  // Remember when this phone first opened the app (stays on the phone), so early users can be given Premium later.
-  try { if (!localStorage.getItem("mme-first-open")) localStorage.setItem("mme-first-open", new Date().toISOString().slice(0, 10)); } catch (e) {}
+  try { localStorage.removeItem("mme-first-open"); } catch (e) {}
   if ("serviceWorker" in navigator && location.protocol === "https:") {
     window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
   }

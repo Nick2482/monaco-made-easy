@@ -4,8 +4,8 @@
 (function () {
   "use strict";
   var CONFIG = {
-    // From this date Pro is paid. Phones that first opened the app before it get Pro free for good ("founders").
-    // While it is null, everyone has Pro (preview).
+    // From this date Pro is paid. While it is null, everyone has Pro (preview).
+    // (Set it when Stripe is ready; nobody keeps Pro free after it without buying.)
     launch: null,          // e.g. "2026-12-01"
     // The Stripe Payment Link. Until it is set, the buy button says "Coming soon".
     payLink: "",           // e.g. "https://buy.stripe.com/..."
@@ -19,9 +19,7 @@
   function status() {
     if (get("mme-pro-test") === "locked") return "locked";   // lets us see the paid version during the preview
     if (get("mme-pro")) return "bought";
-    if (!CONFIG.launch) return "preview";
-    var first = get("mme-first-open");
-    if (first && first < CONFIG.launch) return "founder";
+    if (!CONFIG.launch || new Date().toISOString().slice(0, 10) < CONFIG.launch) return "preview";
     return "locked";
   }
   function isPro() { return status() !== "locked"; }
@@ -69,8 +67,7 @@
         "<h1>" + badge() + esc(t("Monaco Made Easy Pro")) + "</h1>";
       var state = "";
       if (st === "bought") state = '<p class="pro-ok">' + esc(t("Pro is switched on for this phone. Thank you for supporting Monaco Made Easy.")) + '</p><p class="pro-code">' + esc(t("Your unlock code: {code}", { code: get("mme-pro") })) + "</p>";
-      else if (st === "founder") state = '<p class="pro-ok">' + esc(t("You’re one of our first users, so Pro is free for you, for good.")) + "</p>";
-      else if (st === "preview") state = '<p class="pro-ok">' + esc(t("Pro is free for everyone while the app is in preview. If you start using the app before Pro launches, you keep it free for good.")) + "</p>";
+      else if (st === "preview") state = '<p class="pro-ok">' + esc(t("Pro is free for everyone while the app is in preview.")) + "</p>";
       var list = '<ul class="pro-list">' + FEATURES.map(function (f) { return "<li><strong>" + esc(t(f[0])) + "</strong><span>" + esc(t(f[1])) + "</span></li>"; }).join("") + "</ul>";
       var buy = "";
       if (st === "locked") {
@@ -78,7 +75,7 @@
           (inPlayApp() ? '<p class="pro-soon">' + esc(t("Coming soon.")) + "</p>" : CONFIG.payLink ? '<a class="btn btn-red" id="pro-buy" href="' + esc(CONFIG.payLink) + '">' + esc(t("Get Pro")) + "</a>" : '<p class="pro-soon">' + esc(t("Coming soon.")) + "</p>") +
           '<p class="pro-small">' + esc(t("Secure payment by Stripe. Pro switches on as soon as you’ve paid. Not right for you? Email us within 14 days for a full refund.")) + "</p></div>";
       }
-      var have = st === "bought" || st === "founder" || st === "preview" ? "" :
+      var have = st === "bought" || st === "preview" ? "" :
         '<details class="pro-have"><summary>' + esc(t("Already bought Pro?")) + "</summary>" +
         '<form id="pro-code-f" class="pro-f"><label for="pro-code">' + esc(t("Enter your unlock code")) + '</label><input id="pro-code" autocomplete="off" autocapitalize="characters" placeholder="MME-XXXXX-XXXXXX"><button class="btn btn-navy" type="submit">' + esc(t("Switch on Pro")) + "</button></form>" +
         '<form id="pro-mail-f" class="pro-f"><label for="pro-mail">' + esc(t("Or the email address you paid with")) + '</label><input id="pro-mail" type="email" autocomplete="email"><button class="btn btn-line" type="submit">' + esc(t("Find my purchase")) + "</button></form>" +
