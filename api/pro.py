@@ -9,7 +9,7 @@
 #   PRO_SECRET          any long random text, used to sign the unlock codes (never change it once sales start)
 #   PRO_PAYMENT_LINK    optional: the Payment Link id (plink_...), so only Pro payments unlock Pro
 from http.server import BaseHTTPRequestHandler
-import base64, hashlib, hmac, json, os, re, urllib.parse, urllib.request
+import base64, hashlib, hmac, json, os, re, urllib.error, urllib.parse, urllib.request
 
 ALPHA = "ABCDEFGHJKMNPQRSTVWXYZ23456789"  # no 0/O, 1/I/L, U
 STRIPE = "https://api.stripe.com/v1/"
@@ -25,9 +25,11 @@ def enc(b, n):
 
 
 def secret():
-    s = os.environ.get("PRO_SECRET", "")
+    s = os.environ.get("PRO_SECRET", "").strip()
+    if not s:
+        raise RuntimeError("no-pro-secret")
     if len(s) < 16:
-        raise RuntimeError("not-configured")
+        raise RuntimeError("pro-secret-too-short")
     return s.encode()
 
 
@@ -51,9 +53,9 @@ def check_code(code):
 
 
 def stripe_get(path, params=None):
-    key = os.environ.get("STRIPE_SECRET_KEY", "")
+    key = os.environ.get("STRIPE_SECRET_KEY", "").strip()
     if not key:
-        raise RuntimeError("not-configured")
+        raise RuntimeError("no-stripe-key")
     url = STRIPE + path + ("?" + urllib.parse.urlencode(params) if params else "")
     req = urllib.request.Request(url, headers={
         "Authorization": "Basic " + base64.b64encode((key + ":").encode()).decode(),
@@ -78,10 +80,11 @@ def handle(body):
         sid = str(body.get("session") or "")
         if not re.fullmatch(r"cs_(test|live)_[A-Za-z0-9]{10,200}", sid):
             return 400, {"ok": False, "error": "bad-session"}
+        secret()  # check the settings before asking Stripe
         try:
             s = stripe_get("checkout/sessions/" + sid)
-        except urllib.error.HTTPError:
-            return 404, {"ok": False, "error": "not-found"}
+        except urllib.error.HTTPError as e:
+            return 404, {"ok": False, "error": "stripe-%d" % e.code}
         if not is_pro_payment(s):
             return 402, {"ok": False, "error": "not-paid"}
         return 200, {"ok": True, "code": code_for(sid)}
@@ -118,11 +121,16 @@ class handler(BaseHTTPRequestHandler):
             return self.reply(400, {"ok": False, "error": "bad-request"})
         try:
             status, obj = handle(body)
-        except RuntimeError:
-            status, obj = 503, {"ok": False, "error": "not-configured"}
+        except RuntimeError as e:
+            status, obj = 503, {"ok": False, "error": str(e) or "not-configured"}
         except Exception:
             status, obj = 502, {"ok": False, "error": "unavailable"}
         self.reply(status, obj)
 
     def do_GET(self):
-        self.reply(405, {"ok": False, "error": "use-post"})
+        # A quick health check that never shows the values themselves.
+        key = os.environ.get("STRIPE_SECRET_KEY", "").strip()
+        sec = os.environ.get("PRO_SECRET", "").strip()
+        self.reply(405, {"ok": False, "error": "use-post",
+                         "stripe_key": "missing" if not key else ("test" if "_test_" in key else "live"),
+                         "pro_secret": "missing" if not sec else ("too short" if len(sec) < 16 else "ok")})
