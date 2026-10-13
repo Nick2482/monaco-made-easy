@@ -177,7 +177,7 @@
         if (!/^\d{2}:\d{2}$/.test(v)) { err.textContent = t("Choose your all-aboard time."); err.hidden = false; return; }
         var aboard = (+v.slice(0, 2)) * 60 + (+v.slice(3, 5));
         var port = D.places.port;
-        function done(ship) { save("mme-cruise", { ymd: now().ymd, aboard: aboard, ship: ship }); location.hash = "#/"; }
+        function done(ship) { save("mme-cruise", { ymd: now().ymd, aboard: aboard, ship: ship }); if (window.MMEStats) window.MMEStats.track("Cruise mode started"); location.hash = "#/"; }
         if (root.querySelector("input[name=ship]:checked").value === "here") {
           err.textContent = t("Finding where you are…"); err.hidden = false;
           var fin = false;
@@ -226,6 +226,7 @@
       return Promise.all([worker(), worker(), worker(), worker(), worker(), worker()]).then(function () {
         if (failed > urls.length * 0.1) throw new Error("failed");
         save("mme-offline", { ymd: now().ymd, n: urls.length });
+        if (window.MMEStats) window.MMEStats.track("Map saved offline");
       });
     });
   }
@@ -291,6 +292,7 @@
     status: function (id) { var s = latest[id]; return s && s.problem !== "working" ? s : null; },
     report: function (id, problem) {
       var r = { lift_id: id, problem: problem, at: Date.now() };
+      if (window.MMEStats) window.MMEStats.track("Lift reported", { problem: problem });
       var m = mine(); m.push(r); save("mme-my-reports", m);
       apply([r]);
       window.dispatchEvent(new Event("mme-reports"));

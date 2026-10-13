@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Hotel QR cards | Monaco Made Easy</title>
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { padding-bottom: 40px; background: var(--stone); }
+    .maker { max-width: 980px; margin: 0 auto; padding: 22px 16px; display: grid; gap: 24px; }
+    @media (min-width: 900px) { .maker { grid-template-columns: 380px 1fr; align-items: start; } }
+    .maker h1 { font-size: 38px; }
+    .form { background: #fff; border-radius: 16px; padding: 18px; display: grid; gap: 14px; border: 1px solid var(--hair); }
+    .form label { font-weight: 700; font-size: 15.5px; display: block; margin-bottom: 4px; }
+    .form input { width: 100%; font: inherit; font-size: 17px; padding: 11px 12px; border: 1.5px solid var(--line); border-radius: 10px; }
+    .form small { color: var(--grey); font-size: 14px; }
+    .sugg { list-style: none; margin: 6px 0 0; padding: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+    .sugg li { padding: 9px 12px; cursor: pointer; border-top: 1px solid var(--line); font-size: 15.5px; }
+    .sugg li:first-child { border-top: 0; }
+    .sugg li:hover { background: var(--stone); }
+    .sugg small { display: block; }
+    .picked { font-weight: 700; color: #0d5c3c; }
+    .form .btn { border: 0; cursor: pointer; font-family: inherit; width: 100%; }
+    .link-out { font-size: 13.5px; word-break: break-all; color: var(--grey); }
+
+    /* The card: A6 portrait, 105 x 148 mm */
+    .sheet { display: grid; justify-items: center; }
+    .card { width: 105mm; height: 148mm; background: var(--navy); color: #fff; position: relative; overflow: hidden; border-radius: 4mm; box-shadow: 0 14px 40px rgba(10, 31, 60, 0.25); display: flex; flex-direction: column; }
+    .card .c-band { height: 4.5mm; flex: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='14'%3E%3Crect width='10' height='14' fill='%23fff'/%3E%3Cpath d='M5 0L10 7 5 14 0 7z' fill='%23c8102e'/%3E%3C/svg%3E") center 0 / 3.2mm 4.5mm repeat-x; }
+    .card .c-photo { height: 38mm; flex: none; background: linear-gradient(180deg, rgba(10, 31, 60, 0) 40%, rgba(10, 31, 60, 1) 100%), url(img/harbour-hero.jpg) center 30% / cover; }
+    .card .c-body { flex: 1; padding: 0 8mm 6mm; display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: -7mm; }
+    .card .c-brand { font-family: var(--serif); font-size: 7.5mm; line-height: 1; }
+    .card .c-tag { font-weight: 700; font-size: 3.4mm; color: #c9d6e5; margin-top: 1.6mm; }
+    .card .c-qr { background: #fff; border-radius: 3mm; padding: 2.5mm; margin-top: 5mm; width: 40mm; height: 40mm; }
+    .card .c-qr svg { width: 100%; height: 100%; display: block; }
+    .card .c-scan { font-weight: 700; font-size: 3.9mm; margin-top: 4mm; line-height: 1.3; }
+    .card .c-from { color: var(--riva); }
+    .card .c-langs { font-size: 2.6mm; color: #c9d6e5; margin-top: 2mm; line-height: 1.5; }
+    .card .c-url { margin-top: auto; font-weight: 700; font-size: 3.2mm; letter-spacing: 0.02em; }
+    .card .c-water { height: 1.6mm; flex: none; background: var(--riva); }
+    .print-note { color: var(--grey); font-size: 14.5px; margin-top: 10px; text-align: center; }
+
+    @media print {
+      @page { size: A4 portrait; margin: 8mm; }
+      body { background: #fff; padding: 0; }
+      .no-print, .bar { display: none !important; }
+      .maker { display: block; padding: 0; max-width: none; }
+      .sheet { display: grid; grid-template-columns: 105mm 105mm; gap: 0; justify-content: center; }
+      .sheet .card { box-shadow: none; border-radius: 0; outline: 0.2mm dashed #bbb; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+    @media screen { .sheet .card + .card { display: none; } }
+  </style>
+</head>
+<body>
+  <header class="bar no-print">
+    <a class="brand" href="./#/" aria-label="Monaco Made Easy, home">
+      <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4l6 7h-4v9h-4v-9H6z"/></svg></span>
+      <span class="brand-name">Monaco Made Easy</span>
+    </a>
+  </header>
+  <main class="maker">
+    <div class="no-print">
+      <h1>Hotel QR cards</h1>
+      <p class="lede-dark">Make a printable card for a hotel's reception. Guests scan it and the app opens with the hotel already set as their starting point.</p>
+      <form class="form" id="f" autocomplete="off">
+        <div>
+          <label for="name">Name on the card</label>
+          <input id="name" placeholder="e.g. Hôtel Example" required>
+        </div>
+        <div>
+          <label for="where">Where is it?</label>
+          <input id="where" placeholder="Search the name or address, or paste a Google Maps link">
+          <ul class="sugg" id="sugg" hidden></ul>
+          <p class="picked" id="picked" hidden></p>
+          <small>The starting point for guests' routes. Use the hotel's main entrance.</small>
+        </div>
+        <button type="submit" class="btn btn-red">Make the card</button>
+        <p class="link-out" id="link"></p>
+        <button type="button" class="btn btn-navy" id="print" hidden>Print 4 cards on A4</button>
+      </form>
+    </div>
+    <div>
+      <div class="sheet" id="sheet"></div>
+      <p class="print-note no-print" id="note" hidden>Prints 4 cards to an A4 page, with dashed lines to cut along. In the print window, turn on “Background graphics”.</p>
+    </div>
+  </main>
+  <script src="vendor/qrcode.js"></script>
+  <script>
+  (function () {
+    "use strict";
+    var AREA = { minLng: 7.395, minLat: 43.718, maxLng: 7.455, maxLat: 43.760 };
+    var picked = null, timer = null;
+    function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+    function parseCoords(text) {
+      var m = text.match(/@(-?\d{1,2}\.\d+),\s*(-?\d{1,3}\.\d+)/) || text.match(/[?&](?:q|query|ll|destination|daddr)=(-?\d{1,2}\.\d+)(?:,|%2C)\s*(-?\d{1,3}\.\d+)/i) || text.match(/(-?\d{1,2}\.\d{3,})\s*,\s*(-?\d{1,3}\.\d{3,})/);
+      return m ? { lat: parseFloat(m[1]), lng: parseFloat(m[2]) } : null;
+    }
+    var where = document.getElementById("where"), sugg = document.getElementById("sugg"), pk = document.getElementById("picked");
+    function pick(p, label) { picked = p; sugg.hidden = true; pk.hidden = false; pk.textContent = "✓ " + label + " (" + p.lat.toFixed(5) + ", " + p.lng.toFixed(5) + ")"; }
+    where.addEventListener("input", function () {
+      var q = where.value.trim(); picked = null; pk.hidden = true; clearTimeout(timer);
+      var c = parseCoords(q);
+      if (c) { pick(c, "Location from the link"); return; }
+      if (q.length < 3) { sugg.hidden = true; return; }
+      timer = setTimeout(function () {
+        fetch("https://photon.komoot.io/api/?q=" + encodeURIComponent(q) + "&limit=8&bbox=" + [AREA.minLng, AREA.minLat, AREA.maxLng, AREA.maxLat].join(","))
+          .then(function (r) { return r.json(); }).then(function (j) {
+            var items = (j.features || []).map(function (f) {
+              var pr = f.properties || {}, c = f.geometry.coordinates;
+              return { label: pr.name || [pr.housenumber, pr.street].filter(Boolean).join(" "), sub: [pr.street, pr.city].filter(Boolean).join(", "), lat: c[1], lng: c[0] };
+            }).filter(function (x) { return x.label; });
+            sugg.innerHTML = items.map(function (it, i) { return '<li data-i="' + i + '">' + esc(it.label) + "<small>" + esc(it.sub) + "</small></li>"; }).join("") || "<li>No matches. Try pasting a Google Maps link instead.</li>";
+            sugg.hidden = false;
+            sugg.onclick = function (e) { var li = e.target.closest("[data-i]"); if (li) { var it = items[+li.dataset.i]; pick(it, it.label); } };
+          }).catch(function () { sugg.innerHTML = "<li>Search isn't available right now. Paste a Google Maps link instead.</li>"; sugg.hidden = false; });
+      }, 300);
+    });
+    function cardHtml(name, url) {
+      var qr = qrcode(0, "M"); qr.addData(url); qr.make();
+      return '<div class="card"><div class="c-band"></div><div class="c-photo"></div><div class="c-body">' +
+        '<div class="c-brand">Monaco Made Easy</div><div class="c-tag">Monaco, without the climb.</div>' +
+        '<div class="c-qr">' + qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true }) + "</div>" +
+        '<div class="c-scan">Scan for the easiest way around Monaco from <span class="c-from">' + esc(name) + "</span></div>" +
+        '<div class="c-langs">Scannez · Scansiona · Scannen · Escanea · 扫码 · スキャン · 스캔 · Сканируйте</div>' +
+        '<div class="c-url">monacomadeeasy.com</div></div><div class="c-water"></div></div>';
+    }
+    document.getElementById("f").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var name = document.getElementById("name").value.trim();
+      if (!name) return;
+      if (!picked) { pk.hidden = false; pk.textContent = "Choose the location from the list, or paste a Google Maps link."; pk.style.color = "#a00d25"; return; }
+      pk.style.color = "";
+      var url = "https://www.monacomadeeasy.com/#/from?name=" + encodeURIComponent(name) + "&lat=" + picked.lat.toFixed(6) + "&lng=" + picked.lng.toFixed(6) + "&ref=qr";
+      var one = cardHtml(name, url);
+      document.getElementById("sheet").innerHTML = one + one + one + one;
+      document.getElementById("link").textContent = url;
+      document.getElementById("print").hidden = false;
+      document.getElementById("note").hidden = false;
+    });
+    document.getElementById("print").addEventListener("click", function () { window.print(); });
+  })();
+  </script>
+</body>
+</html>

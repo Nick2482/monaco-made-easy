@@ -201,7 +201,7 @@
       var to = state.to, layer = L.layerGroup().addTo(map), fromPt = null;
       L.marker([to.lat, to.lng], { icon: L.divIcon({ className: "", html: '<span class="mk-end mk-to"></span>', iconSize: [26, 26], iconAnchor: [13, 13] }) }).addTo(map);
 
-      var lastNote = null, blockedKey = "";
+      var lastNote = null, blockedKey = "", tracked = false;
       function draw(from, note) {
         fromPt = from; lastNote = note;
         layer.clearLayers();
@@ -286,6 +286,7 @@
         body.innerHTML = h;
         var wcBox = body.querySelector("#wc-on");
         if (wcBox) wcBox.addEventListener("change", function () { setWheelchair(wcBox.checked); avoidSteps = true; draw0(fromPt, lastNote); });
+        if (!tracked && window.MMEStats) { tracked = true; window.MMEStats.track("Route planned", { wheelchair: wc ? "yes" : "no", found: r ? "yes" : "no" }); }
         var sh = body.querySelector("#save-home");
         if (sh) sh.addEventListener("click", function () {
           window.MMEExtras.Home.set(to);
@@ -378,6 +379,7 @@
         if (!picked) { err.textContent = input.value.trim() ? t("Pick your accommodation from the list as you type.") : t("Tell us where you’re staying."); err.hidden = false; return; }
         var how = root.querySelector("input[name=arrival]:checked").value;
         setWheelchair(root.querySelector("#ar-wc").checked);
+        if (window.MMEStats) window.MMEStats.track("Just arrived", { how: how });
         state.to = picked;
         state.arrival = how;
         if (window.MMEExtras) window.MMEExtras.Home.set(picked);
@@ -396,6 +398,7 @@
   }
   function shareSpot(pos, name, status) {
     var url = spotLink(pos, name);
+    if (window.MMEStats) window.MMEStats.track("Meet me here shared");
     var text = name ? t("{name} is here. Tap for the easiest way, using Monaco’s free lifts and escalators:", { name: name }) : t("Meet me here. Tap for the easiest way, using Monaco’s free lifts and escalators:");
     var note = pos.acc > 40 ? " " + t("Your location is only accurate to about {n} m, so you may want to add a landmark.", { n: Math.round(pos.acc) }) : "";
     if (navigator.share) {
@@ -427,7 +430,11 @@
   function fromLink(hash) {
     var q = params(hash);
     var lat = parseFloat(q.lat), lng = parseFloat(q.lng);
-    if (q.name && isFinite(lat) && isFinite(lng)) state.from = { label: q.name, lat: lat, lng: lng, kind: "partner" };
+    if (q.name && isFinite(lat) && isFinite(lng)) {
+      state.from = { label: q.name, lat: lat, lng: lng, kind: "partner" };
+      // Lets you tell a hotel how many guests used its card.
+      if (window.MMEStats) window.MMEStats.track("Hotel QR opened", { place: q.name.slice(0, 60), ref: (q.ref || "link").slice(0, 20) });
+    }
   }
 
   function placeRef(id) { var p = D.places[id]; return { label: p.name, sub: p.area, lat: p.lat, lng: p.lng, kind: id === "station" ? "station" : "place", placeId: id }; }

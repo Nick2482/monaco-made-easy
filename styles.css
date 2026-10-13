@@ -562,3 +562,44 @@ html.cjk .know h2 { font-family: "PingFang SC", "Hiragino Mincho ProN", "Noto Se
     url(img/harbour-hero.jpg) center top / 100% auto no-repeat,
     var(--navy); }
 }
+
+/* ---------- v17: essentials on the map ---------- */
+.ess-chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 4px -16px 14px; padding: 2px 16px; }
+.ess-chips::-webkit-scrollbar { display: none; }
+.ess-chips .chip { text-decoration: none; white-space: nowrap; }
+.mk.mk-ess { width: 30px; height: 30px; border-width: 2.5px; }
+.mk.mk-ess svg { width: 18px; height: 18px; fill: #fff; }
+.note-ess { margin: 4px 0 12px; border-left-color: var(--navy); }
+.ess-quick { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 12px; }
+.ess-quick a { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.18); color: #fff; text-decoration: none; font-weight: 700; font-size: 15.5px; }
+.eq-ico { display: grid; place-items: center; flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--c); }
+.eq-ico svg { width: 18px; height: 18px; fill: #fff; }
+
+/* ---------- v17: Changing of the Guard and step-free walks ---------- */
+.find-me { white-space: nowrap; }
+.guard-card { display: grid; gap: 2px; margin-top: 16px; padding: 14px 16px; border-radius: 14px; background: rgba(10, 31, 60, 0.72); border: 1px solid rgba(255, 255, 255, 0.28); color: #fff; text-decoration: none; box-shadow: inset 4px 0 0 var(--red); }
+.gd-top { font-size: 13.5px; font-weight: 700; color: var(--riva); }
+.guard-card strong { font-family: var(--serif); font-weight: 400; font-size: 23px; line-height: 1.15; }
+.guard-card small { font-size: 15px; color: #dbe5f0; }
+.walk .guard-card { background: var(--navy); margin: 14px 0 6px; }
+.block-lede { color: var(--grey); margin: 4px 0 14px; max-width: 46ch; }
+.walk-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.walk-card { display: grid; gap: 4px; padding: 18px; border-radius: 18px; text-decoration: none; color: #fff; background: linear-gradient(180deg, rgba(10, 31, 60, 0.55), rgba(10, 31, 60, 0.95)), url(img/harbour-hero.jpg) center 35% / cover; box-shadow: 0 10px 26px rgba(10, 31, 60, 0.18); }
+.walk-list li:nth-child(2) .walk-card { background: linear-gradient(180deg, rgba(10, 31, 60, 0.55), rgba(10, 31, 60, 0.95)), url(img/harbour-hero.jpg) right 20% / cover; }
+.wk-title { font-family: var(--serif); font-size: 26px; line-height: 1.1; }
+.wk-sub { color: #dbe5f0; font-size: 15.5px; }
+.wk-stops { margin-top: 6px; font-size: 13.5px; font-weight: 700; color: var(--riva); }
+.walk { padding: 14px 16px 24px; }
+.walk h1 { font-size: clamp(34px, 9vw, 44px); margin-top: 6px; }
+.walk .plan-map { margin: 14px -16px 0; }
+.walk-stops { list-style: none; margin: 18px 0 0; padding: 0; }
+.walk-stops > li { display: grid; grid-template-columns: 34px 1fr; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.walk-stops strong { display: block; font-family: var(--serif); font-weight: 400; font-size: 22px; line-height: 1.15; }
+.walk-stops p { color: #2d3a47; margin-top: 4px; }
+.wk-num { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--red); color: #fff; font-weight: 700; font-size: 15px; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25); }
+.walk-stops .wk-num { width: 32px; height: 32px; border: 0; box-shadow: none; }
+.wk-how { margin-top: 8px; }
+.wk-how summary { cursor: pointer; font-weight: 700; color: var(--navy); font-size: 15.5px; }
+.wk-how .steps { margin-top: 8px; }
+.btn-small { margin-top: 10px; font: inherit; font-weight: 700; font-size: 15px; padding: 8px 14px; border-radius: 999px; border: 1.5px solid var(--navy); background: #fff; color: var(--navy); cursor: pointer; }
+html.cjk .wk-title, html.cjk .walk-stops strong, html.cjk .guard-card strong { font-family: "PingFang SC", "Hiragino Mincho ProN", "Noto Serif CJK SC", "Noto Serif JP", "Noto Serif KR", serif; font-weight: 700; }

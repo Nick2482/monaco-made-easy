@@ -80,16 +80,53 @@
       '<br><a href="' + directions(l.lat, l.lng) + '" target="_blank" rel="noopener">' + esc(t("Walking directions")) + "</a>" + (X() ? X().reportBox(l) : "") + "</div>";
   }
 
+  // ---------- Essentials: toilets, pharmacies, cash, water, defibrillators (from OpenStreetMap) ----------
+  var CATS = [["lifts", "Lifts"], ["toilets", "Toilets"], ["pharmacy", "Pharmacies"], ["atm", "Cash machines"], ["drinking_water", "Drinking water"], ["defibrillator", "Defibrillators"]];
+  var CAT_ONE = { toilets: "Toilets", pharmacy: "Pharmacy", atm: "Cash machine", drinking_water: "Drinking water", defibrillator: "Defibrillator" };
+  var CAT_COLOR = { toilets: "#6b4fa0", pharmacy: "#18a058", atm: "#b7791f", drinking_water: "#2b8cc4", defibrillator: "#0f6b45" };
+  function essList() { return window.MMEEssentials || []; }
+  function essTitle(e) { return e.n || t(CAT_ONE[e.k]); }
+  function essDetails(e) {
+    var d = [];
+    if (e.wc === "yes") d.push(t("Wheelchair accessible"));
+    if (e.fee === "no") d.push(t("Free"));
+    if (e.fee === "yes") d.push(t("Small charge"));
+    if (e.baby) d.push(t("Baby changing"));
+    if (e.h) d.push(e.h);
+    if (e.loc) d.push(e.loc);
+    return d.join(" · ");
+  }
+  function essIcon(e) {
+    return L.divIcon({ className: "", html: '<span class="mk mk-ess" style="background:' + CAT_COLOR[e.k] + '">' + window.MMEUI.icon(e.k) + "</span>", iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -14] });
+  }
+  function essPopup(e) {
+    var esc = window.MMEUI.esc, det = essDetails(e);
+    return '<div class="lift-pop"><strong>' + esc(essTitle(e)) + "</strong>" + (det ? "<br>" + esc(det) : "") +
+      '<br><button type="button" class="pop-go" data-goto="' + e.lat + "," + e.lng + '" data-label="' + CAT_ONE[e.k] + '">' + esc(t("Take me there")) + "</button></div>";
+  }
+  function catNote(cat) {
+    if (cat === "pharmacy") return t("At night, on Sundays and on holidays, one pharmacy stays open. In Monaco its name and address are posted on the door of every pharmacy. In Beausoleil and the rest of France, call 3237 to find it.");
+    if (cat === "defibrillator") return t("In an emergency, call 112 first. The operator can tell you where the nearest defibrillator is and guide you.");
+    return "";
+  }
+
   // ---------- The map screen ----------
   var screen = {
     html: function () {
       var esc = window.MMEUI.esc;
-      return '<section class="mapscreen">' +
+      var cat = currentCat();
+      var note = catNote(cat);
+      return '<section class="mapscreen' + (cat !== "lifts" ? " cat-" + cat : "") + '">' +
         '<div class="map-wrap"><div id="map" class="map" role="application" aria-label="' + esc(t("Map of Monaco lifts and escalators")) + '"></div>' +
-        '<button type="button" class="find-me" id="find-me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-1-7h2v3.06A8 8 0 0 1 19.94 11H23v2h-3.06A8 8 0 0 1 13 19.94V23h-2v-3.06A8 8 0 0 1 4.06 13H1v-2h3.06A8 8 0 0 1 11 4.06zm1 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>' + esc(t("Lifts near me")) + "</button>" +
+        '<button type="button" class="find-me" id="find-me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-1-7h2v3.06A8 8 0 0 1 19.94 11H23v2h-3.06A8 8 0 0 1 13 19.94V23h-2v-3.06A8 8 0 0 1 4.06 13H1v-2h3.06A8 8 0 0 1 11 4.06zm1 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>' + esc(t(cat === "lifts" ? "Lifts near me" : "Find the nearest")) + "</button>" +
         '<div class="map-key"><span><i class="mk-k mk-lift"></i>' + esc(t("Lift")) + '</span><span><i class="mk-k mk-escalator"></i>' + esc(t("Escalator")) + '</span><span><i class="mk-k mk-approx-k"></i>' + esc(t("Being checked")) + "</span></div></div>" +
-        '<div class="near"><h1 id="near-h">' + esc(t("Lifts and escalators")) + '</h1><p class="lede-dark" id="near-sub">' + esc(t("Tap “Lifts near me” to sort them by distance, or tap anywhere on the map to get there.")) + '</p><p class="loc-error" id="loc-error" hidden></p><ul class="lifts" id="near-list"></ul>' +
-        '<p class="unchecked">' + esc(t("Lift positions come from OpenStreetMap and are being checked on the ground.")) + "</p></div></section>";
+        '<div class="near"><div class="ess-chips" role="group" aria-label="' + esc(t("Show on the map")) + '">' + CATS.map(function (c) {
+          return '<a class="chip' + (c[0] === cat ? " on" : "") + '" href="#/map/' + c[0] + '"' + (c[0] === cat ? ' aria-current="true"' : "") + ">" + esc(t(c[1])) + "</a>";
+        }).join("") + "</div>" +
+        '<h1 id="near-h">' + esc(cat === "lifts" ? t("Lifts and escalators") : t(CATS.filter(function (c) { return c[0] === cat; })[0][1])) + '</h1><p class="lede-dark" id="near-sub">' + esc(cat === "lifts" ? t("Tap “Lifts near me” to sort them by distance, or tap anywhere on the map to get there.") : t("Finding the nearest to you…")) + "</p>" +
+        (note ? '<aside class="note note-ess"><p>' + esc(note) + "</p></aside>" : "") +
+        '<p class="loc-error" id="loc-error" hidden></p><ul class="lifts" id="near-list"></ul>' +
+        '<p class="unchecked">' + esc(cat === "lifts" ? t("Lift positions come from OpenStreetMap and are being checked on the ground.") : t("Locations come from OpenStreetMap and are being checked on the ground.")) + "</p></div></section>";
     },
     mount: function (root) {
       var ui = window.MMEUI;
@@ -104,8 +141,28 @@
       });
       var me = null, centred = false;
       var list = root.querySelector("#near-list");
+      var cat = currentCat();
+      if (cat !== "lifts") {
+        essList().filter(function (e) { return e.k === cat; }).forEach(function (e) {
+          L.marker([e.lat, e.lng], { icon: essIcon(e), title: essTitle(e), keyboard: true, zIndexOffset: 500 }).addTo(map).bindPopup(essPopup(e));
+        });
+      }
+
+      function drawEss(pos) {
+        var all = essList().filter(function (e) { return e.k === cat; });
+        var items = all.map(function (e) { return { e: e, d: pos ? distance(pos, e) : null }; });
+        if (pos) items.sort(function (a, b) { return a.d - b.d; });
+        items = items.slice(0, 15);
+        list.innerHTML = items.map(function (it) {
+          var e = it.e, det = essDetails(e);
+          return '<li><span class="step-ico" style="--c:' + CAT_COLOR[e.k] + '">' + ui.icon(e.k) + "</span><div><strong>" + ui.esc(essTitle(e)) + "</strong>" +
+            (det ? "<span>" + ui.esc(det) + "</span>" : "") + "<small>" + ui.esc(it.d !== null ? t("{d} away, about {n} min walk", { d: niceDistance(it.d), n: walkMinutes(it.d) }) : e.a) + "</small></div>" +
+            '<button type="button" class="map-mini" data-goto="' + e.lat + "," + e.lng + '" data-label="' + CAT_ONE[e.k] + '">' + ui.esc(t("Take me there")) + "</button></li>";
+        }).join("") + '<li class="more-note">' + ui.esc(t(pos ? "The 15 closest of {n}. All of them are on the map." : "{n} in Monaco and Beausoleil. All of them are on the map.", { n: all.length })) + "</li>";
+      }
 
       function drawList(pos) {
+        if (cat !== "lifts") { drawEss(pos); return; }
         var items = D.lifts.map(function (l) { return { l: l, d: pos ? distance(pos, l) : null }; });
         if (pos) items.sort(function (a, b) { return a.d - b.d; });
         else items.sort(function (a, b) { return (a.l.name.indexOf("Public") === 0) - (b.l.name.indexOf("Public") === 0); });
@@ -166,15 +223,17 @@
         var b = e.target.closest("[data-goto]");
         if (!b) return;
         var ll = b.dataset.goto.split(",");
-        window.MMEPlanner.state.to = { label: "Pinned spot on the map", lat: +ll[0], lng: +ll[1], kind: "pin" };
+        window.MMEPlanner.state.to = { label: b.dataset.label || "Pinned spot on the map", lat: +ll[0], lng: +ll[1], kind: "pin" };
         window.MMEPlanner.state.from = null;
         window.MMEPlanner.state.arrival = null;
         location.hash = "#/plan";
       });
-      if (/near/.test(location.hash)) locate();
+      if (/near/.test(location.hash) || cat !== "lifts") locate();
+      if (cat !== "lifts" && window.MMEStats) window.MMEStats.track("Essentials", { type: cat });
       setTimeout(function () { map.invalidateSize(); }, 50);
     }
   };
 
-  window.MMEMap = { CARTO_KEY: CARTO_KEY, liftName: liftName, here: function () { return here; }, screen: screen, makeMap: makeMap, liftIcon: liftIcon, meIcon: meIcon, startLocating: startLocating, onLocation: onLocation, distance: distance, niceDistance: niceDistance };
+  function currentCat() { var c = (location.hash.split("/")[2] || "").split("?")[0]; return CAT_ONE[c] ? c : "lifts"; }
+  window.MMEMap = { CAT_ONE: CAT_ONE, CAT_COLOR: CAT_COLOR, CARTO_KEY: CARTO_KEY, liftName: liftName, here: function () { return here; }, screen: screen, makeMap: makeMap, liftIcon: liftIcon, meIcon: meIcon, startLocating: startLocating, onLocation: onLocation, distance: distance, niceDistance: niceDistance };
 })();

@@ -17,7 +17,12 @@
     walk: '<path d="M13.5 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM10 8.5l3-1 2 .6 2.4 3.4-1.6 1.1-1.8-2.4-.9 3.4 2.4 2.8V22h-2v-5.6l-2.3-2.4-1 3.7L7.3 22l-1.9-.9 2.6-4.6L10 8.5zm-1.4 1.2L7 14.2l-1.9-.6 1.8-5 1.7 1.1z"/>',
     bus: '<path d="M6 3h12a2 2 0 0 1 2 2v12a2 2 0 0 1-1 1.7V21h-3v-2H8v2H5v-2.3A2 2 0 0 1 4 17V5a2 2 0 0 1 2-2zm0 3v5h12V6zm1.5 8a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm9 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>',
     steps: '<path d="M3 20v-3h4v-4h4V9h4V5h6v3h-3v4h-4v4h-4v4z"/>',
-    arrive: '<path d="M12 2a7 7 0 0 1 7 7c0 5.2-7 13-7 13S5 14.2 5 9a7 7 0 0 1 7-7zm0 4.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z"/>'
+    arrive: '<path d="M12 2a7 7 0 0 1 7 7c0 5.2-7 13-7 13S5 14.2 5 9a7 7 0 0 1 7-7zm0 4.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z"/>',
+    toilets: '<text x="12" y="16.2" font-size="10.5" font-weight="700" text-anchor="middle" font-family="Arial, sans-serif">WC</text>',
+    pharmacy: '<path d="M9.5 3h5v6.5H21v5h-6.5V21h-5v-6.5H3v-5h6.5z"/>',
+    atm: '<path d="M2 6h20v12H2zm2 2v8h16V8zm8 1.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM5.5 10.5h2v3h-2zm11 0h2v3h-2z"/>',
+    drinking_water: '<path d="M12 2.5s6.5 7 6.5 11.8a6.5 6.5 0 0 1-13 0C5.5 9.5 12 2.5 12 2.5z"/>',
+    defibrillator: '<path fill-rule="evenodd" d="M12 21 3.6 12.8A5 5 0 0 1 12 6.4a5 5 0 0 1 8.4 6.4zM12.8 8.5 9 13.2h2.6l-1.3 4.3 4.2-5.4h-2.7z"/>'
   };
   function icon(type, cls) {
     return '<svg class="' + (cls || "ico") + '" viewBox="0 0 24 24" aria-hidden="true">' + ICONS[type] + "</svg>";
@@ -139,11 +144,12 @@
     return '<section class="hero">' +
       '<p class="preview">' + esc(t("Preview: routes are being checked on the ground")) + "</p>" +
       "<h1>" + esc(t("Monaco, without the climb.")) + "</h1>" +
-      (X ? X.eventBanner() + X.cruiseCard() + X.homeCard() : "") +
+      (X ? X.eventBanner() + X.cruiseCard() + X.homeCard() : "") + (window.MMEWalks ? window.MMEWalks.guardCard() : "") +
       '<a class="arrive-btn" href="#/arrive"><span><strong>' + esc(t("Just arrived?")) + "</strong><small>" + esc(t("The easiest way to where you’re staying, with your bags")) + '</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.6 5.4 10 4l8 8-8 8-1.4-1.4 6.6-6.6z"/></svg></a>' +
-      '<p class="lede">' + esc(t("Around 80 free public lifts, 37 escalators and 8 moving walkways link Monaco and Beausoleil. We show you how to use them.")) + "</p>" + (X ? X.knowLink() : "") +
+      '<p class="lede">' + esc(t("Around 80 free public lifts, 37 escalators and 8 moving walkways link Monaco and Beausoleil. We show you how to use them.")) + "</p>" + (X ? X.knowLink() + essQuick() : "") +
       window.MMEPlanner.boxHtml() +
       "</section>" +
+      (window.MMEWalks ? window.MMEWalks.walksBlock() : "") +
       '<section class="block" id="routes" aria-labelledby="routes-h">' +
       '<div class="block-head"><h2 id="routes-h">' + esc(pf ? t("Routes for {place}", { place: placeShort(pf) }) : t("Popular routes")) + "</h2>" +
       (pf ? '<button type="button" class="link-btn" data-clear>' + esc(t("Show all")) + "</button>" : "") + "</div>" +
@@ -154,6 +160,14 @@
         '<p class="empty">' + esc(t("We haven’t written a route with that filter yet.")) + " " + (pf ? '<a href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=' + pf.lat + "," + pf.lng + '" target="_blank" rel="noopener">' + esc(t("Walking directions in Google Maps")) + "</a>" : "") + "</p>") +
       "</section>" +
       '<section class="side-on"><figure class="chart-card"><figcaption><span>' + esc(t("Monaco, side on")) + '</span><span class="key"><i class="k-sf"></i>' + esc(t("Step-free")) + ' <i class="k-st"></i>' + esc(t("Some steps")) + "</span></figcaption>" + heightChart() + '<p class="chart-hint">' + esc(t("Monaco climbs 100 m from the sea. Tap a place to see its routes.")) + "</p></figure></section>";
+  }
+
+  // Quick links to the nearest toilets, pharmacy, cash machine and water.
+  function essQuick() {
+    var items = [["toilets", "Toilets"], ["pharmacy", "Pharmacy"], ["atm", "Cash machine"], ["drinking_water", "Drinking water"]];
+    return '<nav class="ess-quick" aria-label="' + esc(t("Nearest essentials")) + '">' + items.map(function (i) {
+      return '<a href="#/map/' + i[0] + '"><span class="eq-ico" style="--c:' + window.MMEMap.CAT_COLOR[i[0]] + '">' + icon(i[0]) + "</span>" + esc(t(i[1])) + "</a>";
+    }).join("") + "</nav>";
   }
 
   function infoPage() {
@@ -184,6 +198,11 @@
     else if (parts[0] === "survey") { screen = window.MMESurvey.screen; tab = ""; }
     else if (parts[0] === "info") { html = infoPage(); tab = "info"; }
     else if (parts[0] === "cruise") { screen = X.cruiseScreen; tab = "transport"; }
+    else if (parts[0] === "walk" || parts[0] === "walks") {
+      var wid = parts[1];
+      screen = { html: function () { return window.MMEWalks.walkScreen.html(wid); }, mount: function (el) { window.MMEWalks.walkScreen.mount(el, wid); } };
+    }
+    else if (parts[0] === "to-palace") { window.MMEWalks.toPalace(); location.replace("#/plan"); return; }
     else if (parts[0] === "home-route") { location.replace(window.MMEPlanner.homeRoute() ? "#/plan" : "#/arrive"); return; }
     else if (parts[0] === "ship") { location.replace(window.MMEPlanner.shipRoute() ? "#/plan" : "#/cruise"); return; }
     else if (parts[0] === "plan") { screen = window.MMEPlanner.screen; }
@@ -222,6 +241,7 @@
     if (p && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); p.click(); }
   });
   window.addEventListener("hashchange", function () { render(); window.scrollTo(0, 0); });
+  if (window.MMEStats) window.MMEStats.track("App opened", { lang: window.MMEI18N.lang() });
   // Changing language redraws the current screen in the new language.
   window.addEventListener("mme-lang", function () { render(); });
   // A newer bus timetable arrived: redraw the transport screens.
