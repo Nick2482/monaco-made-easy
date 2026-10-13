@@ -51,7 +51,7 @@
   // ---------- Heights: free terrain tiles (AWS Terrain Tiles, Terrarium format) ----------
   // Each pixel stores height above sea level. Loaded once, then kept offline by the service worker.
   var height = null;
-  var TZ = 14, TILES_X = [8529, 8530], TILES_Y = [5972, 5973, 5974, 5975];
+  var TZ = 14, TILES_X = [8528, 8529, 8530], TILES_Y = [5972, 5973, 5974, 5975];
   var TILE_URL = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/";
   function loadTile(x, y) {
     return new Promise(function (resolve) {

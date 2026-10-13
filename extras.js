@@ -157,6 +157,7 @@
 
   var cruiseScreen = {
     html: function () {
+      if (window.MMEPro && !window.MMEPro.isPro()) return '<section class="arrive cruise"><a class="back" href="#/transport"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + esc(t("Transport")) + "</a><h1>" + esc(t("Cruise day")) + "</h1>" + window.MMEPro.lockCard("Cruise day") + "</section>";
       var c = load("mme-cruise"), active = cruise();
       var val = c && c.aboard != null ? hhmm(c.aboard) : "17:00";
       return '<section class="arrive cruise"><a class="back" href="#/transport"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + esc(t("Transport")) + "</a>" +
@@ -172,6 +173,7 @@
     },
     mount: function (root) {
       var err = root.querySelector("#cr-err");
+      if (!err) return;
       root.querySelector("#cr-go").addEventListener("click", function () {
         var v = root.querySelector("#cr-time").value;
         if (!/^\d{2}:\d{2}$/.test(v)) { err.textContent = t("Choose your all-aboard time."); err.hidden = false; return; }
@@ -195,7 +197,7 @@
   // 4. Save the map for use without mobile data
   // ---------------------------------------------------------------------------
   var TILES = "mme-map-tiles";
-  var BOX = { s: 43.722, n: 43.756, w: 7.400, e: 7.450 }; // Monaco, Beausoleil and Cap d'Ail edge
+  var BOX = { s: 43.712, n: 43.756, w: 7.385, e: 7.450 }; // Monaco, Beausoleil and Cap d'Ail edge
   function tileUrls() {
     var r = (window.devicePixelRatio || 1) > 1 ? "@2x" : "", out = [];
     function tx(lng, z) { return Math.floor((lng + 180) / 360 * Math.pow(2, z)); }
@@ -205,7 +207,7 @@
         out.push("https://" + "abcd"[Math.abs(x + y) % 4] + ".basemaps.cartocdn.com/rastertiles/voyager/" + z + "/" + x + "/" + y + r + ".png?key=" + window.MMEMap.CARTO_KEY);
       }
     }
-    [8529, 8530].forEach(function (x) { [5972, 5973, 5974, 5975].forEach(function (y) { out.push("https://s3.amazonaws.com/elevation-tiles-prod/terrarium/14/" + x + "/" + y + ".png"); }); });
+    [8528, 8529, 8530].forEach(function (x) { [5972, 5973, 5974, 5975].forEach(function (y) { out.push("https://s3.amazonaws.com/elevation-tiles-prod/terrarium/14/" + x + "/" + y + ".png"); }); });
     return out;
   }
   function offlineSize() { return Math.max(1, Math.round(tileUrls().length * ((window.devicePixelRatio || 1) > 1 ? 0.045 : 0.018))); }
@@ -231,6 +233,7 @@
     });
   }
   function offlineCard() {
+    if (window.MMEPro && !window.MMEPro.isPro()) return window.MMEPro.lockCard("Use it without mobile data");
     var s = load("mme-offline");
     var when = "";
     if (s && s.ymd) { try { when = new Intl.DateTimeFormat(lang(), { day: "numeric", month: "long" }).format(new Date(Date.UTC(+s.ymd.slice(0, 4), +s.ymd.slice(4, 6) - 1, +s.ymd.slice(6, 8), 12))); } catch (e) { when = s.ymd; } }

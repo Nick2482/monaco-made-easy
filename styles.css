@@ -610,3 +610,74 @@ a.preview { text-decoration: none; }
 .route-fb span { flex: 1 1 100%; }
 .route-fb .btn-small { margin-top: 0; min-width: 72px; }
 @media (min-width: 420px) { .route-fb span { flex: 1 1 auto; } }
+
+/* ---------- v20: Pro and the guide ---------- */
+.tabs { grid-template-columns: repeat(5, 1fr); }
+.tabs a { font-size: 12.5px; padding-left: 2px; padding-right: 2px; text-align: center; line-height: 1.2; }
+.pro-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px 2px 7px; border-radius: 999px; background: var(--navy); color: #fff; font-family: var(--sans); font-size: 13px; font-weight: 700; letter-spacing: 0.02em; vertical-align: middle; line-height: 1.5; box-shadow: inset 0 -2px 0 var(--riva); }
+.pro-star { width: 13px; height: 13px; fill: var(--riva); }
+h1 .pro-badge { margin-left: 4px; font-size: 14px; }
+.pro-page h1 .pro-badge { margin: 0 10px 0 0; position: relative; top: -4px; }
+.block-head .pro-badge { flex: none; }
+.pro-lock { margin: 16px 0; padding: 18px; border-radius: 16px; background: var(--navy); color: #fff; box-shadow: inset 0 -4px 0 var(--riva); }
+.pro-lock .pl-head { display: flex; align-items: center; gap: 10px; }
+.pro-lock .pl-head .pro-badge { background: #fff; color: var(--navy); }
+.pro-lock .pl-head .pro-star { fill: var(--red); }
+.pro-lock strong { font-size: 18px; line-height: 1.3; }
+.pro-lock p { color: #c9d6e5; margin-top: 8px; font-size: 16.5px; }
+.pro-lock .btn { width: 100%; margin-top: 14px; text-align: center; }
+.pro-lock .pl-free { font-size: 14.5px; margin-top: 10px; }
+.pro-page .lede-dark { margin-top: 12px; }
+.pro-ok { margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: var(--riva-pale); color: var(--navy); font-weight: 700; }
+.pro-code { margin-top: 8px; color: var(--grey); font-size: 15.5px; }
+.pro-list { list-style: none; margin: 16px 0 0; padding: 0; border-top: 1px solid var(--line); }
+.pro-list li { display: grid; gap: 2px; padding: 12px 0 12px 26px; border-bottom: 1px solid var(--line); position: relative; }
+.pro-list li::before { content: ""; position: absolute; left: 2px; top: 19px; width: 12px; height: 12px; background: var(--fusil) center / 10px 14px; transform: scale(1.2); clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); background: var(--red); }
+.pro-list span { color: var(--grey); font-size: 16px; }
+.pro-buy { margin-top: 18px; padding: 18px; border-radius: 16px; border: 1px solid var(--line); background: var(--stone); }
+.pro-price strong { font-family: var(--serif); font-size: 34px; font-weight: 400; color: var(--navy); }
+.pro-buy .btn { display: block; width: 100%; margin-top: 12px; text-align: center; }
+.pro-soon { margin-top: 10px; font-weight: 700; color: var(--red-deep); }
+.pro-small { margin-top: 10px; color: var(--grey); font-size: 14.5px; }
+.pro-have { margin-top: 18px; }
+.pro-have summary { cursor: pointer; font-weight: 700; color: var(--navy); }
+.pro-f { display: grid; gap: 8px; margin-top: 14px; }
+.pro-f label { font-weight: 700; font-size: 15.5px; }
+.pro-f input { font: inherit; font-size: 17px; padding: 11px 12px; border: 1.5px solid var(--line); border-radius: 10px; width: 100%; }
+.pro-f .btn { border: 0; cursor: pointer; font-family: inherit; }
+.pro-f .btn-line { border: 2px solid var(--navy); }
+.pro-link { display: flex; align-items: center; gap: 12px; margin: 14px 0 0; padding: 14px; border-radius: 14px; border: 1px solid var(--line); text-decoration: none; color: var(--navy); }
+.pro-link span { display: grid; }
+.pro-link small { color: var(--grey); font-size: 15px; }
+.play-soon { margin-top: 12px; color: var(--grey); font-size: 15.5px; }
+.legal-links a + a { margin-left: 0; }
+.legal-links { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+/* Guide */
+.g-quick { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 14px; }
+.g-quick a { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: #fff; color: var(--navy); text-decoration: none; font-weight: 700; font-size: 15.5px; line-height: 1.25; }
+.guide-block .block-head { align-items: center; }
+.g-search { width: 100%; margin-top: 12px; font: inherit; font-size: 17px; padding: 11px 14px; border: 1.5px solid var(--line); border-radius: 12px; }
+.g-list .g-item { align-items: start; }
+.g-item > div { display: grid; gap: 3px; min-width: 0; }
+.g-item > div > span { color: var(--grey); font-size: 15.5px; }
+.g-item .g-desc { font-size: 15.5px; color: #2d3a47; }
+.g-item .g-hours { font-size: 15px; color: var(--grey); }
+.g-open, .g-shut { font-weight: 700; padding: 0 6px; border-radius: 6px; font-size: 13.5px; }
+.g-open { background: #e3f4ea; color: #0d5c3c; }
+.g-shut { background: #f4e5e7; color: #8a1424; }
+.g-item .g-wc { font-size: 14.5px; color: #0d5c3c; font-weight: 700; }
+.g-links { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 15px; }
+.g-links a { color: var(--navy); font-weight: 700; word-break: break-all; }
+.g-item .map-mini { align-self: start; margin-top: 4px; }
+.mk.mk-ess.mk-g { width: 22px; height: 22px; border-width: 2px; }
+.mk.mk-ess.mk-g svg { width: 13px; height: 13px; }
+.pro-tip { position: relative; margin: 18px 0; padding: 18px 18px 16px; border-radius: 16px; background: var(--navy); color: #fff; box-shadow: inset 0 -4px 0 var(--riva); }
+.pro-tip .pl-head { display: flex; align-items: center; gap: 10px; padding-right: 30px; }
+.pro-tip .pl-head .pro-badge { background: #fff; color: var(--navy); }
+.pro-tip .pl-head .pro-star { fill: var(--red); }
+.pro-tip strong { font-size: 18px; }
+.pro-tip p { color: #c9d6e5; margin-top: 8px; font-size: 16.5px; }
+.pro-tip .pt-actions { display: grid; gap: 8px; margin-top: 14px; }
+.pro-tip .btn { width: 100%; text-align: center; font-family: inherit; cursor: pointer; }
+.pro-tip .pt-no { background: transparent; color: #fff; border: 2px solid rgba(255, 255, 255, 0.5); }
+.pro-tip .pt-x { position: absolute; top: 8px; right: 8px; width: 40px; height: 40px; border: 0; background: transparent; color: #fff; font-size: 28px; line-height: 1; cursor: pointer; }

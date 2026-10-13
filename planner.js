@@ -6,7 +6,7 @@
   var D = window.MME;
   var t = function (s, v) { return window.MMEI18N.t(s, v); };
   var SEARCH_URL = "https://photon.komoot.io/api/";
-  var AREA = { minLng: 7.395, minLat: 43.718, maxLng: 7.455, maxLat: 43.760 }; // Monaco and Beausoleil
+  var AREA = { minLng: 7.383, minLat: 43.710, maxLng: 7.455, maxLat: 43.760 }; // Monaco, Beausoleil and Cap d'Ail
   var CENTRE = { lat: 43.7385, lng: 7.4240 };
 
   var state = { from: null, to: null }; // null "from" means "my location"
@@ -285,6 +285,7 @@
           '<p class="unchecked">' + esc(t("Routes are worked out from OpenStreetMap. Lifts can be closed for repairs, so follow the blue “Ascenseur public” signs on the day.")) + "</p>";
         var body = root.querySelector("#plan-body");
         body.innerHTML = h;
+        if (r && window.MMEPro) window.MMEPro.tipAfterRoute(body);
         var wcBox = body.querySelector("#wc-on");
         if (wcBox) wcBox.addEventListener("change", function () { setWheelchair(wcBox.checked); avoidSteps = true; draw0(fromPt, lastNote); });
         if (!tracked && window.MMEStats) { tracked = true; window.MMEStats.track("Route planned", { wheelchair: wc ? "yes" : "no", found: r ? "yes" : "no" }); }
@@ -308,6 +309,7 @@
         });
         var sh = body.querySelector("#save-home");
         if (sh) sh.addEventListener("click", function () {
+          if (window.MMEPro && !window.MMEPro.isPro()) { location.hash = "#/pro"; return; }
           window.MMEExtras.Home.set(to);
           var ok = document.createElement("p"); ok.className = "off-ok"; ok.setAttribute("role", "status");
           ok.textContent = t("Saved. Tap “Back to {name}” on the home screen any time.", { name: lbl(to) });

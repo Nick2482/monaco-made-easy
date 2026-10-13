@@ -22,7 +22,15 @@
     pharmacy: '<path d="M9.5 3h5v6.5H21v5h-6.5V21h-5v-6.5H3v-5h6.5z"/>',
     atm: '<path d="M2 6h20v12H2zm2 2v8h16V8zm8 1.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM5.5 10.5h2v3h-2zm11 0h2v3h-2z"/>',
     drinking_water: '<path d="M12 2.5s6.5 7 6.5 11.8a6.5 6.5 0 0 1-13 0C5.5 9.5 12 2.5 12 2.5z"/>',
-    defibrillator: '<path fill-rule="evenodd" d="M12 21 3.6 12.8A5 5 0 0 1 12 6.4a5 5 0 0 1 8.4 6.4zM12.8 8.5 9 13.2h2.6l-1.3 4.3 4.2-5.4h-2.7z"/>'
+    defibrillator: '<path fill-rule="evenodd" d="M12 21 3.6 12.8A5 5 0 0 1 12 6.4a5 5 0 0 1 8.4 6.4zM12.8 8.5 9 13.2h2.6l-1.3 4.3 4.2-5.4h-2.7z"/>',
+    eat: '<path d="M4.5 2H6v5h1V2h1.5v5h1V2H11v6a2.5 2.5 0 0 1-2 2.45V22H7V10.45A2.5 2.5 0 0 1 4.5 8zM18 2v20h-2v-8h-2.5V8c0-3 1.6-5.4 4.5-6z"/>',
+    cafe: '<path d="M3 8h14v2h1.5a3.5 3.5 0 0 1 0 7h-2A6.5 6.5 0 0 1 10 21H9.5A6.5 6.5 0 0 1 3 14.5zm14 4v3h1.5a1.5 1.5 0 0 0 0-3zM7 2.5h2c0 1.3-1 1.7-1 3h-2c0-1.3 1-1.7 1-3zm4 0h2c0 1.3-1 1.7-1 3h-2c0-1.3 1-1.7 1-3z"/>',
+    bar: '<path d="M3 3h18l-8 9.2V19h4v2H7v-2h4v-6.8zm4.4 2 4.6 5.3L16.6 5z"/>',
+    culture: '<path d="M12 2 2 7v2h20V7zM4 10h2.5v8H4zm4.75 0h2.5v8h-2.5zm4.5 0h2.5v8h-2.5zM17.5 10H20v8h-2.5zM2 19h20v3H2z"/>',
+    yacht: '<path d="M12 2a3 3 0 0 1 1 5.83V10h3v2h-3v7.9A7 7 0 0 0 18.9 15h-2.4l3-4 3 4h-1.6A9 9 0 0 1 3.1 15H1.5l3-4 3 4H5.1A7 7 0 0 0 11 19.9V12H8v-2h3V7.83A3 3 0 0 1 12 2zm0 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>',
+    broker: '<path d="M11 2.5V13H4.5zM13 5.5l6.5 7.5H13zM2 15h20l-2.6 5.2a1.5 1.5 0 0 1-1.3.8H5.9a1.5 1.5 0 0 1-1.3-.8z"/>',
+    club: '<path d="M5 2h2v20H5zM8 3l13 4.5L8 12z"/>',
+    info: '<path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm-1.3 8v8h2.6v-8zM12 5.5a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2z"/>'
   };
   function icon(type, cls) {
     return '<svg class="' + (cls || "ico") + '" viewBox="0 0 24 24" aria-hidden="true">' + ICONS[type] + "</svg>";
@@ -149,6 +157,7 @@
       '<p class="lede">' + esc(t("Around 80 free public lifts, 37 escalators and 8 moving walkways link Monaco and Beausoleil. We show you how to use them.")) + "</p>" + (X ? X.knowLink() + essQuick() : "") +
       window.MMEPlanner.boxHtml() +
       "</section>" +
+      (window.MMEGuide ? guideBlock() : "") +
       (window.MMEWalks ? window.MMEWalks.walksBlock() : "") +
       '<section class="block" id="routes" aria-labelledby="routes-h">' +
       '<div class="block-head"><h2 id="routes-h">' + esc(pf ? t("Routes for {place}", { place: placeShort(pf) }) : t("Popular routes")) + "</h2>" +
@@ -160,6 +169,15 @@
         '<p class="empty">' + esc(t("We haven’t written a route with that filter yet.")) + " " + (pf ? '<a href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=' + pf.lat + "," + pf.lng + '" target="_blank" rel="noopener">' + esc(t("Walking directions in Google Maps")) + "</a>" : "") + "</p>") +
       "</section>" +
       '<section class="side-on"><figure class="chart-card"><figcaption><span>' + esc(t("Monaco, side on")) + '</span><span class="key"><i class="k-sf"></i>' + esc(t("Step-free")) + ' <i class="k-st"></i>' + esc(t("Some steps")) + "</span></figcaption>" + heightChart() + '<p class="chart-hint">' + esc(t("Monaco climbs 100 m from the sea. Tap a place to see its routes.")) + "</p></figure></section>";
+  }
+
+  // The guide: eat, drink, see.
+  function guideBlock() {
+    var P = window.MMEPro, G = window.MMEGuide;
+    return '<section class="block guide-block"><div class="block-head"><h2>' + esc(t("Eat, drink and see")) + "</h2>" + (P ? P.badge() : "") + '</div><p class="block-lede">' +
+      esc(t("Restaurants, bars, museums and more, each with the step-free way there.")) + '</p><nav class="g-quick">' + G.CATS.map(function (c) {
+        return '<a href="#/guide/' + c[0] + '"><span class="eq-ico" style="--c:' + G.COLOR[c[0]] + '">' + icon(c[0]) + "</span>" + esc(t(c[1])) + "</a>";
+      }).join("") + "</nav></section>";
   }
 
   // Quick links to the nearest toilets, pharmacy, cash machine and water.
@@ -182,10 +200,12 @@
       [t("Emergencies"), t("Call 112 from any phone.")],
       [t("Where our data comes from"), t("Streets, paths, lifts and escalators: © OpenStreetMap contributors (ODbL). Heights: Terrain Tiles from AWS Open Data (Mapzen and others). Map style: © CARTO. Buses: Compagnie des Autobus de Monaco open data.")]
     ];
-    return '<section class="page"><h1>' + esc(t("Good to know")) + "</h1>" + (X ? X.knowCard() + X.offlineCard() : "") + '<dl class="info">' + items.map(function (i) {
+    return '<section class="page"><h1>' + esc(t("Good to know")) + "</h1>" + (X ? X.knowCard() + X.offlineCard() : "") +
+      '<a class="pro-link" href="#/pro">' + (window.MMEPro ? window.MMEPro.badge() : "") + "<span><strong>" + esc(t("Monaco Made Easy Pro")) + "</strong><small>" + esc(t("What’s included, and how to get it")) + "</small></span></a>" +
+      '<p class="play-soon">' + esc(t("Coming soon to Google Play. You can already add this app to your home screen: in your browser’s menu, choose “Add to Home Screen”.")) + "</p>" + '<dl class="info">' + items.map(function (i) {
       return "<div><dt>" + esc(i[0]) + "</dt><dd>" + esc(i[1]) + "</dd></div>";
     }).join("") + "</dl>" + (X ? X.eventsInfo() : "") + '<p class="unchecked">' + esc(t("This is a preview. Details are gathered from published sources and are being checked on the ground before launch.")) + "</p>" +
-      '<p class="legal-links"><a href="mailto:hello@monacomadeeasy.com?subject=Monaco%20Made%20Easy">' + esc(t("Report a problem with the app")) + '</a><a href="privacy.html">' + esc(t("Privacy policy")) + "</a></p></section>";
+      '<p class="legal-links"><a href="mailto:hello@monacomadeeasy.com?subject=Monaco%20Made%20Easy">' + esc(t("Report a problem with the app")) + '</a><a href="privacy.html">' + esc(t("Privacy policy")) + '</a><a href="terms.html">' + esc(t("Terms of sale")) + "</a></p></section>";
   }
 
   // ---------- Router ----------
@@ -197,6 +217,8 @@
     else if (parts[0] === "map" || parts[0] === "lifts") { screen = window.MMEMap.screen; tab = "map"; }
     else if (parts[0] === "survey") { screen = window.MMESurvey.screen; tab = ""; }
     else if (parts[0] === "info") { html = infoPage(); tab = "info"; }
+    else if (parts[0] === "guide") { screen = window.MMEGuide.screen; tab = "guide"; }
+    else if (parts[0].indexOf("pro") === 0) { window.MMEPro.previewSwitch(); screen = window.MMEPro.screen; }
     else if (parts[0] === "cruise") { screen = X.cruiseScreen; tab = "transport"; }
     else if (parts[0] === "walk" || parts[0] === "walks") {
       var wid = parts[1];
@@ -220,7 +242,7 @@
     else if (parts[0].indexOf("from") === 0) { window.MMEPlanner.fromLink(location.hash); location.replace("#/"); return; }
     else html = home();
     main.innerHTML = screen ? screen.html() : html;
-    document.body.classList.toggle("is-map", tab === "map");
+    document.body.classList.toggle("is-map", tab === "map" || tab === "guide");
     if (screen) screen.mount(main.firstElementChild);
     else if (!parts[0]) { window.MMEPlanner.mountBox(main); if (X) X.mountHome(main); }
     else if (parts[0] === "info" && X) X.mountOffline(main);
@@ -246,9 +268,14 @@
   window.addEventListener("mme-lang", function () { render(); });
   // A newer bus timetable arrived: redraw the transport screens.
   window.addEventListener("mme-bus", function () { if (/^#\/(transport|bus)/.test(location.hash)) render(); });
+  // Pro switched on (or off): redraw.
+  window.addEventListener("mme-pro", function () { render(); });
+  if (window.MMEPro) { window.MMEPro.checkReturn(); window.MMEPro.retryPending(); }
   render();
 
   // Works offline once opened: cache the app on the phone.
+  // Remember when this phone first opened the app (stays on the phone), so early users can be given Premium later.
+  try { if (!localStorage.getItem("mme-first-open")) localStorage.setItem("mme-first-open", new Date().toISOString().slice(0, 10)); } catch (e) {}
   if ("serviceWorker" in navigator && location.protocol === "https:") {
     window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
   }
