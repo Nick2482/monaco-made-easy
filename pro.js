@@ -8,7 +8,7 @@
     // (Set it when Stripe is ready; nobody keeps Pro free after it without buying.)
     launch: null,          // e.g. "2026-12-01"
     // The Stripe Payment Link. Until it is set, the buy button says "Coming soon".
-    payLink: "",           // e.g. "https://buy.stripe.com/..."
+    payLink: "https://buy.stripe.com/test_5kQeVd9uu5CH6TScEeenS00",           // e.g. "https://buy.stripe.com/..."
     price: "£2.99"
   };
   function t(s, v) { return window.MMEI18N.t(s, v); }
