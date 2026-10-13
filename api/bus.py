@@ -8,7 +8,7 @@ import csv, io, json, zipfile, urllib.request, collections
 
 DATASET_API = "https://www.data.gouv.fr/api/1/datasets/gtfs-3/"
 FALLBACK_ZIP = "https://www.data.gouv.fr/api/1/datasets/r/2f510784-2957-48e3-b01c-b0e4f9938da7"
-UA = {"User-Agent": "MonacoMadeEasy/1.0 (+https://going-going-gone.uk)"}
+UA = {"User-Agent": "MonacoMadeEasy/1.0 (+https://monacomadeeasy.com)"}
 
 
 def get(url, timeout=20):

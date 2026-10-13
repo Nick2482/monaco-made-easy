@@ -171,7 +171,7 @@
     return '<section class="page"><h1>' + esc(t("Good to know")) + "</h1>" + (X ? X.knowCard() + X.offlineCard() : "") + '<dl class="info">' + items.map(function (i) {
       return "<div><dt>" + esc(i[0]) + "</dt><dd>" + esc(i[1]) + "</dd></div>";
     }).join("") + "</dl>" + (X ? X.eventsInfo() : "") + '<p class="unchecked">' + esc(t("This is a preview. Details are gathered from published sources and are being checked on the ground before launch.")) + "</p>" +
-      '<p class="legal-links"><a href="mailto:nickhutton840@gmail.com?subject=Monaco%20Made%20Easy">' + esc(t("Report a problem with the app")) + '</a><a href="privacy.html">' + esc(t("Privacy policy")) + "</a></p></section>";
+      '<p class="legal-links"><a href="mailto:hello@monacomadeeasy.com?subject=Monaco%20Made%20Easy">' + esc(t("Report a problem with the app")) + '</a><a href="privacy.html">' + esc(t("Privacy policy")) + "</a></p></section>";
   }
 
   // ---------- Router ----------
