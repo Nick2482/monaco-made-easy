@@ -281,12 +281,31 @@
         }
         var canSave = window.MMEExtras && to.kind !== "ship" && to.kind !== "home" && !window.MMEExtras.Home.is(to);
         h += '<div class="actions">' + (canSave ? '<button type="button" class="btn btn-line save-home" id="save-home">' + esc(t("Save as where I’m staying")) + "</button>" : "") + '<a class="btn btn-line" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=' + from.lat + "," + from.lng + "&destination=" + to.lat + "," + to.lng + '">' + esc(t("Compare in Google Maps")) + "</a></div>" +
+          '<div class="route-fb" id="route-fb"><span>' + esc(t("Was this route right?")) + '</span><button type="button" class="btn-small" data-fb="yes">' + esc(t("Yes")) + '</button><button type="button" class="btn-small" data-fb="no">' + esc(t("No")) + "</button></div>" +
           '<p class="unchecked">' + esc(t("Routes are worked out from OpenStreetMap. Lifts can be closed for repairs, so follow the blue “Ascenseur public” signs on the day.")) + "</p>";
         var body = root.querySelector("#plan-body");
         body.innerHTML = h;
         var wcBox = body.querySelector("#wc-on");
         if (wcBox) wcBox.addEventListener("change", function () { setWheelchair(wcBox.checked); avoidSteps = true; draw0(fromPt, lastNote); });
         if (!tracked && window.MMEStats) { tracked = true; window.MMEStats.track("Route planned", { wheelchair: wc ? "yes" : "no", found: r ? "yes" : "no" }); }
+        // "Was this route right?" A "No" opens an email to us with the route details filled in.
+        var fb = body.querySelector("#route-fb");
+        if (fb) fb.addEventListener("click", function (e) {
+          var btn = e.target.closest("[data-fb]");
+          if (!btn) return;
+          var ans = btn.dataset.fb;
+          if (window.MMEStats) window.MMEStats.track("Route feedback", { answer: ans });
+          if (ans === "no") {
+            var lines = [t("What was wrong? You can write in any language."), "", "", "", "---",
+              "From: " + lbl(state.from) + " (" + from.lat.toFixed(5) + ", " + from.lng.toFixed(5) + ")",
+              "To: " + lbl(to) + " (" + to.lat.toFixed(5) + ", " + to.lng.toFixed(5) + ")",
+              r ? "Route: " + r.minutes + " min, " + r.metres + " m, " + r.lifts + " lifts, " + r.escalators + " escalators, " + r.steps + " sets of steps" : "Route: none found",
+              "Wheelchair mode: " + (wc ? "on" : "off") + " · Language: " + window.MMEI18N.lang(),
+              "Streets: " + (r && r.streets ? r.streets.slice(0, 8).join(", ") : "")];
+            location.href = "mailto:hello@monacomadeeasy.com?subject=" + encodeURIComponent("Route feedback: " + lbl(to)) + "&body=" + encodeURIComponent(lines.join("\n"));
+          }
+          fb.innerHTML = "<span>" + esc(t("Thanks for letting us know.")) + "</span>";
+        });
         var sh = body.querySelector("#save-home");
         if (sh) sh.addEventListener("click", function () {
           window.MMEExtras.Home.set(to);

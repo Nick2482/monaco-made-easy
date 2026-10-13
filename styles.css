@@ -603,3 +603,10 @@ html.cjk .know h2 { font-family: "PingFang SC", "Hiragino Mincho ProN", "Noto Se
 .wk-how .steps { margin-top: 8px; }
 .btn-small { margin-top: 10px; font: inherit; font-weight: 700; font-size: 15px; padding: 8px 14px; border-radius: 999px; border: 1.5px solid var(--navy); background: #fff; color: var(--navy); cursor: pointer; }
 html.cjk .wk-title, html.cjk .walk-stops strong, html.cjk .guard-card strong { font-family: "PingFang SC", "Hiragino Mincho ProN", "Noto Serif CJK SC", "Noto Serif JP", "Noto Serif KR", serif; font-weight: 700; }
+
+/* ---------- v18: route feedback ---------- */
+a.preview { text-decoration: none; }
+.route-fb { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-top: 20px; padding: 14px 16px; border-radius: 14px; background: var(--stone); font-weight: 700; }
+.route-fb span { flex: 1 1 100%; }
+.route-fb .btn-small { margin-top: 0; min-width: 72px; }
+@media (min-width: 420px) { .route-fb span { flex: 1 1 auto; } }

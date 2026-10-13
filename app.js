@@ -142,7 +142,7 @@
     var chips = [["all", t("All routes")], ["stepfree", t("Step-free only")], ["beausoleil", t("Beausoleil")]];
     var pf = placeFilter ? D.places[placeFilter] : null;
     return '<section class="hero">' +
-      '<p class="preview">' + esc(t("Preview: routes are being checked on the ground")) + "</p>" +
+      '<a class="preview" href="mailto:hello@monacomadeeasy.com?subject=' + encodeURIComponent("Monaco Made Easy feedback") + '">' + esc(t("Spotted something wrong? Tell us")) + "</a>" +
       "<h1>" + esc(t("Monaco, without the climb.")) + "</h1>" +
       (X ? X.eventBanner() + X.cruiseCard() + X.homeCard() : "") + (window.MMEWalks ? window.MMEWalks.guardCard() : "") +
       '<a class="arrive-btn" href="#/arrive"><span><strong>' + esc(t("Just arrived?")) + "</strong><small>" + esc(t("The easiest way to where you’re staying, with your bags")) + '</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.6 5.4 10 4l8 8-8 8-1.4-1.4 6.6-6.6z"/></svg></a>' +
