@@ -681,3 +681,7 @@ h1 .pro-badge { margin-left: 4px; font-size: 14px; }
 .pro-tip .btn { width: 100%; text-align: center; font-family: inherit; cursor: pointer; }
 .pro-tip .pt-no { background: transparent; color: #fff; border: 2px solid rgba(255, 255, 255, 0.5); }
 .pro-tip .pt-x { position: absolute; top: 8px; right: 8px; width: 40px; height: 40px; border: 0; background: transparent; color: #fff; font-size: 28px; line-height: 1; cursor: pointer; }
+.pro-pending { margin-top: 14px; padding: 14px; border-radius: 12px; background: #fff4e5; border: 1px solid #f0c27a; }
+.pro-pending p { color: #6b4300; font-weight: 700; }
+.pro-pending .pro-small { font-weight: 400; color: #6b4300; }
+.pro-pending .btn { width: 100%; margin-top: 10px; border: 0; cursor: pointer; font-family: inherit; }

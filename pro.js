@@ -75,6 +75,8 @@
           (inPlayApp() ? '<p class="pro-soon">' + esc(t("Coming soon.")) + "</p>" : CONFIG.payLink ? '<a class="btn btn-red" id="pro-buy" href="' + esc(CONFIG.payLink) + '">' + esc(t("Get Pro")) + "</a>" : '<p class="pro-soon">' + esc(t("Coming soon.")) + "</p>") +
           '<p class="pro-small">' + esc(t("Secure payment by Stripe. Pro switches on as soon as you’ve paid. Not right for you? Email us within 14 days for a full refund.")) + "</p></div>";
       }
+      if (st !== "bought" && get("mme-pro-pending")) state += '<div class="pro-pending" role="alert"><p>' + esc(t("We couldn’t confirm your payment yet. Your payment is safe. Tap “Try again”, or email us and we’ll sort it out.")) + "</p>" +
+        (lastError ? '<p class="pro-small">(' + esc(lastError) + ")</p>" : "") + '<button type="button" class="btn btn-navy" id="pro-retry">' + esc(t("Try again")) + "</button></div>";
       var have = st === "bought" || st === "preview" ? "" :
         '<details class="pro-have"><summary>' + esc(t("Already bought Pro?")) + "</summary>" +
         '<form id="pro-code-f" class="pro-f"><label for="pro-code">' + esc(t("Enter your unlock code")) + '</label><input id="pro-code" autocomplete="off" autocapitalize="characters" placeholder="MME-XXXXX-XXXXXX"><button class="btn btn-navy" type="submit">' + esc(t("Switch on Pro")) + "</button></form>" +
@@ -101,6 +103,8 @@
         e.preventDefault();
         api({ action: "restore", email: root.querySelector("#pro-mail").value }).then(function (r) { if (r.ok) { unlock(r.code, "email"); } else fail(r.error); });
       });
+      var rt = root.querySelector("#pro-retry");
+      if (rt) rt.addEventListener("click", function () { rt.disabled = true; retryPending(function () { window.dispatchEvent(new Event("mme-pro")); }); });
       var b = root.querySelector("#pro-buy");
       if (b) b.addEventListener("click", function () { if (window.MMEStats) window.MMEStats.track("Pro checkout opened"); });
     }
@@ -134,15 +138,19 @@
     try { history.replaceState(null, "", location.pathname + "#/pro"); } catch (e) {}
     api({ action: "claim", session: sid }).then(function (r) {
       if (r.ok) unlock(r.code, "purchase");
-      else { set("mme-pro-pending", sid); }
+      else { set("mme-pro-pending", sid); lastError = r.error || "unavailable"; }
       if (location.hash !== "#/pro") location.hash = "#/pro"; else window.dispatchEvent(new Event("mme-pro"));
     });
   }
   // A purchase that couldn't be confirmed (no signal): try again next time.
-  function retryPending() {
+  var lastError = null;
+  function retryPending(onDone) {
     var sid = get("mme-pro-pending");
     if (!sid) return;
-    api({ action: "claim", session: sid }).then(function (r) { if (r.ok) { set("mme-pro-pending", null); unlock(r.code, "purchase"); } });
+    api({ action: "claim", session: sid }).then(function (r) {
+      if (r.ok) { set("mme-pro-pending", null); lastError = null; unlock(r.code, "purchase"); }
+      else { lastError = r.error || "unavailable"; if (onDone) onDone(); }
+    });
   }
 
   // #/pro?preview=locked shows the app as a non-paying visitor will see it; #/pro?preview=on goes back.
