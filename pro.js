@@ -6,9 +6,9 @@
   var CONFIG = {
     // From this date Pro is paid. While it is null, everyone has Pro (preview).
     // (Set it when Stripe is ready; nobody keeps Pro free after it without buying.)
-    launch: null,          // e.g. "2026-12-01"
+    launch: "2026-10-14",          // e.g. "2026-12-01"
     // The Stripe Payment Link. Until it is set, the buy button says "Coming soon".
-    payLink: "https://buy.stripe.com/test_5kQeVd9uu5CH6TScEeenS00",           // e.g. "https://buy.stripe.com/..."
+    payLink: "https://buy.stripe.com/bJe8wPcyC7mc11Z5FwgYU00",           // e.g. "https://buy.stripe.com/..."
     price: "£2.99"
   };
   function t(s, v) { return window.MMEI18N.t(s, v); }
@@ -19,6 +19,7 @@
   function status() {
     if (get("mme-pro-test") === "locked") return "locked";   // lets us see the paid version during the preview
     if (get("mme-pro")) return "bought";
+    if (inPlayApp()) return "playapp";   // Google Play version: free until Google's own payment system is added
     if (!CONFIG.launch || new Date().toISOString().slice(0, 10) < CONFIG.launch) return "preview";
     return "locked";
   }
@@ -67,6 +68,7 @@
         "<h1>" + badge() + esc(t("Monaco Made Easy Pro")) + "</h1>";
       var state = "";
       if (st === "bought") state = '<p class="pro-ok">' + esc(t("Pro is switched on for this phone. Thank you for supporting Monaco Made Easy.")) + '</p><p class="pro-code">' + esc(t("Your unlock code: {code}", { code: get("mme-pro") })) + "</p>";
+      else if (st === "playapp") state = '<p class="pro-ok">' + esc(t("Pro is free in the Google Play version of the app for now.")) + "</p>";
       else if (st === "preview") state = '<p class="pro-ok">' + esc(t("Pro is free for everyone while the app is in preview.")) + "</p>";
       var list = '<ul class="pro-list">' + FEATURES.map(function (f) { return "<li><strong>" + esc(t(f[0])) + "</strong><span>" + esc(t(f[1])) + "</span></li>"; }).join("") + "</ul>";
       var buy = "";
@@ -77,7 +79,7 @@
       }
       if (st !== "bought" && get("mme-pro-pending")) state += '<div class="pro-pending" role="alert"><p>' + esc(t("We couldn’t confirm your payment yet. Your payment is safe. Tap “Try again”, or email us and we’ll sort it out.")) + "</p>" +
         (lastError ? '<p class="pro-small">(' + esc(lastError) + ")</p>" : "") + '<button type="button" class="btn btn-navy" id="pro-retry">' + esc(t("Try again")) + "</button></div>";
-      var have = st === "bought" || st === "preview" ? "" :
+      var have = st === "bought" || st === "preview" || st === "playapp" ? "" :
         '<details class="pro-have"><summary>' + esc(t("Already bought Pro?")) + "</summary>" +
         '<form id="pro-code-f" class="pro-f"><label for="pro-code">' + esc(t("Enter your unlock code")) + '</label><input id="pro-code" autocomplete="off" autocapitalize="characters" placeholder="MME-XXXXX-XXXXXX"><button class="btn btn-navy" type="submit">' + esc(t("Switch on Pro")) + "</button></form>" +
         '<form id="pro-mail-f" class="pro-f"><label for="pro-mail">' + esc(t("Or the email address you paid with")) + '</label><input id="pro-mail" type="email" autocomplete="email"><button class="btn btn-line" type="submit">' + esc(t("Find my purchase")) + "</button></form>" +
@@ -159,5 +161,5 @@
     if (m) set("mme-pro-test", m[1] === "locked" ? "locked" : null);
   }
 
-  window.MMEPro = { CONFIG: CONFIG, status: status, isPro: isPro, lockCard: lockCard, badge: badge, screen: screen, tipAfterRoute: tipAfterRoute, checkReturn: checkReturn, retryPending: retryPending, previewSwitch: previewSwitch };
+  window.MMEPro = { CONFIG: CONFIG, inPlayApp: inPlayApp, status: status, isPro: isPro, lockCard: lockCard, badge: badge, screen: screen, tipAfterRoute: tipAfterRoute, checkReturn: checkReturn, retryPending: retryPending, previewSwitch: previewSwitch };
 })();

@@ -157,6 +157,7 @@
       '<p class="lede">' + esc(t("Around 80 free public lifts, 37 escalators and 8 moving walkways link Monaco, Beausoleil and Cap d’Ail. We show you how to use them.")) + "</p>" + (X ? X.knowLink() + essQuick() : "") +
       window.MMEPlanner.boxHtml() +
       "</section>" +
+      (window.MMEInstall ? window.MMEInstall.card("home") : "") +
       (window.MMEGuide ? guideBlock() : "") +
       (window.MMEWalks ? window.MMEWalks.walksBlock() : "") +
       '<section class="block" id="routes" aria-labelledby="routes-h">' +
@@ -203,6 +204,7 @@
     ];
     return '<section class="page"><h1>' + esc(t("Good to know")) + "</h1>" + (X ? X.knowCard() + X.offlineCard() : "") +
       '<a class="pro-link" href="#/pro">' + (window.MMEPro ? window.MMEPro.badge() : "") + "<span><strong>" + esc(t("Monaco Made Easy Pro")) + "</strong><small>" + esc(t("What’s included, and how to get it")) + "</small></span></a>" +
+      (window.MMEInstall ? window.MMEInstall.card("info") : "") +
       '<p class="play-soon">' + esc(t("Coming soon to Google Play. You can already add this app to your home screen: in your browser’s menu, choose “Add to Home Screen”.")) + "</p>" + '<dl class="info">' + items.map(function (i) {
       return "<div><dt>" + esc(i[0]) + "</dt><dd>" + esc(i[1]) + "</dd></div>";
     }).join("") + "</dl>" + (X ? X.eventsInfo() : "") + '<p class="unchecked">' + esc(t("This is a preview. Details are gathered from published sources and are being checked on the ground before launch.")) + "</p>" +
@@ -245,6 +247,7 @@
     main.innerHTML = screen ? screen.html() : html;
     document.body.classList.toggle("is-map", tab === "map" || tab === "guide");
     if (screen) screen.mount(main.firstElementChild);
+    if (window.MMEInstall) window.MMEInstall.mount(main);
     else if (!parts[0]) { window.MMEPlanner.mountBox(main); if (X) X.mountHome(main); }
     else if (parts[0] === "info" && X) X.mountOffline(main);
     document.querySelectorAll(".tabs a").forEach(function (a) {

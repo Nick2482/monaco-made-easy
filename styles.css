@@ -685,3 +685,15 @@ h1 .pro-badge { margin-left: 4px; font-size: 14px; }
 .pro-pending p { color: #6b4300; font-weight: 700; }
 .pro-pending .pro-small { font-weight: 400; color: #6b4300; }
 .pro-pending .btn { width: 100%; margin-top: 10px; border: 0; cursor: pointer; font-family: inherit; }
+/* Add to home screen */
+.install-card { position: relative; display: grid; grid-template-columns: 44px 1fr; gap: 14px; margin: 18px 16px 0; padding: 16px; border-radius: 16px; background: var(--riva-pale); border: 1px solid #cfe7f3; color: var(--navy); }
+.page .install-card { margin: 16px 0 0; }
+.install-card .ic-ico { width: 44px; height: 44px; border-radius: 12px; background: var(--navy); display: grid; place-items: center; }
+.install-card .ic-ico svg { width: 24px; height: 24px; fill: #fff; }
+.install-card strong { font-size: 18px; display: block; padding-right: 28px; }
+.install-card p { margin-top: 4px; font-size: 16px; color: #2d3a47; }
+.install-card .ic-steps { font-weight: 700; color: var(--navy); }
+.install-card .btn { margin-top: 10px; border: 0; cursor: pointer; font-family: inherit; }
+.install-card .ic-x { position: absolute; top: 6px; right: 6px; width: 40px; height: 40px; border: 0; background: transparent; color: var(--navy); font-size: 26px; cursor: pointer; }
+@media (min-width: 700px) { .install-card { margin-left: auto; margin-right: auto; max-width: var(--col); } .page .install-card { max-width: none; } }
+.install-card [hidden] { display: none !important; }
