@@ -1,5 +1,5 @@
 // The guide: restaurants, cafés, bars, museums and galleries, yachting and tourist information,
-// each with the step-free way there. Tourist information is free; the rest is part of Pro.
+// each with the step-free way there. All of it is part of Pro.
 (function () {
   "use strict";
   function t(s, v) { return window.MMEI18N.t(s, v); }
@@ -9,7 +9,7 @@
 
   var CATS = [["eat", "Restaurants"], ["cafe", "Cafés"], ["bar", "Bars"], ["culture", "Museums and galleries"], ["yacht", "Yachting"], ["broker", "Yacht brokers"], ["club", "Clubs"], ["info", "Tourist information"]];
   var COLOR = { eat: "#9c3d54", cafe: "#7a5230", bar: "#8a2f6b", culture: "#0e7c86", yacht: "#1f4e8c", broker: "#2b6a8f", club: "#7a4f1d", info: "#4a5d70" };
-  var FREE = { info: true };
+  var FREE = {};
   var SUB = { museum: "Museum", gallery: "Art gallery", theatre: "Theatre", garden: "Garden", venue: "Exhibitions and events", chandlery: "Chandlery", harbour: "Harbour office", pub: "Pub", nightclub: "Nightclub",
     motor: "Motor club", yacht: "Yacht club", rowing: "Rowing club", tennis: "Tennis club", sailing: "Sailing club", hiking: "Hiking club" };
   var CUISINE = { italian: "Italian", pizza: "Pizza", burger: "Burgers", mediterranean: "Mediterranean", french: "French", japanese: "Japanese", sushi: "Sushi",

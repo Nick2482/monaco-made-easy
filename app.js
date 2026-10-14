@@ -216,6 +216,12 @@
     var h = location.hash.replace(/^#\/?/, "");
     var parts = h.split("/");
     var tab = "routes", html, screen = null;
+    // Pro features go straight to the Pro page for visitors who haven't bought it.
+    var P = window.MMEPro, sub = (parts[1] || "").split("?")[0];
+    if (P && !P.isPro() && ((parts[0].split("?")[0] === "guide") || parts[0] === "walk" || parts[0] === "walks" || parts[0] === "cruise")) {
+      if (window.MMEStats) window.MMEStats.track("Pro feature tapped", { what: parts[0] + (sub ? "/" + sub : "") });
+      location.replace("#/pro"); return;
+    }
     if (parts[0] === "route") { location.replace("#/go/" + parts[1]); return; }
     else if (parts[0] === "map" || parts[0] === "lifts") { screen = window.MMEMap.screen; tab = "map"; }
     else if (parts[0] === "survey") { screen = window.MMESurvey.screen; tab = ""; }
@@ -248,7 +254,7 @@
     document.body.classList.toggle("is-map", tab === "map" || tab === "guide");
     if (screen) screen.mount(main.firstElementChild);
     if (window.MMEInstall) window.MMEInstall.mount(main);
-    else if (!parts[0]) { window.MMEPlanner.mountBox(main); if (X) X.mountHome(main); }
+    if (!parts[0]) { window.MMEPlanner.mountBox(main); if (X) X.mountHome(main); }
     else if (parts[0] === "info" && X) X.mountOffline(main);
     document.querySelectorAll(".tabs a").forEach(function (a) {
       if (a.dataset.tab === tab) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
