@@ -1,8 +1,11 @@
 [{
-      "relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "com.monacomadeeasy.www.twa",
-        "sha256_cert_fingerprints": ["93:91:06:37:D7:DF:76:56:D1:6F:D8:B4:6A:43:CC:9C:BC:2F:C4:45:C3:BD:3F:DD:FA:64:B0:20:CB:6C:89:46"]
-      }
-    }]
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.monacomadeeasy.www.twa",
+    "sha256_cert_fingerprints": [
+      "6D:08:32:AA:9E:F8:5C:26:7E:00:43:E5:41:07:02:3A:8B:10:3D:0F:71:CB:C7:05:F1:E4:1C:3B:B9:98:C5:F1",
+      "93:91:06:37:D7:DF:76:56:D1:6F:D8:B4:6A:43:CC:9C:BC:2F:C4:45:C3:BD:3F:DD:FA:64:B0:20:CB:6C:89:46"
+    ]
+  }
+}]
