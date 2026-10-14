@@ -333,7 +333,7 @@
       draw = function (f, n) { heightsReady.then(function () { draw0(f, n); }); };
       if (state.from) draw(state.from);
       else {
-        M().startLocating(function (msg) { root.querySelector("#plan-body").innerHTML = '<p class="loc-error">' + esc(msg) + '</p><p><a class="btn btn-line" href="#/">' + esc(t("Choose a starting point instead")) + "</a></p>"; });
+        M().startLocating(function (msg) { if (fromPt) return; root.querySelector("#plan-body").innerHTML = '<p class="loc-error">' + esc(msg) + '</p><p><a class="btn btn-line" href="#/">' + esc(t("Choose a starting point instead")) + "</a></p>"; });
         var done = false;
         var stop = M().onLocation(function (pos) {
           if (done) return; done = true; setTimeout(function () { stop(); }, 0);
@@ -347,6 +347,15 @@
           draw(pos);
         });
       }
+      // A blue dot that follows you along the route (only when you're in Monaco, Beausoleil or Cap d'Ail).
+      M().startLocating(function () {});
+      var meMk = null;
+      var stopMe = M().onLocation(function (p) {
+        if (!document.body.contains(root)) { setTimeout(function () { stopMe(); }, 0); return; }
+        if (!inArea(p)) return;
+        if (!meMk) meMk = L.marker([p.lat, p.lng], { icon: M().meIcon, interactive: false, zIndexOffset: 1000 }).addTo(map);
+        else meMk.setLatLng([p.lat, p.lng]);
+      });
       setTimeout(function () { map.invalidateSize(); }, 50);
     }
   };
