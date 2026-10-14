@@ -154,7 +154,7 @@
       "<h1>" + esc(t("Monaco, without the climb.")) + "</h1>" +
       (X ? X.eventBanner() + X.cruiseCard() + X.homeCard() : "") + (window.MMEWalks ? window.MMEWalks.guardCard() : "") +
       '<a class="arrive-btn" href="#/arrive"><span><strong>' + esc(t("Just arrived?")) + "</strong><small>" + esc(t("The easiest way to where you’re staying, with your bags")) + '</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.6 5.4 10 4l8 8-8 8-1.4-1.4 6.6-6.6z"/></svg></a>' +
-      '<p class="lede">' + esc(t("Around 80 free public lifts, 37 escalators and 8 moving walkways link Monaco and Beausoleil. We show you how to use them.")) + "</p>" + (X ? X.knowLink() + essQuick() : "") +
+      '<p class="lede">' + esc(t("Around 80 free public lifts, 37 escalators and 8 moving walkways link Monaco, Beausoleil and Cap d’Ail. We show you how to use them.")) + "</p>" + (X ? X.knowLink() + essQuick() : "") +
       window.MMEPlanner.boxHtml() +
       "</section>" +
       (window.MMEGuide ? guideBlock() : "") +
@@ -196,6 +196,7 @@
       [t("Buses"), t("Monaco’s buses climb the hills for you. See the Transport tab for the next buses near you.")],
       [t("Across the harbour"), t("The small electric Bateau-Bus ferry crosses Port Hercule and has a boarding ramp.")],
       [t("Accessible toilets"), t("There are accessible toilets at the Casino Square tourist office, the Oceanographic Museum, the Grimaldi Forum, Larvotto Beach and Port Hercule.")],
+      [t("Cap d'Ail"), t("Cap d’Ail is in France, just west of Fontvieille, with no border checks. A flat seaside path links it to Monaco, and it has beaches, restaurants and a small harbour.")],
       [t("Beausoleil"), t("Beausoleil is in France, right behind Monte-Carlo. The border is just a street, with no checks. It’s steep, so plan to use the lifts on the way back up.")],
       [t("Emergencies"), t("Call 112 from any phone.")],
       [t("Where our data comes from"), t("Streets, paths, lifts and escalators: © OpenStreetMap contributors (ODbL). Heights: Terrain Tiles from AWS Open Data (Mapzen and others). Map style: © CARTO. Buses: Compagnie des Autobus de Monaco open data.")]

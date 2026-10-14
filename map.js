@@ -105,7 +105,7 @@
       '<br><button type="button" class="pop-go" data-goto="' + e.lat + "," + e.lng + '" data-label="' + CAT_ONE[e.k] + '">' + esc(t("Take me there")) + "</button></div>";
   }
   function catNote(cat) {
-    if (cat === "pharmacy") return t("At night, on Sundays and on holidays, one pharmacy stays open. In Monaco its name and address are posted on the door of every pharmacy. In Beausoleil and the rest of France, call 3237 to find it.");
+    if (cat === "pharmacy") return t("At night, on Sundays and on holidays, one pharmacy stays open. In Monaco its name and address are posted on the door of every pharmacy. In Beausoleil, Cap d’Ail and the rest of France, call 3237 to find it.");
     if (cat === "defibrillator") return t("In an emergency, call 112 first. The operator can tell you where the nearest defibrillator is and guide you.");
     return "";
   }
@@ -158,7 +158,7 @@
           return '<li><span class="step-ico" style="--c:' + CAT_COLOR[e.k] + '">' + ui.icon(e.k) + "</span><div><strong>" + ui.esc(essTitle(e)) + "</strong>" +
             (det ? "<span>" + ui.esc(det) + "</span>" : "") + "<small>" + ui.esc(it.d !== null ? t("{d} away, about {n} min walk", { d: niceDistance(it.d), n: walkMinutes(it.d) }) : e.a) + "</small></div>" +
             '<button type="button" class="map-mini" data-goto="' + e.lat + "," + e.lng + '" data-label="' + CAT_ONE[e.k] + '">' + ui.esc(t("Take me there")) + "</button></li>";
-        }).join("") + '<li class="more-note">' + ui.esc(t(pos ? "The 15 closest of {n}. All of them are on the map." : "{n} in Monaco and Beausoleil. All of them are on the map.", { n: all.length })) + "</li>";
+        }).join("") + '<li class="more-note">' + ui.esc(t(pos ? "The 15 closest of {n}. All of them are on the map." : "{n} in Monaco, Beausoleil and Cap d’Ail. All of them are on the map.", { n: all.length })) + "</li>";
       }
 
       function drawList(pos) {

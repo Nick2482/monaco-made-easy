@@ -1,7 +1,7 @@
 {
   "name": "Monaco Made Easy",
   "short_name": "Monaco Easy",
-  "description": "Get around Monaco and Beausoleil without the climb: step-by-step routes using the free public lifts, escalators and walkways, plus buses, taxis and trains, in 9 languages.",
+  "description": "Get around Monaco, Beausoleil and Cap d’Ail without the climb: step-by-step routes using the free public lifts, escalators and walkways, plus buses, taxis and trains, in 9 languages.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
