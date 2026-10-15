@@ -1,4 +1,4 @@
-// The guide: restaurants, cafés, bars, museums and galleries, yachting and tourist information,
+// The guide: restaurants, cafés, bakeries, bars, supermarkets, museums and galleries, yachting and tourist information,
 // each with the step-free way there. All of it is part of Pro.
 (function () {
   "use strict";
@@ -7,11 +7,11 @@
   function places() { return window.MMEGuidePlaces || []; }
   function lang() { var l = window.MMEI18N.lang(); return l === "en" ? "en-GB" : l === "zh" ? "zh-CN" : l; }
 
-  var CATS = [["eat", "Restaurants"], ["cafe", "Cafés"], ["bar", "Bars"], ["culture", "Museums and galleries"], ["yacht", "Yachting"], ["broker", "Yacht brokers"], ["club", "Clubs"], ["info", "Tourist information"]];
-  var COLOR = { eat: "#9c3d54", cafe: "#7a5230", bar: "#8a2f6b", culture: "#0e7c86", yacht: "#1f4e8c", broker: "#2b6a8f", club: "#7a4f1d", info: "#4a5d70" };
+  var CATS = [["eat", "Restaurants"], ["cafe", "Cafés"], ["bakery", "Bakeries"], ["bar", "Bars"], ["shop", "Supermarkets"], ["culture", "Museums and galleries"], ["yacht", "Yachting"], ["broker", "Yacht brokers"], ["club", "Clubs"], ["info", "Tourist information"]];
+  var COLOR = { bakery: "#a0661a", shop: "#2f7a3d", eat: "#9c3d54", cafe: "#7a5230", bar: "#8a2f6b", culture: "#0e7c86", yacht: "#1f4e8c", broker: "#2b6a8f", club: "#7a4f1d", info: "#4a5d70" };
   var FREE = {};
   var SUB = { museum: "Museum", gallery: "Art gallery", theatre: "Theatre", garden: "Garden", venue: "Exhibitions and events", chandlery: "Chandlery", harbour: "Harbour office", pub: "Pub", nightclub: "Nightclub",
-    motor: "Motor club", yacht: "Yacht club", rowing: "Rowing club", tennis: "Tennis club", sailing: "Sailing club", hiking: "Hiking club" };
+    motor: "Motor club", yacht: "Yacht club", rowing: "Rowing club", tennis: "Tennis club", sailing: "Sailing club", hiking: "Hiking club", convenience: "Mini-market", pastry: "Pâtisserie" };
   var CUISINE = { italian: "Italian", pizza: "Pizza", burger: "Burgers", mediterranean: "Mediterranean", french: "French", japanese: "Japanese", sushi: "Sushi",
     regional: "Local dishes", local: "Local dishes", seafood: "Seafood", fish: "Seafood", international: "International", pasta: "Pasta", steak_house: "Steakhouse", grill: "Grill",
     lebanese: "Lebanese", thai: "Thai", indian: "Indian", mexican: "Mexican", asian: "Asian", chinese: "Chinese", peruvian: "Peruvian", ice_cream: "Ice cream",
@@ -76,6 +76,7 @@
       if (c.length) bits.push(c.join(", "));
     }
     if (e.sub && SUB[e.sub]) bits.push(t(SUB[e.sub]));
+    else if (e.k === "shop") bits.push(t("Supermarket"));
     if (e.k === "broker") bits.push(t("Yacht sales and charter"));
     if (e.addr) bits.push(e.addr);
     bits.push(t(e.a));

@@ -53,9 +53,9 @@
   }
 
   var FEATURES = [
-    ["Eat, drink and see", "Restaurants, cafés, bars, museums and galleries, with opening hours and the step-free way there."],
+    ["Eat, drink and see", "Restaurants, cafés, bakeries, bars, supermarkets, museums and galleries, with opening hours and the step-free way there."],
     ["Yachting", "Chandleries, yacht brokers, clubs and harbour offices around the ports."],
-    ["Step-free walks", "Sightseeing walks that use the lifts, with more added over time."],
+    ["Walks", "Sightseeing walks that use the lifts, and the sea path from Cap d’Ail to Monaco."],
     ["Cruise day", "Set your all-aboard time and we’ll tell you when to head back."],
     ["Use it without mobile data", "Save the map on your phone for when roaming is off."],
     ["Take me home", "Save where you’re staying and get back there from anywhere in one tap."]

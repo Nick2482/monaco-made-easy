@@ -25,6 +25,15 @@
         { name: "Japanese Garden", lat: 43.74237, lng: 7.43101, text: "A free, peaceful Japanese garden with ponds, a waterfall and a tea house." },
         { name: "Grimaldi Forum", lat: 43.74383, lng: 7.43192, text: "Monaco’s congress and exhibition centre, with a big exhibition every summer." },
         { name: "Larvotto Beach", lat: D.places.larvotto.lat, lng: D.places.larvotto.lng, text: "Monaco’s public beach, with a promenade, cafés and restaurants." }
+      ] },
+    { id: "seapath", title: "The sea path from Cap d’Ail", sub: "Our favourite walk: along the water from Mala beach to Monaco’s heliport", coast: true,
+      photos: ["img/seapath-arch.jpg", "img/seapath-coast.jpg"],
+      stops: [
+        { name: "Plage de la Mala", lat: 43.72205, lng: 7.39085, text: "A small cove with clear water, below the villas of Cap d’Ail. There are steps down to the beach and the path. Cap d’Ail station is about 10 minutes’ walk away." },
+        { name: "Pointe des Douaniers", lat: 43.71995, lng: 7.40465, text: "The path follows the rocks round the headland, with the sea right beside you and views back along the coast." },
+        { name: "Plage Marquet", lat: 43.72395, lng: 7.41095, text: "A sandy beach in a sheltered bay, with a beach restaurant." },
+        { name: "Port de Cap d’Ail", lat: 43.72602, lng: 7.41344, text: "Cap d’Ail’s marina, with cafés and restaurants on the quay." },
+        { name: "Monaco Heliport", lat: 43.72634, lng: 7.41755, text: "You’re in Monaco. Fontvieille’s shops and restaurants are a few minutes further on." }
       ] }
   ];
 
@@ -65,12 +74,13 @@
   // ---------- Screens ----------
   function walkCard(w) {
     var esc = ui().esc;
-    return '<li><a class="walk-card" href="#/walk/' + w.id + '"><span class="wk-title">' + esc(t(w.title)) + "</span><span class=\"wk-sub\">" + esc(t(w.sub)) + "</span>" +
+    return '<li><a class="walk-card wk-' + w.id + '" href="#/walk/' + w.id + '"><span class="wk-title">' + esc(t(w.title)) + "</span><span class=\"wk-sub\">" + esc(t(w.sub)) + "</span>" +
+      (w.coast ? '<span class="wk-tag">' + esc(t("Coastal path, with some steps")) + "</span>" : "") +
       '<span class="wk-stops">' + w.stops.map(function (s) { return esc(t(s.name)); }).join(" · ") + "</span></a></li>";
   }
   function walksBlock() {
     var esc = ui().esc;
-    return '<section class="block walks-block"><div class="block-head"><h2>' + esc(t("Step-free walks")) + "</h2>" + (window.MMEPro ? window.MMEPro.badge() : "") + '</div><p class="block-lede">' + esc(t("Sightseeing walks that use the lifts, so you see the best of Monaco without the climb.")) + '</p><ul class="walk-list">' + WALKS.map(walkCard).join("") + "</ul></section>";
+    return '<section class="block walks-block"><div class="block-head"><h2>' + esc(t("Walks")) + "</h2>" + (window.MMEPro ? window.MMEPro.badge() : "") + '</div><p class="block-lede">' + esc(t("Sightseeing walks that use the lifts, so you see the best of Monaco without the climb.")) + '</p><ul class="walk-list">' + WALKS.map(walkCard).join("") + "</ul></section>";
   }
 
   var walkScreen = {
@@ -80,6 +90,7 @@
       if (window.MMEPro && !window.MMEPro.isPro()) return '<section class="plan walk"><a class="back" href="#/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + esc(t("Home")) + "</a><h1>" + esc(t(w.title)) + '</h1><p class="lede-dark">' + esc(t(w.sub)) + "</p>" + window.MMEPro.lockCard("Step-free walks") + "</section>";
       return '<section class="plan walk"><a class="back" href="#/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + esc(t("Home")) + "</a>" +
         "<h1>" + esc(t(w.title)) + '</h1><p class="lede-dark">' + esc(t(w.sub)) + "</p>" +
+        (w.photos ? '<div class="wk-photos">' + w.photos.map(function (p) { return '<img src="' + p + '" alt="" loading="lazy">'; }).join("") + "</div>" : "") +
         (w.id === "rock" ? guardCard() : "") +
         '<div class="map plan-map" id="walk-map"></div><div id="walk-body"><p class="lede-dark" role="status">' + esc(t("Working out the easiest way…")) + "</p></div></section>";
     },
@@ -102,7 +113,8 @@
         function fit() { map.invalidateSize(); if (b.isValid()) map.fitBounds(b.pad(0.08)); }
         fit(); setTimeout(fit, 200);
         var h = factsHtml(s);
-        if (!s.ok) h += '<aside class="note"><p>' + esc(t("We couldn’t find a way between these two places without steps or escalators. A taxi is the easiest option.")) + "</p></aside>";
+        if (w.coast) h += '<aside class="note"><strong>' + esc(t("Good to know")) + "</strong><p>" + esc(t("This path is right by the sea, with uneven ground and some steps, so it isn’t suitable for wheelchairs or pushchairs. It can be closed in rough seas, so check the signs at each end. Wear good shoes and take water.")) + "</p></aside>";
+        if (!s.ok && !w.coast) h += '<aside class="note"><p>' + esc(t("We couldn’t find a way between these two places without steps or escalators. A taxi is the easiest option.")) + "</p></aside>";
         h += '<ol class="walk-stops">' + w.stops.map(function (st, i) {
           var leg = i > 0 ? legs[i - 1] : null;
           var how = leg ? '<details class="wk-how"><summary>' + esc(t("How to get there: {n} min", { n: leg.minutes })) + "</summary><ol class=\"steps\">" + leg.directions.map(function (d) {
