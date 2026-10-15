@@ -588,10 +588,15 @@ html.cjk .know h2 { font-family: "PingFang SC", "Hiragino Mincho ProN", "Noto Se
 .walk-list li:nth-child(2) .walk-card { background: linear-gradient(180deg, rgba(10, 31, 60, 0.55), rgba(10, 31, 60, 0.95)), url(img/harbour-hero.jpg) right 20% / cover; }
 .wk-title { font-family: var(--serif); font-size: 26px; line-height: 1.1; }
 .wk-sub { color: #dbe5f0; font-size: 15.5px; }
-.walk-list .walk-card.wk-seapath { background: linear-gradient(180deg, rgba(10, 31, 60, 0.35), rgba(10, 31, 60, 0.92)), url(img/seapath-coast.jpg) center 40% / cover; }
-.wk-photos { display: grid; grid-template-columns: 3fr 5fr; gap: 8px; margin: 4px 0 16px; }
+.walk-list li .walk-card.wk-seapath { background: linear-gradient(180deg, rgba(10, 31, 60, 0.35), rgba(10, 31, 60, 0.92)), url(img/seapath-coast.jpg) center 40% / cover; }
+.wk-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 4px 0 16px; }
+.wk-photos.wk-p1 { grid-template-columns: 1fr; }
+.wk-photos.wk-p1 img { height: 210px; }
+.wk-photos.wk-portrait { grid-template-columns: 3fr 5fr; }
+.walk-list li .walk-card.wk-rock { background: linear-gradient(180deg, rgba(10, 31, 60, 0.3), rgba(10, 31, 60, 0.92)), url(img/rock-museum.jpg) center 30% / cover; }
+.walk-list li .walk-card.wk-montecarlo { background: linear-gradient(180deg, rgba(10, 31, 60, 0.35), rgba(10, 31, 60, 0.92)), url(img/mc-garden-pond.jpg) center 45% / cover; }
 .wk-photos img { width: 100%; height: 230px; object-fit: cover; border-radius: 14px; display: block; }
-.wk-photos img:first-child { object-position: center 40%; }
+.wk-portrait img:first-child { object-position: center 40%; }
 .wk-tag { display: inline-block; width: fit-content; margin-top: 6px; padding: 2px 9px; border-radius: 999px; background: rgba(255,255,255,.14); color: #fff; font-size: 13.5px; font-weight: 600; }
 .wk-stops { margin-top: 6px; font-size: 13.5px; font-weight: 700; color: var(--riva); }
 .walk { padding: 14px 16px 24px; }
@@ -715,3 +720,4 @@ h1 .pro-badge { margin-left: 4px; font-size: 14px; }
 .wx-tip { grid-column: 1 / -1; margin: 10px 0 0; padding-top: 9px; border-top: 1px solid rgba(255, 255, 255, 0.18); font-size: 15px; }
 .wx-credit { grid-column: 1 / -1; margin: 6px 0 0; color: #b9c7d8; font-size: 12.5px; }
 .wx-credit a { color: inherit; }
+.wk-photos img[src$="mc-casino.jpg"] { object-position: 12% center; }
