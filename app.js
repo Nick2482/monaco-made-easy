@@ -153,7 +153,7 @@
     var pf = placeFilter ? D.places[placeFilter] : null;
     return '<section class="hero">' +
       '<a class="preview" href="mailto:hello@monacomadeeasy.com?subject=' + encodeURIComponent("Monaco Made Easy feedback") + '">' + esc(t("Spotted something wrong? Tell us")) + "</a>" +
-      "<h1>" + esc(t("Monaco, without the climb.")) + "</h1>" +
+      "<h1>" + esc(t("Monaco, without the climb.")) + "</h1>" + (window.MMEWeather ? window.MMEWeather.strip() : "") +
       (X ? X.eventBanner() + X.cruiseCard() + X.homeCard() : "") + (window.MMEWalks ? window.MMEWalks.guardCard() : "") +
       '<a class="arrive-btn" href="#/arrive"><span><strong>' + esc(t("Just arrived?")) + "</strong><small>" + esc(t("The easiest way to where you’re staying, with your bags")) + '</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.6 5.4 10 4l8 8-8 8-1.4-1.4 6.6-6.6z"/></svg></a>' +
       '<p class="lede">' + esc(t("Around 80 free public lifts, 37 escalators and 8 moving walkways link Monaco, Beausoleil and Cap d’Ail. We show you how to use them.")) + "</p>" + (X ? X.knowLink() + essQuick() : "") +
@@ -256,7 +256,7 @@
     document.body.classList.toggle("is-map", tab === "map" || tab === "guide");
     if (screen) screen.mount(main.firstElementChild);
     if (window.MMEInstall) window.MMEInstall.mount(main);
-    if (!parts[0]) { window.MMEPlanner.mountBox(main); if (X) X.mountHome(main); }
+    if (!parts[0]) { if (window.MMEWeather) window.MMEWeather.mount(main); window.MMEPlanner.mountBox(main); if (X) X.mountHome(main); }
     else if (parts[0] === "info" && X) X.mountOffline(main);
     document.querySelectorAll(".tabs a").forEach(function (a) {
       if (a.dataset.tab === tab) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");

@@ -702,3 +702,16 @@ h1 .pro-badge { margin-left: 4px; font-size: 14px; }
 .install-card .ic-x { position: absolute; top: 6px; right: 6px; width: 40px; height: 40px; border: 0; background: transparent; color: var(--navy); font-size: 26px; cursor: pointer; }
 @media (min-width: 700px) { .install-card { margin-left: auto; margin-right: auto; max-width: var(--col); } .page .install-card { max-width: none; } }
 .install-card [hidden] { display: none !important; }
+
+/* ---------- v38: today's weather on the home screen (forecast: MET Norway) ---------- */
+.wx { display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 12px; margin-top: 14px; padding: 12px 14px; border-radius: 16px; background: rgba(10, 31, 60, 0.55); border: 1px solid rgba(255, 255, 255, 0.22); color: #fff; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.wx[hidden] { display: none; }
+.wx-ico svg { width: 40px; height: 40px; display: block; fill: #dbe5f0; }
+.wx-ico.wx-clear svg, .wx-ico.wx-partly svg { fill: #ffc94d; }
+.wx-main { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 8px; row-gap: 2px; min-width: 0; }
+.wx-temp { font-size: 30px; line-height: 1; font-weight: 700; }
+.wx-what { font-weight: 700; font-size: 16.5px; }
+.wx-more { flex-basis: 100%; color: #dbe5f0; font-size: 14.5px; }
+.wx-tip { grid-column: 1 / -1; margin: 10px 0 0; padding-top: 9px; border-top: 1px solid rgba(255, 255, 255, 0.18); font-size: 15px; }
+.wx-credit { grid-column: 1 / -1; margin: 6px 0 0; color: #b9c7d8; font-size: 12.5px; }
+.wx-credit a { color: inherit; }
