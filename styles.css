@@ -721,3 +721,18 @@ h1 .pro-badge { margin-left: 4px; font-size: 14px; }
 .wx-credit { grid-column: 1 / -1; margin: 6px 0 0; color: #b9c7d8; font-size: 12.5px; }
 .wx-credit a { color: inherit; }
 .wk-photos img[src$="mc-casino.jpg"] { object-position: 12% center; }
+
+/* ---------- v41: Share the app ---------- */
+.share-card { display: grid; grid-template-columns: 44px 1fr; gap: 14px; margin: 18px 16px 0; padding: 16px; border-radius: 16px; background: #fff4e6; border: 1px solid #f3d9b5; color: var(--navy); }
+.page .share-card { margin: 12px 0 0; }
+.share-card .ic-ico { width: 44px; height: 44px; border-radius: 12px; background: #c25e12; display: grid; place-items: center; }
+.share-card .ic-ico svg { width: 22px; height: 22px; fill: #fff; }
+.share-card strong { font-size: 18px; display: block; }
+.share-card p { margin-top: 4px; font-size: 16px; color: #2d3a47; }
+.share-card .btn { margin-top: 10px; cursor: pointer; font-family: inherit; }
+.share-card .sh-go { border: 0; }
+.share-card .sh-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.share-card .sh-opts[hidden] { display: none; }
+.share-card .sh-opts .btn { margin-top: 10px; padding: 9px 14px; font-size: 15px; }
+@media (min-width: 700px) { .share-card { margin-left: auto; margin-right: auto; max-width: var(--col); } .page .share-card { max-width: none; } }
+.share-card .sh-copy { background: transparent; }

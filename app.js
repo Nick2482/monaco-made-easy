@@ -162,6 +162,7 @@
       (window.MMEInstall ? window.MMEInstall.card("home") : "") +
       (window.MMEGuide ? guideBlock() : "") +
       (window.MMEWalks ? window.MMEWalks.walksBlock() : "") +
+      (window.MMEInstall ? window.MMEInstall.shareCard() : "") +
       '<section class="block" id="routes" aria-labelledby="routes-h">' +
       '<div class="block-head"><h2 id="routes-h">' + esc(pf ? t("Routes for {place}", { place: placeShort(pf) }) : t("Popular routes")) + "</h2>" +
       (pf ? '<button type="button" class="link-btn" data-clear>' + esc(t("Show all")) + "</button>" : "") + "</div>" +
@@ -206,7 +207,7 @@
     ];
     return '<section class="page"><h1>' + esc(t("Good to know")) + "</h1>" + (X ? X.knowCard() + X.offlineCard() : "") +
       '<a class="pro-link" href="#/pro">' + (window.MMEPro ? window.MMEPro.badge() : "") + "<span><strong>" + esc(t("Monaco Made Easy Pro")) + "</strong><small>" + esc(t("What’s included, and how to get it")) + "</small></span></a>" +
-      (window.MMEInstall ? window.MMEInstall.card("info") : "") +
+      (window.MMEInstall ? window.MMEInstall.card("info") + window.MMEInstall.shareCard() : "") +
       '<p class="play-soon">' + esc(t("Coming soon to Google Play. You can already add this app to your home screen: in your browser’s menu, choose “Add to Home Screen”.")) + "</p>" + '<dl class="info">' + items.map(function (i) {
       return "<div><dt>" + esc(i[0]) + "</dt><dd>" + esc(i[1]) + "</dd></div>";
     }).join("") + "</dl>" + (X ? X.eventsInfo() : "") + '<p class="unchecked">' + esc(t("This is a preview. Details are gathered from published sources and are being checked on the ground before launch.")) + "</p>" +

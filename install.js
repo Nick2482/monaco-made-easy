@@ -69,5 +69,36 @@
     });
   }
 
-  window.MMEInstall = { card: card, mount: mount, installed: installed };
+  // "Share the app": the phone's own share sheet where there is one, otherwise WhatsApp, email or copy the link.
+  var SHARE_URL = "https://www.monacomadeeasy.com/";
+  var SHARE_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 16.1a2.9 2.9 0 0 0-2 .8l-7.1-4.1a3 3 0 0 0 0-1.6L16 7.1A3 3 0 1 0 15 5a3 3 0 0 0 .1.8L8 9.9a3 3 0 1 0 0 4.2l7.1 4.2a2.8 2.8 0 0 0-.1.7 3 3 0 1 0 3-2.9z"/></svg>';
+  function shareText() { return t("Monaco Made Easy: the easy way round Monaco, using the free public lifts and escalators."); }
+  function shareCard() {
+    return '<aside class="share-card"><span class="ic-ico">' + SHARE_ICON + "</span><div><strong>" + esc(t("Travelling with others?")) + "</strong>" +
+      "<p>" + esc(t("Send them the app, so everyone can find the lifts.")) + "</p>" +
+      '<button type="button" class="btn btn-navy sh-go">' + esc(t("Share the app")) + "</button>" +
+      '<div class="sh-opts" hidden><a class="btn btn-line" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(shareText() + " " + SHARE_URL) + '">WhatsApp</a>' +
+      '<a class="btn btn-line" href="mailto:?subject=' + encodeURIComponent("Monaco Made Easy") + "&body=" + encodeURIComponent(shareText() + "\n\n" + SHARE_URL) + '">' + esc(t("Email")) + "</a>" +
+      '<button type="button" class="btn btn-line sh-copy">' + esc(t("Copy link")) + "</button></div></div></aside>";
+  }
+  function mountShare(root) {
+    root.querySelectorAll(".share-card").forEach(function (c) {
+      var go = c.querySelector(".sh-go"), opts = c.querySelector(".sh-opts");
+      go.addEventListener("click", function () {
+        if (window.MMEStats) window.MMEStats.track("Share tapped");
+        if (navigator.share) {
+          navigator.share({ title: "Monaco Made Easy", text: shareText(), url: SHARE_URL }).catch(function () {});
+        } else { opts.hidden = !opts.hidden; }
+      });
+      c.querySelector(".sh-copy").addEventListener("click", function (e) {
+        var b = e.currentTarget;
+        function done() { b.textContent = t("Link copied"); }
+        if (navigator.clipboard) navigator.clipboard.writeText(SHARE_URL).then(done, function () {}); else done();
+      });
+    });
+  }
+  var mount0 = mount;
+  mount = function (root) { mount0(root); mountShare(root); };
+
+  window.MMEInstall = { card: card, mount: mount, installed: installed, shareCard: shareCard };
 })();
