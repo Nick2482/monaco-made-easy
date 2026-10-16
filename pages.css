@@ -30,3 +30,8 @@ body { padding-bottom: 0; background: #fff; }
 .gp-more .gp-langs { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 15px; }
 .gp-more .gp-langs a { display: inline; padding: 0; border: 0; }
 .gp-more .gp-langs a[aria-current] { color: var(--grey); text-decoration: none; }
+/* Wider screens: keep the photos in the same column as the text, instead of edge to edge. */
+@media (min-width: 700px) {
+  .gp-hero { max-width: 680px; margin: 22px auto 0; padding: 0 16px; }
+  .gp-hero img, .gp-hero.gp-two img { height: 360px; border-radius: 16px; }
+}
