@@ -27,3 +27,6 @@ body { padding-bottom: 0; background: #fff; }
 .gp-more a { display: block; padding: 13px 16px; border-radius: 12px; border: 1px solid var(--line); color: var(--navy); font-weight: 700; text-decoration: none; }
 .gp-more .gp-legal { margin-top: 22px; font-size: 15px; color: var(--grey); }
 .gp-more .gp-legal a { display: inline; padding: 0; border: 0; margin-right: 14px; }
+.gp-more .gp-langs { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 15px; }
+.gp-more .gp-langs a { display: inline; padding: 0; border: 0; }
+.gp-more .gp-langs a[aria-current] { color: var(--grey); text-decoration: none; }

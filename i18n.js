@@ -17,6 +17,9 @@
   var lang = "en";
 
   function pick() {
+    // Arriving from a guide page in another language (?lang=fr): use that language and remember it.
+    var m = /[?&]lang=([a-z]{2})\b/.exec(location.search);
+    if (m && LANGS.some(function (l) { return l.code === m[1]; })) { try { localStorage.setItem("mme-lang", m[1]); } catch (e) {} return m[1]; }
     var saved = null;
     try { saved = localStorage.getItem("mme-lang"); } catch (e) {}
     if (saved && LANGS.some(function (l) { return l.code === saved; })) return saved;
