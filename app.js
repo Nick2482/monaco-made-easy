@@ -162,6 +162,7 @@
       (window.MMEInstall ? window.MMEInstall.card("home") : "") +
       (window.MMEGuide ? guideBlock() : "") +
       (window.MMEWalks ? window.MMEWalks.walksBlock() : "") +
+      guidesBlock(" block") +
       (window.MMEInstall ? window.MMEInstall.shareCard() : "") +
       '<section class="block" id="routes" aria-labelledby="routes-h">' +
       '<div class="block-head"><h2 id="routes-h">' + esc(pf ? t("Routes for {place}", { place: placeShort(pf) }) : t("Popular routes")) + "</h2>" +
@@ -192,6 +193,14 @@
     }).join("") + "</nav>";
   }
 
+  // Links to the visitor guide pages, in the visitor's language.
+  function guidesBlock(cls) {
+    var L = window.MMEI18N.lang(), G = window.MMEGuideTitles && window.MMEGuideTitles[L];
+    return '<section class="gp-links' + cls + '"><h2>' + esc(t("Guides for visitors")) + '</h2><ul>' + [["monaco-public-lifts.html", "Monaco’s free public lifts and escalators"], ["step-free-monaco.html", "Step-free Monaco: wheelchairs and pushchairs"], ["monaco-train-station.html", "Monaco Monte-Carlo station: which exit?"], ["cap-dail-sea-path.html", "The sea path from Cap d’Ail to Monaco"], ["beausoleil.html", "Getting around Beausoleil"]].map(function (g) {
+      return '<li><a href="' + (L === "en" ? "" : L + "/") + g[0] + '">' + esc(G ? G[g[0]] : g[1]) + "</a></li>";
+    }).join("") + "</ul></section>";
+  }
+
   function infoPage() {
     var items = [
       [t("Free to use"), t("Every public lift, escalator and moving walkway in Monaco is free.")],
@@ -211,10 +220,7 @@
       '<p class="play-soon">' + esc(t("Coming soon to Google Play. You can already add this app to your home screen: in your browser’s menu, choose “Add to Home Screen”.")) + "</p>" + '<dl class="info">' + items.map(function (i) {
       return "<div><dt>" + esc(i[0]) + "</dt><dd>" + esc(i[1]) + "</dd></div>";
     }).join("") + "</dl>" + (X ? X.eventsInfo() : "") +
-      '<section class="gp-links"><h2>' + esc(t("Guides for visitors")) + '</h2><ul>' + [["monaco-public-lifts.html", "Monaco’s free public lifts and escalators"], ["step-free-monaco.html", "Step-free Monaco: wheelchairs and pushchairs"], ["monaco-train-station.html", "Monaco Monte-Carlo station: which exit?"], ["cap-dail-sea-path.html", "The sea path from Cap d’Ail to Monaco"], ["beausoleil.html", "Getting around Beausoleil"]].map(function (g) {
-        var L = window.MMEI18N.lang(), G = window.MMEGuideTitles && window.MMEGuideTitles[L];
-        return '<li><a href="' + (L === "en" ? "" : L + "/") + g[0] + '">' + esc(G ? G[g[0]] : g[1]) + "</a></li>";
-      }).join("") + "</ul></section>" + '<p class="unchecked">' + esc(t("This is a preview. Details are gathered from published sources and are being checked on the ground before launch.")) + "</p>" +
+      guidesBlock("") + '<p class="unchecked">' + esc(t("This is a preview. Details are gathered from published sources and are being checked on the ground before launch.")) + "</p>" +
       '<p class="legal-links"><a href="mailto:hello@monacomadeeasy.com?subject=Monaco%20Made%20Easy">' + esc(t("Report a problem with the app")) + '</a><a href="privacy.html">' + esc(t("Privacy policy")) + '</a><a href="terms.html">' + esc(t("Terms of sale")) + "</a></p></section>";
   }
 
