@@ -60,6 +60,7 @@
     if (k === "partly" && night) k = "clearnight";
     var s = { temp: cur.temp, kind: k, hi: Math.max.apply(null, temps), lo: Math.min.apply(null, temps), pop: Math.max.apply(null, pops), wind: cur.wind,
       gust: Math.max.apply(null, next.map(function (h) { return h.gust || h.wind || 0; })), wetNow: /rain|showers|thunder|sleet/.test(kind(cur.sym) || ""), wetLater: wet.length > 0,
+      popKnown: next.some(function (h) { return h.pop != null; }),
       thunder: next.some(function (h) { return /thunder/.test(h.sym || ""); }) };
     // One tip, the most useful first.
     if (s.thunder) s.tip = t("Storms forecast. Indoor places in the Guide are a good plan, and the sea path may be closed.");
@@ -79,7 +80,7 @@
     el.innerHTML = '<span class="wx-ico wx-' + s.kind + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + (ICON[s.kind] || ICON.partly) + "</svg></span>" +
       '<div class="wx-main"><strong class="wx-temp">' + s.temp + "°</strong>" +
       '<span class="wx-what">' + esc(t(LABEL[s.kind] || "Partly cloudy")) + "</span>" +
-      '<span class="wx-more">' + esc(t("High {hi}°, low {lo}°", { hi: s.hi, lo: s.lo })) + " · " + esc(t("Rain {n}%", { n: s.pop })) + " · " + esc(t("Wind {n} km/h", { n: s.wind })) + "</span></div>" +
+      '<span class="wx-more">' + esc(t("High {hi}°, low {lo}°", { hi: s.hi, lo: s.lo })) + (s.popKnown ? " · " + esc(t("Rain {n}%", { n: s.pop })) : "") + " · " + esc(t("Wind {n} km/h", { n: s.wind })) + "</span></div>" +
       (s.tip ? '<p class="wx-tip">' + esc(s.tip) + "</p>" : "") +
       '<p class="wx-credit">' + (stale ? esc(t("Saved forecast from {time}", { time: hhmm(new Date(d.got)) })) + " · " : "") +
       esc(t("Monaco weather")) + ' · <a href="https://www.yr.no/en" target="_blank" rel="noopener">' + esc(t("Forecast: MET Norway")) + "</a></p>";
