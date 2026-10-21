@@ -241,7 +241,19 @@
             : "<li><strong>" + esc(t(r.lifts === 1 ? "1 lift" : "{n} lifts", { n: r.lifts })) + "</strong><span>" + esc(r.escalators ? t(r.escalators === 1 ? "and 1 escalator" : "and {n} escalators", { n: r.escalators }) : t("on the way")) + "</span></li>";
           h += '<ul class="facts"><li><strong>' + esc(t("{n} min", { n: r.minutes })) + "</strong><span>" + esc(t("{d} on foot", { d: r.metres >= 1000 ? (r.metres / 1000).toFixed(1) + " km" : r.metres + " m" })) + "</span></li>" +
             "<li><strong>" + esc(r.stepFree ? t("No steps") : t(r.steps === 1 ? "1 set of steps" : "{n} sets of steps", { n: r.steps })) + "</strong><span>" + esc(r.stepFree ? (wc ? t("no escalators") : r.escalators ? t("but uses escalators") : t("step-free")) : t("on this route")) + "</span></li>" + vert + "</ul>";
-          if (wc) h += '<aside class="note note-wc"><strong>' + esc(t("Wheelchair or pushchair")) + "</strong><p>" + esc(t("Some of Monaco’s streets are steep even without steps. Lift access comes from OpenStreetMap and is being checked on the ground.")) + "</p></aside>";
+          if (wc) {
+            // Say what the wheelchair setting changed compared with the usual route.
+            var usual = isStation ? null : R.route(from, to, { avoidSteps: true, blocked: blocked });
+            var diff = "";
+            if (usual) {
+              if (usual.steps && usual.escalators) diff = t("Compared with the usual route, this one avoids {s} sets of steps and {e} escalators.", { s: usual.steps, e: usual.escalators });
+              else if (usual.escalators) diff = t(usual.escalators === 1 ? "Compared with the usual route, this one avoids an escalator." : "Compared with the usual route, this one avoids {e} escalators.", { e: usual.escalators });
+              else if (usual.steps) diff = t(usual.steps === 1 ? "Compared with the usual route, this one avoids a set of steps." : "Compared with the usual route, this one avoids {s} sets of steps.", { s: usual.steps });
+              else if (Math.abs(usual.metres - r.metres) > 30) diff = t("This route keeps to gentler slopes and lifts than the usual one.");
+              else diff = t("The usual route here is already step-free with no escalators, so it’s the same.");
+            }
+            h += '<aside class="note note-wc"><strong>' + esc(t("Wheelchair or pushchair")) + "</strong><p>" + (diff ? esc(diff) + " " : "") + esc(t("Some of Monaco’s streets are steep even without steps. Lift access comes from OpenStreetMap and is being checked on the ground.")) + "</p></aside>";
+          }
           if (other && Math.abs(other.minutes - r.minutes) >= 3 && other.steps !== r.steps) {
             h += avoidSteps
               ? '<button type="button" class="alt-btn" data-mode="steps">' + esc(t(other.steps === 1 ? "Happy with steps? There’s a quicker way: {m} min with 1 set of steps" : "Happy with steps? There’s a quicker way: {m} min with {n} sets of steps", { m: other.minutes, n: other.steps })) + "</button>"

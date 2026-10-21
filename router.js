@@ -48,6 +48,14 @@
     return best < 0 ? null : { node: best, d: metres(p.lat, p.lng, lat[best], lng[best]) };
   }
 
+  // Every network point within r metres of p.
+  function nearby(p, r) {
+    var gy = Math.floor(p.lat / CELL), gx = Math.floor(p.lng / CELL), out = [];
+    for (var y = gy - 2; y <= gy + 2; y++) for (var x = gx - 2; x <= gx + 2; x++)
+      (grid[y + ":" + x] || []).forEach(function (n) { if (metres(p.lat, p.lng, lat[n], lng[n]) <= r) out.push(n); });
+    return out;
+  }
+
   // ---------- Heights: free terrain tiles (AWS Terrain Tiles, Terrarium format) ----------
   // Each pixel stores height above sea level. Loaded once, then kept offline by the service worker.
   var height = null;
@@ -138,13 +146,22 @@
     dist[s.node] = 0;
     // Binary heap of [cost, node]
     var heap = [[0, s.node]];
+    // Wheelchair or pushchair: the closest point may be on a stairway, so also start from any point within 100 m (the walk there counts).
+    // Never "start" across a cliff: the extra points must be at about the same height as the closest one.
+    function sameLevel(a, b) { return !height || !isFinite(height[a]) || !isFinite(height[b]) || Math.abs(height[a] - height[b]) < 6; }
+    nearby(from, opts.wheelchair ? 50 : 35).forEach(function (n) {
+      if (liftAt[n] || n === s.node || !sameLevel(n, s.node)) return;
+      var c0 = metres(from.lat, from.lng, lat[n], lng[n]) * 3;
+      if (c0 < dist[n]) { dist[n] = c0; heap.push([c0, n]); }
+    });
+    heap.sort(function (a, b) { return a[0] - b[0]; });
     function push(item) { heap.push(item); var c = heap.length - 1; while (c > 0) { var p = (c - 1) >> 1; if (heap[p][0] <= heap[c][0]) break; var tmp = heap[p]; heap[p] = heap[c]; heap[c] = tmp; c = p; } }
     function pop() { var top = heap[0], last = heap.pop(); if (heap.length) { heap[0] = last; var c = 0; for (;;) { var l = 2 * c + 1, r = l + 1, m = c; if (l < heap.length && heap[l][0] < heap[m][0]) m = l; if (r < heap.length && heap[r][0] < heap[m][0]) m = r; if (m === c) break; var tmp = heap[m]; heap[m] = heap[c]; heap[c] = tmp; c = m; } } return top; }
     while (heap.length) {
       var cur = pop(), u = cur[1];
       if (seen[u]) continue;
       seen[u] = 1;
-      if (u === g.node) break;
+      if (u === g.node && !opts.wheelchair) break;
       var list = adj[u];
       for (var j = 0; j < list.length; j++) {
         var k = list[j], fwd = k >= 0, e = G.e[fwd ? k : -k - 1];
@@ -155,19 +172,32 @@
         if (opts.wheelchair && (e[3] === 2 || e[3] === 3 || (liftAt[v] && liftAt[v].wheelchair === "no"))) continue;
         var c = legCost(e, fwd, avoid).cost + (liftAt[v] ? LIFT_WAIT : 0);
         // Climbing on foot (not by lift or escalator) costs about 10 seconds a metre for an easy walker.
-        if (e[3] !== 3 && e[3] !== 4) { var up = climb(u, v); if (up > 0) c += up * (avoid ? 12 : 7); }
+        if (e[3] !== 3 && e[3] !== 4) {
+          var up = climb(u, v);
+          if (up > 0) c += up * (avoid ? 12 : 7);
+          // Wheelchair or pushchair: steep streets are the real obstacle, uphill and downhill. Keep to the gentle ones and the lifts.
+          if (opts.wheelchair && e[2] > 0) { var grade = Math.abs(up) / e[2]; if (up > 0) c += up * 25; if (grade > 0.05) c += e[2] * (grade - 0.05) * 400; }
+        }
         if (dist[u] + c < dist[v]) { dist[v] = dist[u] + c; prev[v] = k >= 0 ? k + 1 : k; push([dist[v], v]); }
       }
+    }
+    // Wheelchair or pushchair: if the closest point can only be reached by steps, end at the nearest point that can be reached
+    // without them (the last few metres are shown as a dotted line).
+    if (opts.wheelchair && !isFinite(dist[g.node])) {
+      var bestN = -1, bestC = Infinity;
+      nearby(to, 60).forEach(function (n) { if (!liftAt[n] && isFinite(dist[n]) && sameLevel(n, g.node)) { var cc = dist[n] + metres(to.lat, to.lng, lat[n], lng[n]) * 3; if (cc < bestC) { bestC = cc; bestN = n; } } });
+      if (bestN >= 0) g = { node: bestN, d: metres(to.lat, to.lng, lat[bestN], lng[bestN]) };
     }
     if (!isFinite(dist[g.node])) return null;
     // Walk back from the end.
     var legs = [], n = g.node;
-    while (n !== s.node) {
+    while (prev[n] !== 0) {
       var pk = prev[n], fw = pk > 0, ed = G.e[fw ? pk - 1 : -pk - 1];
       legs.push({ e: ed, fwd: fw, to: n, from: fw ? ed[0] : ed[1] });
       n = fw ? ed[0] : ed[1];
     }
     legs.reverse();
+    if (n !== s.node) s = { node: n, d: metres(from.lat, from.lng, lat[n], lng[n]) };   // started from a nearby point instead
     var out = describe(legs, s, g, from, to);
     // Street names used, e.g. to warn when a route crosses the Grand Prix circuit.
     var used = {};
