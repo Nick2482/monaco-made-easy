@@ -8,6 +8,9 @@
   function lang() { var l = window.MMEI18N.lang(); return l === "en" ? "en-GB" : l === "zh" ? "zh-CN" : l; }
 
   var CATS = [["eat", "Restaurants"], ["cafe", "Cafés"], ["bakery", "Bakeries"], ["bar", "Bars"], ["shop", "Supermarkets and markets"], ["tabac", "Cigars and tabacs"], ["culture", "Museums and galleries"], ["yacht", "Yachting"], ["broker", "Yacht brokers"], ["club", "Clubs"], ["info", "Tourist information"]];
+  // Sections inside Restaurants.
+  var GRPS = [["fine", "Michelin and fine dining"], ["french", "French and brasseries"], ["italian", "Italian and pizza"], ["seafood", "Seafood and Mediterranean"],
+    ["asian", "Asian"], ["local", "Monégasque and Niçois"], ["world", "World food"], ["beach", "Beach and sea view"], ["quick", "Burgers and quick bites"]];
   var COLOR = { bakery: "#a0661a", shop: "#2f7a3d", tabac: "#6b4a2e", eat: "#9c3d54", cafe: "#7a5230", bar: "#8a2f6b", culture: "#0e7c86", yacht: "#1f4e8c", broker: "#2b6a8f", club: "#7a4f1d", info: "#4a5d70" };
   var FREE = {};
   var SUB = { museum: "Museum", gallery: "Art gallery", theatre: "Theatre", garden: "Garden", venue: "Exhibitions and events", chandlery: "Chandlery", harbour: "Harbour office", pub: "Pub", nightclub: "Nightclub",
@@ -16,7 +19,7 @@
   var CUISINE = { italian: "Italian", pizza: "Pizza", burger: "Burgers", mediterranean: "Mediterranean", french: "French", japanese: "Japanese", sushi: "Sushi",
     regional: "Local dishes", local: "Local dishes", seafood: "Seafood", fish: "Seafood", international: "International", pasta: "Pasta", steak_house: "Steakhouse", grill: "Grill",
     lebanese: "Lebanese", thai: "Thai", indian: "Indian", mexican: "Mexican", asian: "Asian", chinese: "Chinese", peruvian: "Peruvian", ice_cream: "Ice cream",
-    coffee_shop: "Coffee", sandwich: "Sandwiches", salad: "Salads", british: "British", belgian: "Belgian", italian_pizza: "Pizza", roman: "Italian", venezuelan: "Venezuelan" };
+    coffee_shop: "Coffee", sandwich: "Sandwiches", salad: "Salads", british: "British", belgian: "Belgian", italian_pizza: "Pizza", roman: "Italian", venezuelan: "Venezuelan", argentinian: "Argentinian", vegan: "Vegan", crepe: "Crêpes", vietnamese: "Vietnamese" };
 
   // ---------- Opening hours (OpenStreetMap format) ----------
   var DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
@@ -76,6 +79,7 @@
       c = c.filter(function (x, i) { return c.indexOf(x) === i; }).slice(0, 2).map(function (x) { return t(x); });
       if (c.length) bits.push(c.join(", "));
     }
+    if (!bits.length && e.grp) { var g0 = GRPS.filter(function (g) { return g[0] === e.grp[e.grp[0] === "fine" && e.grp[1] ? 1 : 0]; })[0]; if (g0 && g0[0] !== "fine") bits.push(t(g0[1])); }
     if (e.sub && SUB[e.sub]) bits.push(t(SUB[e.sub]));
     else if (e.k === "shop") bits.push(t("Supermarket"));
     else if (e.k === "tabac" && e.n !== "Tabac") bits.push(t("Tabac"));
@@ -94,7 +98,8 @@
     var esc = ui().esc, open = e.hx ? null : openNow(e.h), hrs = hoursLine(e);
     var webUrl = e.w && /^https?:\/\//.test(e.w) ? e.w : e.w ? "https://" + e.w : "";
     return '<li class="g-item"><span class="step-ico" style="--c:' + COLOR[e.k] + '">' + ui().icon(e.k) + "</span><div>" +
-      "<strong>" + esc(t(e.n)) + (e.pick ? ' <b class="g-pick">★ ' + esc(t("Our pick")) + "</b>" : "") + "</strong><span>" + esc(subtitle(e)) + "</span>" +
+      "<strong>" + esc(t(e.n)) + (e.pick ? ' <b class="g-pick">★ ' + esc(t("Our pick")) + "</b>" : "") +
+        (e.mich ? ' <b class="g-mich" title="' + esc(t(e.mich === 1 ? "1 Michelin star" : "{n} Michelin stars", { n: e.mich })) + '">' + new Array(e.mich + 1).join("★") + " Michelin</b>" : "") + "</strong><span>" + esc(subtitle(e)) + "</span>" +
       (e.d ? '<p class="g-desc">' + esc(t(e.d)) + "</p>" : "") +
       (hrs || open !== null ? '<span class="g-hours">' + (open === true ? '<b class="g-open">' + esc(t("Open now")) + "</b> " : open === false ? '<b class="g-shut">' + esc(t("Closed now")) + "</b> " : "") + esc(hrs) + "</span>" : "") +
       (e.wc === "yes" ? '<span class="g-wc">' + esc(t("Wheelchair accessible")) + "</span>" : "") +
@@ -105,18 +110,23 @@
   }
 
   function currentCat() { var c = (location.hash.split("/")[2] || "").split("?")[0]; return COLOR[c] ? c : "eat"; }
+  function currentGrp(cat) { var g = (location.hash.split("/")[3] || "").split("?")[0]; return cat === "eat" && GRPS.some(function (x) { return x[0] === g; }) ? g : ""; }
+  function inCat(e, cat, grp) { return e.k === cat && (!grp || (e.grp || []).indexOf(grp) >= 0); }
 
   var screen = {
     html: function () {
-      var esc = ui().esc, cat = currentCat(), P = window.MMEPro, locked = !FREE[cat] && P && !P.isPro();
-      var all = places().filter(function (e) { return e.k === cat; });
+      var esc = ui().esc, cat = currentCat(), grp = currentGrp(cat), P = window.MMEPro, locked = !FREE[cat] && P && !P.isPro();
+      var all = places().filter(function (e) { return inCat(e, cat, grp); });
       return '<section class="mapscreen guide g-' + cat + '">' +
         '<div class="map-wrap"><div id="g-map" class="map" role="application" aria-label="' + esc(t("Map")) + '"></div>' +
         '<button type="button" class="find-me" id="g-find"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-1-7h2v3.06A8 8 0 0 1 19.94 11H23v2h-3.06A8 8 0 0 1 13 19.94V23h-2v-3.06A8 8 0 0 1 4.06 13H1v-2h3.06A8 8 0 0 1 11 4.06zm1 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>' + esc(t("Find the nearest")) + "</button></div>" +
         '<div class="near"><div class="ess-chips" role="group" aria-label="' + esc(t("Guide")) + '">' + CATS.map(function (c) {
           return '<a class="chip' + (c[0] === cat ? " on" : "") + '" href="#/guide/' + c[0] + '"' + (c[0] === cat ? ' aria-current="true"' : "") + ">" + esc(t(c[1])) + "</a>";
         }).join("") + "</div>" +
-        "<h1>" + esc(t(CATS.filter(function (c) { return c[0] === cat; })[0][1])) + (FREE[cat] ? "" : " " + (P ? P.badge() : "")) + "</h1>" +
+        (cat === "eat" ? '<div class="ess-chips g-grps" role="group" aria-label="' + esc(t("Restaurants")) + '"><a class="chip' + (!grp ? " on" : "") + '" href="#/guide/eat"' + (!grp ? ' aria-current="true"' : "") + ">" + esc(t("All")) + "</a>" +
+          GRPS.map(function (g) { return '<a class="chip' + (g[0] === grp ? " on" : "") + '" href="#/guide/eat/' + g[0] + '"' + (g[0] === grp ? ' aria-current="true"' : "") + ">" + esc(t(g[1])) + "</a>"; }).join("") + "</div>" : "") +
+        "<h1>" + esc(t(grp ? GRPS.filter(function (g) { return g[0] === grp; })[0][1] : CATS.filter(function (c) { return c[0] === cat; })[0][1])) + (FREE[cat] ? "" : " " + (P ? P.badge() : "")) + "</h1>" +
+        (grp === "fine" ? '<p class="lede-dark">' + esc(t("Stars from the Michelin Guide 2026. Book well ahead, and expect a dress code.")) + "</p>" : "") +
         (cat === "broker" ? '<aside class="note note-ess"><p>' + esc(t("These are offices. Call or email ahead to arrange a visit.")) + "</p></aside>" : "") +
         '<p class="lede-dark" id="g-sub">' + esc(t("{n} in Monaco and nearby, each with the step-free way there.", { n: all.length })) + "</p>" +
         (all.length > 12 && !locked ? '<input class="g-search" id="g-search" type="search" placeholder="' + esc(t("Search by name or food")) + '" aria-label="' + esc(t("Search by name or food")) + '">' : "") +
@@ -125,8 +135,8 @@
         '<p class="unchecked">' + esc(t("Places come from OpenStreetMap and local listings. Opening times change, so check before you go.")) + "</p></div></section>";
     },
     mount: function (root) {
-      var M = window.MMEMap, cat = currentCat(), P = window.MMEPro, locked = !FREE[cat] && P && !P.isPro();
-      var all = places().filter(function (e) { return e.k === cat; });
+      var M = window.MMEMap, cat = currentCat(), grp = currentGrp(cat), P = window.MMEPro, locked = !FREE[cat] && P && !P.isPro();
+      var all = places().filter(function (e) { return inCat(e, cat, grp); });
       var map = M.makeMap(root.querySelector("#g-map"));
       var icon = function (e) { return L.divIcon({ className: "", html: '<span class="mk mk-ess' + (all.length > 30 ? " mk-g" : "") + '" style="background:' + COLOR[e.k] + '">' + ui().icon(e.k) + "</span>", iconSize: all.length > 30 ? [22, 22] : [30, 30], iconAnchor: all.length > 30 ? [11, 11] : [15, 15], popupAnchor: [0, -12] }); };
       all.forEach(function (e, i) {
@@ -149,7 +159,7 @@
           items.slice(0, 60).forEach(function (it) { it.w = M.walkTo(pos, it.e); });
           items.sort(function (a, b) { return (a.w ? a.w.minutes : 1e9) - (b.w ? b.w.minutes : 1e9) || a.d - b.d; });
         }
-        else items.sort(function (a, b) { return (b.e.star || 0) - (a.e.star || 0) || (b.e.d ? 1 : 0) - (a.e.d ? 1 : 0); });
+        else items.sort(function (a, b) { return (b.e.mich || 0) - (a.e.mich || 0) || (b.e.star || 0) - (a.e.star || 0) || (b.e.d ? 1 : 0) - (a.e.d ? 1 : 0); });
         var shown = locked ? items.slice(0, 3) : items.slice(0, q ? 40 : 25);
         list.innerHTML = shown.map(function (it) { return itemHtml(it.e, it.d, it.w); }).join("") +
           (!locked && items.length > shown.length ? '<li class="more-note">' + ui().esc(t(pos ? "The {s} closest of {n}. All of them are on the map." : "{s} of {n}. All of them are on the map.", { s: shown.length, n: items.length })) + "</li>" : "") +

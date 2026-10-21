@@ -745,3 +745,6 @@ h1 .pro-badge { margin-left: 4px; font-size: 14px; }
 .seo-intro ul { padding-left: 20px; }
 .seo-intro a { color: var(--navy); font-weight: 700; }
 .g-item .g-pick { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: #fdf1d6; color: #7a4f1d; font-size: 13px; font-weight: 700; vertical-align: 2px; }
+.g-item .g-mich { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: #ce1126; color: #fff; font-size: 13px; font-weight: 700; vertical-align: 2px; }
+.g-grps { margin-top: 6px; }
+.g-item .g-links { display: flex; flex-wrap: wrap; gap: 4px 16px; }
