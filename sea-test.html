@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Sea test | Monaco Made Easy</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { background: #fff; }
+    .st { max-width: 640px; margin: 0 auto; padding: 20px 16px 40px; color: var(--ink); }
+    .st h1 { font-size: 34px; }
+    .st .why { color: var(--grey); margin-top: 8px; }
+    .spot { margin-top: 22px; padding: 16px; border-radius: 16px; background: var(--navy); color: #fff; }
+    .spot h2 { font-size: 22px; color: #fff; }
+    .now { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 10px; }
+    .now div { min-width: 110px; }
+    .now strong { display: block; font-size: 28px; }
+    .now span { color: #dbe5f0; font-size: 15px; }
+    .state { margin-top: 10px; font-weight: 700; font-size: 18px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 15px; }
+    th, td { text-align: left; padding: 6px 4px; border-top: 1px solid rgba(255,255,255,.18); }
+    th { color: #b9c7d8; font-weight: 400; }
+    .err { color: var(--red); margin-top: 16px; }
+    .note { margin-top: 22px; padding: 14px 16px; background: var(--stone); border-left: 5px solid var(--red); border-radius: 0 12px 12px 0; }
+    .credit { margin-top: 18px; font-size: 13px; color: var(--grey); }
+  </style>
+</head>
+<body>
+  <main class="st">
+    <h1>Sea test</h1>
+    <p class="why">Private test page for Nick, not linked from the app. Compare these numbers with what you see on the water this weekend.</p>
+    <div id="spots"><p>Loading the sea forecast…</p></div>
+    <div class="note"><strong>What to note for each spot</strong><p>Date and time, what the sea looked like (flat, small waves, choppy, big waves breaking), whether the sea path was open or closed, and if you swam, how the water felt.</p></div>
+    <p class="credit">Forecast: Open-Meteo marine API (test use only). Wave scale: Douglas sea scale.</p>
+  </main>
+<script>
+(function () {
+  var SPOTS = [
+    { name: "Larvotto Beach, Monaco", lat: 43.745, lng: 7.437 },
+    { name: "Sea path, Pointe des Douaniers (Cap d’Ail)", lat: 43.717, lng: 7.406 },
+    { name: "Port Hercule entrance", lat: 43.736, lng: 7.428 }
+  ];
+  // Douglas sea scale, by significant wave height in metres.
+  function state(h) {
+    if (h == null) return "–";
+    if (h < 0.1) return "Calm, like glass";
+    if (h < 0.5) return "Smooth: small waves";
+    if (h < 1.25) return "Slight: some white tops";
+    if (h < 2.5) return "Moderate: the sea path may close";
+    return "Rough: the sea path is likely closed";
+  }
+  function f(x, d) { return x == null ? "–" : x.toFixed(d); }
+  function hhmm(iso) { return iso.slice(11, 16); }
+  var box = document.getElementById("spots");
+  Promise.all(SPOTS.map(function (s) {
+    var u = "https://marine-api.open-meteo.com/v1/marine?latitude=" + s.lat + "&longitude=" + s.lng +
+      "&hourly=wave_height,wave_period,wave_direction,sea_surface_temperature&timezone=Europe%2FParis&forecast_days=2";
+    return fetch(u).then(function (r) { return r.json(); }).then(function (d) { return { s: s, d: d }; }).catch(function () { return { s: s, d: null }; });
+  })).then(function (all) {
+    box.innerHTML = all.map(function (x) {
+      var s = x.s, d = x.d;
+      if (!d || !d.hourly) return '<section class="spot"><h2>' + s.name + '</h2><p class="err">No forecast for this spot' + (d && d.reason ? " (" + d.reason + ")" : "") + ".</p></section>";
+      var H = d.hourly, now = new Date(), i0 = 0;
+      for (var i = 0; i < H.time.length; i++) { if (new Date(H.time[i] + ":00") <= now) i0 = i; }
+      var rows = "";
+      for (var j = i0; j < Math.min(H.time.length, i0 + 24); j += 3) {
+        rows += "<tr><td>" + (j >= 24 && i0 < 24 ? "Tomorrow " : "") + hhmm(H.time[j]) + "</td><td>" + f(H.wave_height[j], 1) + " m</td><td>" + f(H.wave_period[j], 0) + " s</td><td>" + (H.sea_surface_temperature ? f(H.sea_surface_temperature[j], 1) + "°" : "–") + "</td></tr>";
+      }
+      var h = H.wave_height[i0], t = H.sea_surface_temperature ? H.sea_surface_temperature[i0] : null;
+      return '<section class="spot"><h2>' + s.name + "</h2>" +
+        '<div class="now"><div><strong>' + f(h, 1) + ' m</strong><span>waves now</span></div><div><strong>' + f(H.wave_period[i0], 0) + ' s</strong><span>between waves</span></div><div><strong>' + (t == null ? "–" : f(t, 1) + "°") + "</strong><span>sea temperature</span></div></div>" +
+        '<p class="state">' + state(h) + "</p>" +
+        "<table><tr><th>Time</th><th>Waves</th><th>Period</th><th>Sea</th></tr>" + rows + "</table></section>";
+    }).join("");
+  });
+})();
+</script>
+</body>
+</html>

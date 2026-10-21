@@ -7,11 +7,12 @@
   function places() { return window.MMEGuidePlaces || []; }
   function lang() { var l = window.MMEI18N.lang(); return l === "en" ? "en-GB" : l === "zh" ? "zh-CN" : l; }
 
-  var CATS = [["eat", "Restaurants"], ["cafe", "Cafés"], ["bakery", "Bakeries"], ["bar", "Bars"], ["shop", "Supermarkets"], ["culture", "Museums and galleries"], ["yacht", "Yachting"], ["broker", "Yacht brokers"], ["club", "Clubs"], ["info", "Tourist information"]];
-  var COLOR = { bakery: "#a0661a", shop: "#2f7a3d", eat: "#9c3d54", cafe: "#7a5230", bar: "#8a2f6b", culture: "#0e7c86", yacht: "#1f4e8c", broker: "#2b6a8f", club: "#7a4f1d", info: "#4a5d70" };
+  var CATS = [["eat", "Restaurants"], ["cafe", "Cafés"], ["bakery", "Bakeries"], ["bar", "Bars"], ["shop", "Supermarkets and markets"], ["tabac", "Cigars and tabacs"], ["culture", "Museums and galleries"], ["yacht", "Yachting"], ["broker", "Yacht brokers"], ["club", "Clubs"], ["info", "Tourist information"]];
+  var COLOR = { bakery: "#a0661a", shop: "#2f7a3d", tabac: "#6b4a2e", eat: "#9c3d54", cafe: "#7a5230", bar: "#8a2f6b", culture: "#0e7c86", yacht: "#1f4e8c", broker: "#2b6a8f", club: "#7a4f1d", info: "#4a5d70" };
   var FREE = {};
   var SUB = { museum: "Museum", gallery: "Art gallery", theatre: "Theatre", garden: "Garden", venue: "Exhibitions and events", chandlery: "Chandlery", harbour: "Harbour office", pub: "Pub", nightclub: "Nightclub",
-    motor: "Motor club", yacht: "Yacht club", rowing: "Rowing club", tennis: "Tennis club", sailing: "Sailing club", hiking: "Hiking club", convenience: "Mini-market", pastry: "Pâtisserie" };
+    motor: "Motor club", yacht: "Yacht club", rowing: "Rowing club", tennis: "Tennis club", sailing: "Sailing club", hiking: "Hiking club", convenience: "Mini-market", pastry: "Pâtisserie",
+    market: "Market", butcher: "Butcher and fine food", zoo: "Zoo", church: "Church", boats: "Boat sales and service", cigars: "Cigar shop", presse: "Newsagent and tabac" };
   var CUISINE = { italian: "Italian", pizza: "Pizza", burger: "Burgers", mediterranean: "Mediterranean", french: "French", japanese: "Japanese", sushi: "Sushi",
     regional: "Local dishes", local: "Local dishes", seafood: "Seafood", fish: "Seafood", international: "International", pasta: "Pasta", steak_house: "Steakhouse", grill: "Grill",
     lebanese: "Lebanese", thai: "Thai", indian: "Indian", mexican: "Mexican", asian: "Asian", chinese: "Chinese", peruvian: "Peruvian", ice_cream: "Ice cream",
@@ -77,6 +78,7 @@
     }
     if (e.sub && SUB[e.sub]) bits.push(t(SUB[e.sub]));
     else if (e.k === "shop") bits.push(t("Supermarket"));
+    else if (e.k === "tabac" && e.n !== "Tabac") bits.push(t("Tabac"));
     if (e.k === "broker") bits.push(t("Yacht sales and charter"));
     if (e.addr) bits.push(e.addr);
     bits.push(t(e.a));
@@ -88,15 +90,15 @@
     return "";
   }
   function webHost(w) { return w.replace(/^https?:\/\/(www\.)?/, "").replace(/\/.*$/, ""); }
-  function itemHtml(e, d) {
+  function itemHtml(e, d, w) {
     var esc = ui().esc, open = e.hx ? null : openNow(e.h), hrs = hoursLine(e);
     var webUrl = e.w && /^https?:\/\//.test(e.w) ? e.w : e.w ? "https://" + e.w : "";
     return '<li class="g-item"><span class="step-ico" style="--c:' + COLOR[e.k] + '">' + ui().icon(e.k) + "</span><div>" +
-      "<strong>" + esc(t(e.n)) + "</strong><span>" + esc(subtitle(e)) + "</span>" +
+      "<strong>" + esc(t(e.n)) + (e.pick ? ' <b class="g-pick">★ ' + esc(t("Our pick")) + "</b>" : "") + "</strong><span>" + esc(subtitle(e)) + "</span>" +
       (e.d ? '<p class="g-desc">' + esc(t(e.d)) + "</p>" : "") +
       (hrs || open !== null ? '<span class="g-hours">' + (open === true ? '<b class="g-open">' + esc(t("Open now")) + "</b> " : open === false ? '<b class="g-shut">' + esc(t("Closed now")) + "</b> " : "") + esc(hrs) + "</span>" : "") +
       (e.wc === "yes" ? '<span class="g-wc">' + esc(t("Wheelchair accessible")) + "</span>" : "") +
-      (d !== null ? "<small>" + esc(t("{d} away, about {n} min walk", { d: window.MMEMap.niceDistance(d), n: Math.max(1, Math.round(d / 75)) })) + "</small>" : "") +
+      (w ? "<small>" + esc(t("{d} away, about {n} min walk", { d: window.MMEMap.niceDistance(w.metres), n: w.minutes })) + "</small>" : "") +
       '<span class="g-links">' + (e.ph ? '<a href="tel:' + esc(e.ph.replace(/[^+\d]/g, "")) + '">' + esc(e.ph) + "</a>" : "") +
       (webUrl ? '<a href="' + esc(webUrl) + '" target="_blank" rel="noopener">' + esc(webHost(webUrl)) + "</a>" : "") + "</span></div>" +
       '<button type="button" class="map-mini" data-goto="' + e.lat + "," + e.lng + '" data-label="' + esc(e.n) + '">' + esc(t("Take me there")) + "</button></li>";
@@ -140,10 +142,16 @@
           var hay = (t(e.n) + " " + e.n + " " + subtitle(e)).toLowerCase();
           return hay.indexOf(q) >= 0;
         }).map(function (e) { return { e: e, d: pos ? M.distance(pos, e) : null }; });
-        if (pos) items.sort(function (a, b) { return a.d - b.d; });
+        if (pos) {
+          // Real walking times by the easiest route (lifts, escalators, the hills) for the nearer places;
+          // the straight-line distance only decides which ones are worth working out.
+          items.sort(function (a, b) { return a.d - b.d; });
+          items.slice(0, 60).forEach(function (it) { it.w = M.walkTo(pos, it.e); });
+          items.sort(function (a, b) { return (a.w ? a.w.minutes : 1e9) - (b.w ? b.w.minutes : 1e9) || a.d - b.d; });
+        }
         else items.sort(function (a, b) { return (b.e.star || 0) - (a.e.star || 0) || (b.e.d ? 1 : 0) - (a.e.d ? 1 : 0); });
         var shown = locked ? items.slice(0, 3) : items.slice(0, q ? 40 : 25);
-        list.innerHTML = shown.map(function (it) { return itemHtml(it.e, it.d); }).join("") +
+        list.innerHTML = shown.map(function (it) { return itemHtml(it.e, it.d, it.w); }).join("") +
           (!locked && items.length > shown.length ? '<li class="more-note">' + ui().esc(t(pos ? "The {s} closest of {n}. All of them are on the map." : "{s} of {n}. All of them are on the map.", { s: shown.length, n: items.length })) + "</li>" : "") +
           (!items.length ? '<li class="more-note">' + ui().esc(t("Nothing matches that search.")) + "</li>" : "");
       }

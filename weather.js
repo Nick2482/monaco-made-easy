@@ -52,20 +52,26 @@
     if (!hrs.length) return null;
     var cur = hrs[0], next = hrs.slice(0, 12);
     var temps = next.map(function (h) { return h.temp; });
-    var pops = next.map(function (h) { return h.pop == null ? (h.rain > 0.2 ? 60 : 0) : h.pop; });
-    var wet = next.filter(function (h) { var k = kind(h.sym); return k && /rain|showers|thunder|sleet|snow/.test(k); });
+    // Rain only counts when the forecast actually expects some (a "showers" symbol with 0 mm is not rain).
+    function wetHour(h) { var k = kind(h.sym); return !!k && /rain|showers|thunder|sleet|snow/.test(k) && (h.rain == null || h.rain >= 0.2); }
+    var pops = next.map(function (h) { return h.pop == null ? (h.rain >= 0.5 ? 60 : h.rain >= 0.2 ? 30 : 0) : h.pop; });
+    var wet = next.filter(wetHour);
+    // High and low for the rest of today (Monaco time); late in the evening, the next 12 hours instead.
+    var cut = 0; for (var i = 1; i < hrs.length && i < 24; i++) { if (monacoHour(hrs[i].t) === 0) { cut = i; break; } }
+    var span = cut >= 4 ? hrs.slice(0, cut) : next;
+    temps = span.map(function (h) { return h.temp; });
     var hr = monacoHour(cur.t), night = hr >= 20 || hr < 7;
     var k = kind(cur.sym) || "partly";
-    if (k === "clear" && night) k = "clearnight";
-    if (k === "partly" && night) k = "clearnight";
+    if (k && /rain|showers|thunder|sleet|snow/.test(k) && !wetHour(cur)) k = "partly";   // shower symbol, but no rain expected
+    if (k === "clear" && (night || /_night$/.test(cur.sym || ""))) k = "clearnight";
     var s = { temp: cur.temp, kind: k, hi: Math.max.apply(null, temps), lo: Math.min.apply(null, temps), pop: Math.max.apply(null, pops), wind: cur.wind,
-      gust: Math.max.apply(null, next.map(function (h) { return h.gust || h.wind || 0; })), wetNow: /rain|showers|thunder|sleet/.test(kind(cur.sym) || ""), wetLater: wet.length > 0,
+      gust: Math.max.apply(null, next.map(function (h) { return h.gust || h.wind || 0; })), wetNow: wetHour(cur), wetLater: wet.length > 0,
       popKnown: next.some(function (h) { return h.pop != null; }),
-      thunder: next.some(function (h) { return /thunder/.test(h.sym || ""); }) };
+      thunder: next.some(function (h) { return /thunder/.test(h.sym || "") && wetHour(h); }) };
     // One tip, the most useful first.
     if (s.thunder) s.tip = t("Storms forecast. Indoor places in the Guide are a good plan, and the sea path may be closed.");
     else if (s.wetNow) s.tip = t("Raining now. Lifts and covered walkways help you stay dry.");
-    else if (s.pop >= 50 || s.wetLater) s.tip = t("Rain likely later. Take an umbrella.");
+    else if (s.pop >= 50 || (s.wetLater && s.pop >= 30)) s.tip = t("Rain likely later. Take an umbrella.");
     else if (s.gust >= 50) s.tip = t("Windy. The sea path from Cap d’Ail can close when the sea is rough.");
     else if (s.hi >= 28) s.tip = t("Hot today. Take water, and use the lifts for the climbs.");
     return s;
@@ -91,8 +97,9 @@
     var el = root.querySelector("#wx");
     if (!el) return;
     var saved = load();
+    if (saved && !(Date.now() - saved.got < 3 * 3600e3)) saved = null;   // too old to be useful
     var fresh = saved && Date.now() - saved.got < 30 * 60e3;
-    draw(el, saved, saved && !fresh);
+    if (saved) draw(el, saved, !fresh); else el.hidden = true;
     if (fresh) return;
     inflight = inflight || fetch("/api/weather").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
     inflight.then(function (d) {

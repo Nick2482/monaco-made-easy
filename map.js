@@ -39,6 +39,25 @@
     return (m / 1000).toFixed(1) + " km";
   }
   function walkMinutes(m) { return Math.max(1, Math.round(m / 70)); } // a gentle 70 m a minute
+  // Real walk by the easiest route (with the hills, lifts and escalators). Worked out once per spot you stand on.
+  var wCache = { at: null, fn: null };
+  function walkTo(pos, p) {
+    var R = window.MMERouter;
+    if (R && R.timesFrom) {
+      if (!wCache.at || distance(wCache.at, pos) > 30) { wCache.at = pos; wCache.fn = R.timesFrom(pos); }
+      var w = wCache.fn && wCache.fn(p);
+      if (w) return w;
+    }
+    var d = distance(pos, p) * 1.4;   // no route: allow for Monaco's bends and hills
+    return { metres: d, minutes: Math.max(1, Math.round(d / 60)) };
+  }
+  function walkText(w) { return t("{d} away, about {n} min walk", { d: niceDistance(w.metres), n: w.minutes }); }
+  // Nearest first by real walking time: straight-line distance picks the candidates, the route decides the order.
+  function byWalk(items, pos, get) {
+    items.sort(function (a, b) { return a.d - b.d; });
+    items.slice(0, 40).forEach(function (it) { it.w = walkTo(pos, get(it)); });
+    items.sort(function (a, b) { return (a.w ? a.w.minutes : 1e9) - (b.w ? b.w.minutes : 1e9) || a.d - b.d; });
+  }
 
   var CARTO_KEY = "cb1_4i7l_1_06eb2a6dadbe6d5079442b67";
   // A Monaco map with a calm, light style so the red lift markers stand out.
@@ -151,12 +170,12 @@
       function drawEss(pos) {
         var all = essList().filter(function (e) { return e.k === cat; });
         var items = all.map(function (e) { return { e: e, d: pos ? distance(pos, e) : null }; });
-        if (pos) items.sort(function (a, b) { return a.d - b.d; });
+        if (pos) byWalk(items, pos, function (it) { return it.e; });
         items = items.slice(0, 15);
         list.innerHTML = items.map(function (it) {
           var e = it.e, det = essDetails(e);
           return '<li><span class="step-ico" style="--c:' + CAT_COLOR[e.k] + '">' + ui.icon(e.k) + "</span><div><strong>" + ui.esc(essTitle(e)) + "</strong>" +
-            (det ? "<span>" + ui.esc(det) + "</span>" : "") + "<small>" + ui.esc(it.d !== null ? t("{d} away, about {n} min walk", { d: niceDistance(it.d), n: walkMinutes(it.d) }) : e.a) + "</small></div>" +
+            (det ? "<span>" + ui.esc(det) + "</span>" : "") + "<small>" + ui.esc(it.w ? walkText(it.w) : e.a) + "</small></div>" +
             '<button type="button" class="map-mini" data-goto="' + e.lat + "," + e.lng + '" data-label="' + CAT_ONE[e.k] + '">' + ui.esc(t("Take me there")) + "</button></li>";
         }).join("") + '<li class="more-note">' + ui.esc(t(pos ? "The 15 closest of {n}. All of them are on the map." : "{n} in Monaco, Beausoleil and Cap d’Ail. All of them are on the map.", { n: all.length })) + "</li>";
       }
@@ -164,7 +183,7 @@
       function drawList(pos) {
         if (cat !== "lifts") { drawEss(pos); return; }
         var items = D.lifts.map(function (l) { return { l: l, d: pos ? distance(pos, l) : null }; });
-        if (pos) items.sort(function (a, b) { return a.d - b.d; });
+        if (pos) byWalk(items, pos, function (it) { return it.l; });
         else items.sort(function (a, b) { return (a.l.name.indexOf("Public") === 0) - (b.l.name.indexOf("Public") === 0); });
         var total = items.length;
         items = items.slice(0, pos ? 15 : 20);
@@ -173,7 +192,7 @@
           var down = X() && X().Reports.status(l.id);
           return '<li' + (down ? ' class="is-down"' : "") + '><span class="step-ico" style="--c:' + (down ? "#7a8694" : ui.COLORS[l.type]) + '">' + ui.icon(l.type) + "</span><div><strong>" + ui.esc(liftName(l)) + "</strong>" +
             (down ? '<span class="rep-down">' + ui.esc(X().Reports.label(down)) + "</span>" : "") +
-            "<span>" + ui.esc(liftLinks(l)) + "</span><small>" + ui.esc(it.d !== null ? t("{d} away, about {n} min walk", { d: niceDistance(it.d), n: walkMinutes(it.d) }) : l.where + ", " + l.area) + "</small></div>" +
+            "<span>" + ui.esc(liftLinks(l)) + "</span><small>" + ui.esc(it.w ? walkText(it.w) : l.where + ", " + l.area) + "</small></div>" +
             '<button type="button" class="map-mini" data-show="' + l.id + '">' + ui.esc(t("Show")) + "</button></li>";
         }).join("") + '<li class="more-note">' + ui.esc(t(pos ? "The 15 closest of {n} lifts and escalators. All of them are on the map." : "20 of {n} lifts and escalators. All of them are on the map.", { n: total })) + "</li>";
       }
@@ -235,5 +254,5 @@
   };
 
   function currentCat() { var c = (location.hash.split("/")[2] || "").split("?")[0]; return CAT_ONE[c] ? c : "lifts"; }
-  window.MMEMap = { CAT_ONE: CAT_ONE, CAT_COLOR: CAT_COLOR, CARTO_KEY: CARTO_KEY, liftName: liftName, here: function () { return here; }, screen: screen, makeMap: makeMap, liftIcon: liftIcon, meIcon: meIcon, startLocating: startLocating, onLocation: onLocation, distance: distance, niceDistance: niceDistance };
+  window.MMEMap = { CAT_ONE: CAT_ONE, CAT_COLOR: CAT_COLOR, CARTO_KEY: CARTO_KEY, liftName: liftName, here: function () { return here; }, screen: screen, makeMap: makeMap, liftIcon: liftIcon, meIcon: meIcon, startLocating: startLocating, onLocation: onLocation, distance: distance, niceDistance: niceDistance, walkTo: walkTo };
 })();

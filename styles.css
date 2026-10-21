@@ -744,3 +744,4 @@ h1 .pro-badge { margin-left: 4px; font-size: 14px; }
 .gp-links a { display: block; padding: 13px 16px; border-radius: 12px; border: 1px solid var(--line); color: var(--navy); font-weight: 700; text-decoration: none; }
 .seo-intro ul { padding-left: 20px; }
 .seo-intro a { color: var(--navy); font-weight: 700; }
+.g-item .g-pick { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: #fdf1d6; color: #7a4f1d; font-size: 13px; font-weight: 700; vertical-align: 2px; }

@@ -279,7 +279,47 @@
     return best;
   }
 
+
+  // Walking time from one place to everywhere (one search), for "how far is each place in the Guide".
+  // Same preferences as route(): lifts and escalators first, steps avoided where there's a sensible way round.
+  function timesFrom(from, opts) {
+    opts = opts || {};
+    var avoid = opts.avoidSteps !== false;
+    var s = nearest(from);
+    if (!s) return null;
+    var dist = new Float64Array(N).fill(Infinity), secsA = new Float64Array(N), mA = new Float64Array(N), seen = new Uint8Array(N);
+    dist[s.node] = 0;
+    var heap = [[0, s.node]];
+    function push(item) { heap.push(item); var c = heap.length - 1; while (c > 0) { var p = (c - 1) >> 1; if (heap[p][0] <= heap[c][0]) break; var tmp = heap[p]; heap[p] = heap[c]; heap[c] = tmp; c = p; } }
+    function pop() { var top = heap[0], last = heap.pop(); if (heap.length) { heap[0] = last; var c = 0; for (;;) { var l = 2 * c + 1, r = l + 1, m = c; if (l < heap.length && heap[l][0] < heap[m][0]) m = l; if (r < heap.length && heap[r][0] < heap[m][0]) m = r; if (m === c) break; var tmp = heap[m]; heap[m] = heap[c]; heap[c] = tmp; c = m; } } return top; }
+    var LIMIT = 3600 * 3; // stop once everything within reach is found
+    while (heap.length) {
+      var cur = pop(), u = cur[1];
+      if (seen[u]) continue;
+      seen[u] = 1;
+      if (cur[0] > LIMIT) break;
+      var list = adj[u];
+      for (var j = 0; j < list.length; j++) {
+        var k = list[j], fwd = k >= 0, e = G.e[fwd ? k : -k - 1];
+        var v = fwd ? e[1] : e[0];
+        if (seen[v]) continue;
+        if (opts.wheelchair && (e[3] === 2 || e[3] === 3 || (liftAt[v] && liftAt[v].wheelchair === "no"))) continue;
+        var lc = legCost(e, fwd, avoid), c = lc.cost + (liftAt[v] ? LIFT_WAIT : 0), sec = lc.secs + (liftAt[v] ? LIFT_WAIT : 0);
+        if (e[3] !== 3 && e[3] !== 4) { var up = climb(u, v); if (up > 0) { c += up * (avoid ? 12 : 7); sec += up * 4; } }
+        if (dist[u] + c < dist[v]) { dist[v] = dist[u] + c; secsA[v] = secsA[u] + sec; mA[v] = mA[u] + e[2]; push([dist[v], v]); }
+      }
+    }
+    var pre = s.d > 40 ? s.d : 0;
+    // Returns { minutes, metres } to a place, or null when it can't be reached on foot.
+    return function (to) {
+      var g = nearest(to);
+      if (!g || !isFinite(dist[g.node])) return null;
+      var post = g.d > 40 ? g.d : 0;
+      return { minutes: Math.max(1, Math.round((secsA[g.node] + (pre + post) / WALK) / 60)), metres: Math.round(mA[g.node] + pre + post) };
+    };
+  }
+
   function heightAt(p) { var n = nearest(p); return height && n ? Math.round(height[n.node]) : null; }
 
-  window.MMERouter = { route: route, fromStation: fromStation, nearest: nearest, ready: ready, heightAt: heightAt };
+  window.MMERouter = { route: route, timesFrom: timesFrom, fromStation: fromStation, nearest: nearest, ready: ready, heightAt: heightAt };
 })();

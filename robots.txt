@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /sea-test.html
 
 Sitemap: https://www.monacomadeeasy.com/sitemap.xml
