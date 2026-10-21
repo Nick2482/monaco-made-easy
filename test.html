@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Become a tester | Monaco Made Easy</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { background: #fff; }
+    .tp { max-width: 560px; margin: 0 auto; padding: 24px 16px 48px; color: var(--ink); }
+    .tp h1 { font-size: 32px; line-height: 1.15; }
+    .tp .lede { color: var(--grey); margin-top: 8px; font-size: 17px; }
+    .lang { display: flex; gap: 8px; margin-top: 16px; }
+    .lang button { padding: 6px 14px; border-radius: 999px; border: 1px solid #c9d2dc; background: #fff; font: inherit; font-weight: 700; color: var(--navy); cursor: pointer; }
+    .lang button[aria-pressed="true"] { background: var(--navy); color: #fff; border-color: var(--navy); }
+    ol.steps { list-style: none; padding: 0; margin: 22px 0 0; counter-reset: s; }
+    ol.steps li { counter-increment: s; position: relative; padding: 16px 16px 16px 64px; border-radius: 16px; background: var(--stone); margin-top: 12px; }
+    ol.steps li::before { content: counter(s); position: absolute; left: 16px; top: 16px; width: 34px; height: 34px; border-radius: 50%; background: var(--red); color: #fff; font-weight: 700; display: grid; place-items: center; font-size: 18px; }
+    ol.steps strong { display: block; font-size: 18px; color: var(--navy); }
+    ol.steps p { margin: 4px 0 10px; color: var(--grey); }
+    .go { display: inline-block; padding: 12px 18px; border-radius: 12px; background: var(--navy); color: #fff; font-weight: 700; text-decoration: none; }
+    .note { margin-top: 22px; padding: 14px 16px; border-left: 5px solid var(--red); background: #fff6f6; border-radius: 0 12px 12px 0; }
+    .small { margin-top: 18px; font-size: 15px; color: var(--grey); }
+    [data-l] { display: none; }
+    html[lang="fr"] [data-l="fr"], html[lang="en-GB"] [data-l="en"] { display: revert; }
+  </style>
+</head>
+<body>
+<main class="tp">
+  <h1><span data-l="en">Test Monaco Made Easy</span><span data-l="fr">Testez Monaco Made Easy</span></h1>
+  <p class="lede"><span data-l="en">Three taps on your Android phone. Do them in order.</span><span data-l="fr">Trois étapes sur votre téléphone Android, dans l’ordre.</span></p>
+  <div class="lang"><button type="button" data-set="en" aria-pressed="true">English</button><button type="button" data-set="fr" aria-pressed="false">Français</button></div>
+
+  <ol class="steps">
+    <li>
+      <strong><span data-l="en">Join the tester group</span><span data-l="fr">Rejoignez le groupe des testeurs</span></strong>
+      <p><span data-l="en">Tap the button, then tap “Join group”.</span><span data-l="fr">Touchez le bouton, puis « Rejoindre le groupe ».</span></p>
+      <a class="go" href="https://groups.google.com/g/monaco-made-easy-testers" target="_blank" rel="noopener"><span data-l="en">Open the group</span><span data-l="fr">Ouvrir le groupe</span></a>
+    </li>
+    <li>
+      <strong><span data-l="en">Become a tester</span><span data-l="fr">Devenez testeur</span></strong>
+      <p><span data-l="en">Tap the button, then “Become a tester”.</span><span data-l="fr">Touchez le bouton, puis « Devenir testeur ».</span></p>
+      <a class="go" href="https://play.google.com/apps/testing/com.monacomadeeasy.www.twa" target="_blank" rel="noopener"><span data-l="en">Become a tester</span><span data-l="fr">Devenir testeur</span></a>
+    </li>
+    <li>
+      <strong><span data-l="en">Install the app</span><span data-l="fr">Installez l’appli</span></strong>
+      <p><span data-l="en">It shows as “Early access” in Google Play. Tap Install.</span><span data-l="fr">Elle apparaît en « Accès anticipé » sur Google Play. Touchez Installer.</span></p>
+      <a class="go" href="https://play.google.com/store/apps/details?id=com.monacomadeeasy.www.twa" target="_blank" rel="noopener"><span data-l="en">Install from Google Play</span><span data-l="fr">Installer depuis Google Play</span></a>
+    </li>
+  </ol>
+
+  <div class="note">
+    <p data-l="en"><strong>Please keep the app for at least 14 days.</strong> Google needs this before the app can be published. Tell us anything wrong or missing with the “Spotted something wrong?” button in the app.</p>
+    <p data-l="fr"><strong>Merci de garder l’appli au moins 14 jours.</strong> Google l’exige avant la publication. Signalez ce qui est faux ou manque avec le bouton « Une erreur ? » dans l’appli.</p>
+  </div>
+  <p class="small"><span data-l="en">On iPhone? Use the web version at</span><span data-l="fr">Sur iPhone ? Utilisez la version web :</span> <a href="/">monacomadeeasy.com</a> · hello@monacomadeeasy.com</p>
+</main>
+<script>
+(function () {
+  var html = document.documentElement;
+  function set(l) {
+    html.lang = l === "fr" ? "fr" : "en-GB";
+    document.querySelectorAll("[data-set]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.set === l)); });
+  }
+  var q = /[?&]lang=(fr|en)\b/.exec(location.search);
+  set(q ? q[1] : (/^fr/i.test(navigator.language || "") ? "fr" : "en"));
+  document.querySelectorAll("[data-set]").forEach(function (b) { b.addEventListener("click", function () { set(b.dataset.set); }); });
+})();
+</script>
+</body>
+</html>
