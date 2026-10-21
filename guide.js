@@ -19,7 +19,7 @@
   var CUISINE = { italian: "Italian", pizza: "Pizza", burger: "Burgers", mediterranean: "Mediterranean", french: "French", japanese: "Japanese", sushi: "Sushi",
     regional: "Local dishes", local: "Local dishes", seafood: "Seafood", fish: "Seafood", international: "International", pasta: "Pasta", steak_house: "Steakhouse", grill: "Grill",
     lebanese: "Lebanese", thai: "Thai", indian: "Indian", mexican: "Mexican", asian: "Asian", chinese: "Chinese", peruvian: "Peruvian", ice_cream: "Ice cream",
-    coffee_shop: "Coffee", sandwich: "Sandwiches", salad: "Salads", british: "British", belgian: "Belgian", italian_pizza: "Pizza", roman: "Italian", venezuelan: "Venezuelan", argentinian: "Argentinian", vegan: "Vegan", crepe: "Crêpes", vietnamese: "Vietnamese" };
+    coffee_shop: "Coffee", sandwich: "Sandwiches", salad: "Salads", british: "British", belgian: "Belgian", italian_pizza: "Pizza", roman: "Italian", venezuelan: "Venezuelan", argentinian: "Argentinian", vegan: "Vegan", crepe: "Crêpes", vietnamese: "Vietnamese", portuguese: "Portuguese", spanish: "Spanish", creole: "Creole" };
 
   // ---------- Opening hours (OpenStreetMap format) ----------
   var DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
