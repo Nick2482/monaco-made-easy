@@ -748,3 +748,15 @@ h1 .pro-badge { margin-left: 4px; font-size: 14px; }
 .g-item .g-mich { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: #ce1126; color: #fff; font-size: 13px; font-weight: 700; vertical-align: 2px; }
 .g-grps { margin-top: 6px; }
 .g-item .g-links { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.g-gm { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; color: var(--navy); text-decoration: underline; cursor: pointer; }
+.gm-sheet { position: fixed; inset: 0; z-index: 3000; background: rgba(11,37,69,.55); display: flex; align-items: flex-end; justify-content: center; }
+.gm-box { width: 100%; max-width: 640px; height: 82vh; background: #fff; border-radius: 18px 18px 0 0; display: flex; flex-direction: column; overflow: hidden; }
+.gm-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.gm-head strong { font-size: 18px; color: var(--navy); }
+.gm-close { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--stone); font-size: 20px; cursor: pointer; }
+.gm-box iframe { flex: 1; width: 100%; border: 0; }
+.gm-note, .gm-off { margin: 0; padding: 10px 16px 14px; font-size: 14.5px; color: var(--grey); }
+.gm-off { flex: 1; padding-top: 30px; }
+.g-addbiz { margin: 6px 0 20px; font-weight: 700; }
+.g-addbiz a { color: var(--red); }
+@media (min-width: 700px) { .gm-sheet { align-items: center; } .gm-box { border-radius: 18px; height: 80vh; } }

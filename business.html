@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Add your business | Monaco Made Easy</title>
+  <meta name="description" content="Restaurants, cafés, bars and shops in Monaco, Beausoleil, Cap d'Ail and Roquebrune-Cap-Martin: add your business to the free Monaco Made Easy guide.">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { background: #fff; }
+    .bz { max-width: 600px; margin: 0 auto; padding: 24px 16px 56px; color: var(--ink); }
+    .bz h1 { font-size: 32px; line-height: 1.15; }
+    .bz .lede { color: var(--grey); margin-top: 8px; font-size: 17px; }
+    .lang { display: flex; gap: 8px; margin-top: 16px; }
+    .lang button { padding: 6px 14px; border-radius: 999px; border: 1px solid #c9d2dc; background: #fff; font: inherit; font-weight: 700; color: var(--navy); cursor: pointer; }
+    .lang button[aria-pressed="true"] { background: var(--navy); color: #fff; border-color: var(--navy); }
+    .why { margin-top: 18px; padding: 14px 16px; background: var(--stone); border-radius: 14px; }
+    .why ul { margin: 6px 0 0; padding-left: 20px; }
+    form { margin-top: 22px; display: grid; gap: 16px; }
+    label { display: grid; gap: 6px; font-weight: 700; color: var(--navy); }
+    label small { font-weight: 400; color: var(--grey); }
+    input, select, textarea { font: inherit; font-weight: 400; padding: 11px 12px; border: 1.5px solid #c9d2dc; border-radius: 10px; background: #fff; color: var(--ink); width: 100%; box-sizing: border-box; }
+    input:focus, select:focus, textarea:focus { outline: 3px solid #9cc3ea; border-color: var(--navy); }
+    textarea { min-height: 90px; resize: vertical; }
+    .row { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }
+    @media (max-width: 520px) { .row { grid-template-columns: 1fr; } }
+    .check { display: flex; gap: 10px; align-items: flex-start; font-weight: 400; color: var(--ink); }
+    .check input { width: 22px; height: 22px; margin-top: 2px; flex: none; }
+    .send { padding: 14px 18px; border-radius: 12px; border: 0; background: var(--red); color: #fff; font: inherit; font-weight: 700; font-size: 18px; cursor: pointer; }
+    .err { color: var(--red); font-weight: 700; }
+    .done { margin-top: 18px; padding: 14px 16px; border-left: 5px solid var(--red); background: #fff6f6; border-radius: 0 12px 12px 0; }
+    .done pre { white-space: pre-wrap; font: inherit; font-size: 14px; background: #fff; border: 1px solid #e3e7ec; border-radius: 8px; padding: 10px; margin-top: 8px; }
+    .small { margin-top: 18px; font-size: 15px; color: var(--grey); }
+    [data-l] { display: none; }
+    html[lang="fr"] [data-l="fr"], html[lang="en-GB"] [data-l="en"] { display: revert; }
+  </style>
+</head>
+<body>
+<main class="bz">
+  <h1><span data-l="en">Add your business to Monaco Made Easy</span><span data-l="fr">Ajoutez votre établissement à Monaco Made Easy</span></h1>
+  <p class="lede"><span data-l="en">Free. Visitors find you with the easiest, step-free way to your door.</span><span data-l="fr">Gratuit. Les visiteurs vous trouvent, avec le chemin le plus facile et sans marches jusqu’à votre porte.</span></p>
+  <div class="lang"><button type="button" data-set="en" aria-pressed="true">English</button><button type="button" data-set="fr" aria-pressed="false">Français</button></div>
+
+  <div class="why">
+    <strong><span data-l="en">What visitors see</span><span data-l="fr">Ce que voient les visiteurs</span></strong>
+    <ul>
+      <li><span data-l="en">Your name, address, phone, website and opening hours</span><span data-l="fr">Votre nom, adresse, téléphone, site web et horaires</span></li>
+      <li><span data-l="en">A short description, in 9 languages</span><span data-l="fr">Une courte description, en 9 langues</span></li>
+      <li><span data-l="en">“Take me there”: the easiest walking route from wherever they are</span><span data-l="fr">« Emmenez-moi » : le chemin à pied le plus facile depuis l’endroit où ils se trouvent</span></li>
+    </ul>
+  </div>
+
+  <form id="f" novalidate>
+    <label><span><span data-l="en">Business name</span><span data-l="fr">Nom de l’établissement</span> *</span><input name="name" required maxlength="80" autocomplete="organization"></label>
+    <div class="row">
+      <label><span data-l="en">Type</span><span data-l="fr">Type</span>
+        <select name="type">
+          <option value="Restaurant" data-fr="Restaurant">Restaurant</option>
+          <option value="Café / tea room" data-fr="Café / salon de thé">Café / tea room</option>
+          <option value="Bar" data-fr="Bar">Bar</option>
+          <option value="Bakery / pâtisserie" data-fr="Boulangerie / pâtisserie">Bakery / pâtisserie</option>
+          <option value="Shop / market" data-fr="Commerce / marché">Shop / market</option>
+          <option value="Tabac" data-fr="Tabac">Tabac</option>
+          <option value="Museum / gallery / attraction" data-fr="Musée / galerie / visite">Museum / gallery / attraction</option>
+          <option value="Yachting" data-fr="Nautisme">Yachting</option>
+          <option value="Other" data-fr="Autre">Other</option>
+        </select>
+      </label>
+      <label><span data-l="en">Town</span><span data-l="fr">Commune</span>
+        <select name="town"><option>Monaco</option><option>Beausoleil</option><option>Cap d'Ail</option><option>Roquebrune-Cap-Martin</option></select>
+      </label>
+    </div>
+    <label><span><span data-l="en">Street address</span><span data-l="fr">Adresse</span> *</span><input name="addr" required maxlength="120" autocomplete="street-address"></label>
+    <div class="row">
+      <label><span data-l="en">Phone</span><span data-l="fr">Téléphone</span><input name="phone" type="tel" maxlength="30"></label>
+      <label><span data-l="en">Website</span><span data-l="fr">Site web</span><input name="web" maxlength="120" inputmode="url"></label>
+    </div>
+    <label><span data-l="en">Opening hours</span><span data-l="fr">Horaires</span><small><span data-l="en">For example: Mon–Sat 12:00–14:30, 19:00–22:30; closed Sunday</span><span data-l="fr">Par exemple : lun–sam 12h–14h30, 19h–22h30 ; fermé le dimanche</span></small><input name="hours" maxlength="160"></label>
+    <label><span data-l="en">Short description</span><span data-l="fr">Courte description</span><small><span data-l="en">One or two sentences: your cuisine or speciality, what makes you special.</span><span data-l="fr">Une ou deux phrases : votre cuisine ou spécialité, ce qui vous distingue.</span></small><textarea name="desc" maxlength="300"></textarea></label>
+    <label><span data-l="en">Step-free access?</span><span data-l="fr">Accès sans marches ?</span>
+      <select name="access">
+        <option value="Not sure" data-fr="Je ne sais pas">Not sure</option>
+        <option value="Yes, step-free entrance" data-fr="Oui, entrée sans marches">Yes, step-free entrance</option>
+        <option value="With a ramp" data-fr="Avec une rampe">With a ramp</option>
+        <option value="No, there are steps" data-fr="Non, il y a des marches">No, there are steps</option>
+      </select>
+    </label>
+    <div class="row">
+      <label><span><span data-l="en">Your name</span><span data-l="fr">Votre nom</span> *</span><input name="who" required maxlength="80" autocomplete="name"></label>
+      <label><span><span data-l="en">Your email</span><span data-l="fr">Votre e-mail</span> *</span><input name="email" type="email" required maxlength="120" autocomplete="email"></label>
+    </div>
+    <label class="check"><input type="checkbox" name="ok" required><span><span data-l="en">I own or manage this business, and Monaco Made Easy may publish these details in its guide. We only use your name and email to contact you about the listing.</span><span data-l="fr">Je suis propriétaire ou gérant de cet établissement, et Monaco Made Easy peut publier ces informations dans son guide. Votre nom et votre e-mail servent uniquement à vous contacter au sujet de la fiche.</span></span></label>
+    <p class="err" id="err" hidden></p>
+    <button class="send" type="submit"><span data-l="en">Send my details</span><span data-l="fr">Envoyer mes informations</span></button>
+  </form>
+
+  <div class="done" id="done" hidden>
+    <p><strong><span data-l="en">Nearly done: your email app has opened with everything filled in. Just press Send.</span><span data-l="fr">Presque fini : votre messagerie s’est ouverte avec tout rempli. Appuyez simplement sur Envoyer.</span></strong></p>
+    <p><span data-l="en">Photos: reply to our answer with up to 3 photos you own (no customers’ faces, please).</span><span data-l="fr">Photos : répondez à notre réponse avec jusqu’à 3 photos dont vous êtes propriétaire (sans visages de clients, merci).</span></p>
+    <p><span data-l="en">Email app didn’t open? Copy this and send it to hello@monacomadeeasy.com:</span><span data-l="fr">La messagerie ne s’est pas ouverte ? Copiez ceci et envoyez-le à hello@monacomadeeasy.com :</span></p>
+    <pre id="txt"></pre>
+  </div>
+  <p class="small"><a href="/"><span data-l="en">Back to Monaco Made Easy</span><span data-l="fr">Retour à Monaco Made Easy</span></a> · hello@monacomadeeasy.com</p>
+</main>
+<script>
+(function () {
+  var html = document.documentElement, lang = "en";
+  function set(l) {
+    lang = l; html.lang = l === "fr" ? "fr" : "en-GB";
+    document.querySelectorAll("[data-set]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.set === l)); });
+    document.querySelectorAll("option[data-fr]").forEach(function (o) { o.textContent = l === "fr" ? o.dataset.fr : o.value; });
+  }
+  var q = /[?&]lang=(fr|en)\b/.exec(location.search);
+  set(q ? q[1] : (/^fr/i.test(navigator.language || "") ? "fr" : "en"));
+  document.querySelectorAll("[data-set]").forEach(function (b) { b.addEventListener("click", function () { set(b.dataset.set); }); });
+
+  var f = document.getElementById("f"), err = document.getElementById("err");
+  f.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var v = function (n) { return (f.elements[n].value || "").trim(); };
+    var missing = !v("name") || !v("addr") || !v("who") || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v("email")) || !f.elements.ok.checked;
+    if (missing) {
+      err.textContent = lang === "fr" ? "Merci de remplir les champs marqués *, avec une adresse e-mail valide, et de cocher la case." : "Please fill in the fields marked *, with a valid email, and tick the box.";
+      err.hidden = false; return;
+    }
+    err.hidden = true;
+    var body = [
+      "Business: " + v("name"), "Type: " + v("type"), "Town: " + v("town"), "Address: " + v("addr"),
+      "Phone: " + v("phone"), "Website: " + v("web"), "Hours: " + v("hours"), "Step-free: " + v("access"),
+      "Description: " + v("desc"), "", "Contact: " + v("who") + " <" + v("email") + ">",
+      "Confirmed owner/manager and agreed to publication: yes", "Language: " + lang
+    ].join("\n");
+    document.getElementById("txt").textContent = body;
+    document.getElementById("done").hidden = false;
+    f.hidden = true;
+    document.getElementById("done").scrollIntoView({ behavior: "smooth" });
+    location.href = "mailto:hello@monacomadeeasy.com?subject=" + encodeURIComponent("Add my business: " + v("name")) + "&body=" + encodeURIComponent(body);
+  });
+})();
+</script>
+</body>
+</html>

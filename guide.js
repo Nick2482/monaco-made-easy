@@ -105,13 +105,34 @@
       (e.wc === "yes" ? '<span class="g-wc">' + esc(t("Wheelchair accessible")) + "</span>" : "") +
       (w ? "<small>" + esc(t("{d} away, about {n} min walk", { d: window.MMEMap.niceDistance(w.metres), n: w.minutes })) + "</small>" : "") +
       '<span class="g-links">' + (e.ph ? '<a href="tel:' + esc(e.ph.replace(/[^+\d]/g, "")) + '">' + esc(e.ph) + "</a>" : "") +
-      (webUrl ? '<a href="' + esc(webUrl) + '" target="_blank" rel="noopener">' + esc(webHost(webUrl)) + "</a>" : "") + "</span></div>" +
+      (webUrl ? '<a href="' + esc(webUrl) + '" target="_blank" rel="noopener">' + esc(webHost(webUrl)) + "</a>" : "") +
+      '<button type="button" class="g-gm" data-gq="' + esc([e.n, e.addr, e.a].filter(Boolean).join(", ")) + '" data-ll="' + e.lat + "," + e.lng + '">' + esc(t("Reviews on Google")) + "</button></span></div>" +
       '<button type="button" class="map-mini" data-goto="' + e.lat + "," + e.lng + '" data-label="' + esc(e.n) + '">' + esc(t("Take me there")) + "</button></li>";
   }
 
   function currentCat() { var c = (location.hash.split("/")[2] || "").split("?")[0]; return COLOR[c] ? c : "eat"; }
   function currentGrp(cat) { var g = (location.hash.split("/")[3] || "").split("?")[0]; return cat === "eat" && GRPS.some(function (x) { return x[0] === g; }) ? g : ""; }
   function inCat(e, cat, grp) { return e.k === cat && (!grp || (e.grp || []).indexOf(grp) >= 0); }
+
+  // Google's own page for a place (rating, reviews, photos) in a sheet over the app, so the visitor never leaves it.
+  function googleSheet(q, ll) {
+    var esc = ui().esc, old = document.getElementById("gm-sheet");
+    if (old) old.remove();
+    var src = "https://maps.google.com/maps?q=" + encodeURIComponent(q) + "&ll=" + encodeURIComponent(ll) + "&z=17&hl=" + encodeURIComponent(window.MMEI18N.lang()) + "&output=embed";
+    var d = document.createElement("div");
+    d.id = "gm-sheet"; d.className = "gm-sheet"; d.setAttribute("role", "dialog"); d.setAttribute("aria-modal", "true"); d.setAttribute("aria-label", t("Reviews on Google"));
+    d.innerHTML = '<div class="gm-box"><div class="gm-head"><strong>' + esc(q.split(", ")[0]) + '</strong><button type="button" class="gm-close" aria-label="' + esc(t("Close")) + '">✕</button></div>' +
+      (navigator.onLine === false ? '<p class="gm-off">' + esc(t("You’re offline. Google reviews need a connection.")) + "</p>"
+        : '<iframe title="' + esc(t("Reviews on Google")) + '" src="' + esc(src) + '" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>') +
+      '<p class="gm-note">' + esc(t("Google’s rating and map for this place. For all reviews and photos, tap “View larger map”, then Back to return here.")) + "</p></div>";
+    function close() { d.remove(); document.removeEventListener("keydown", onKey); }
+    function onKey(ev) { if (ev.key === "Escape") close(); }
+    d.addEventListener("click", function (ev) { if (ev.target === d || ev.target.closest(".gm-close")) close(); });
+    document.addEventListener("keydown", onKey);
+    document.body.appendChild(d);
+    d.querySelector(".gm-close").focus();
+    if (window.MMEStats) window.MMEStats.track("Google reviews opened");
+  }
 
   var screen = {
     html: function () {
@@ -132,7 +153,8 @@
         (all.length > 12 && !locked ? '<input class="g-search" id="g-search" type="search" placeholder="' + esc(t("Search by name or food")) + '" aria-label="' + esc(t("Search by name or food")) + '">' : "") +
         '<p class="loc-error" id="g-err" hidden></p><ul class="lifts g-list" id="g-list"></ul>' +
         (locked && P ? P.lockCard("See every place, with opening hours and the step-free way there") : "") +
-        '<p class="unchecked">' + esc(t("Places come from OpenStreetMap and local listings. Opening times change, so check before you go.")) + "</p></div></section>";
+        '<p class="unchecked">' + esc(t("Places come from OpenStreetMap and local listings. Opening times change, so check before you go.")) + "</p>" +
+        '<p class="g-addbiz"><a href="business.html">' + esc(t("Own a business here? Add it to the guide")) + "</a></p></div></section>";
     },
     mount: function (root) {
       var M = window.MMEMap, cat = currentCat(), grp = currentGrp(cat), P = window.MMEPro, locked = !FREE[cat] && P && !P.isPro();
@@ -184,6 +206,8 @@
       root.querySelector("#g-find").addEventListener("click", locate);
       locate();
       root.addEventListener("click", function (e) {
+        var gm = e.target.closest("[data-gq]");
+        if (gm) { googleSheet(gm.dataset.gq, gm.dataset.ll); return; }
         var b = e.target.closest("[data-goto]");
         if (!b) return;
         var ll = b.dataset.goto.split(",");
