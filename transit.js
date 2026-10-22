@@ -209,7 +209,7 @@
         trainsCard() +
         '<section class="tr-sec"><h2 class="tr-sec-h">' + tb("Buses along the coast") + "</h2>" +
         '<div class="tr-card tr-train"><strong>' + tb("Bus 600: Nice, Monaco, Menton") + "</strong><span>" + tb("The coastal bus, about every 10 to 15 minutes (every 20 at weekends). It runs from Nice (Square Normandie-Niemen) through Villefranche, Beaulieu, Èze-sur-Mer and Cap d’Ail into Monaco, then on to Roquebrune and Menton. In Monaco it stops near the station (Sainte-Dévote), the Casino and Place des Moulins. €2.10 if you tap your card or phone on board, €2.50 in cash. Live times are in the ZOU! app. Night bus 601 runs Thursday to Saturday.") + "</span></div>" +
-        '<div class="tr-card tr-train"><strong>' + tb("Bus 80: Nice airport, Monaco, Menton") + "</strong><span>" + tb("The express airport bus, every 25 to 50 minutes from early morning to about 10pm, every day. About an hour from **Terminal 2** to Monaco, stopping at Place d’Armes, the tourist office, the Casino and Larvotto. €21.40 if bought in advance, €21.80 on board (tap your card).") + " " + tb("Travelling as a group of 3 to 9? A group ticket bought on board starts at €45.80 for everyone, which is much cheaper.") + '</span><a class="tr-more" href="#/airport">' + tb("Next buses from the airport") + "</a></div>" +
+        '<div class="tr-card tr-train"><strong>' + tb("Bus 80: Nice airport, Monaco, Menton") + "</strong><span>" + tb("The express airport bus, every 25 to 50 minutes from early morning to about 10pm, every day. About an hour from **Terminal 2** to Monaco, stopping at Place d’Armes, the tourist office, the Casino and Larvotto. €21.40 if bought in advance, €21.80 on board (tap your card).") + " " + tb("Travelling as a group of 3 to 9? A group ticket bought on board starts at €45.80 for everyone, which is much cheaper.") + '</span><a class="tr-more" href="#/airport/bus">' + tb("Next buses from the airport") + "</a></div>" +
         "</section>" +
         '<section class="tr-sec"><h2 class="tr-sec-h">' + tb("Buses in Monaco") + "</h2>" +
         '<h3 class="tr-sub">' + tb("Next buses near you") + '</h3><div id="tr-near"><button type="button" class="btn btn-red" id="tr-find"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-1-7h2v3.06A8 8 0 0 1 19.94 11H23v2h-3.06A8 8 0 0 1 13 19.94V23h-2v-3.06A8 8 0 0 1 4.06 13H1v-2h3.06A8 8 0 0 1 11 4.06zm1 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>' + tb("Show buses near me") + "</button></div>" +
@@ -306,7 +306,7 @@
         "<p>" + tb("Walk about 7 minutes from Terminal 1 to **Nice Saint-Augustin** station (from Terminal 2, take the free tram one stop). Trains to Monaco Monte-Carlo usually run every 15 minutes through the day and take about 35 minutes. A regional ticket costs a few euros. Evening and Sunday services can be thinner, so check the SNCF Connect app for live times.") + "</p>" +
         (TR ? trFromAirport(monacoNow()) : "") +
         '<p class="way-tip">' + tb("At Monaco, the app picks the best station exit for where you’re staying. Tap “Just arrived?” on the home screen.") + "</p></li>" +
-        '<li class="way"><div class="way-top"><strong>' + tb("Bus: ZOU! line 80") + '</strong><span class="way-tag">' + tb("Direct") + "</span></div>" +
+        '<li class="way" id="way-bus"><div class="way-top"><strong>' + tb("Bus: ZOU! line 80") + '</strong><span class="way-tag">' + tb("Direct") + "</span></div>" +
         "<p>" + tb("From **Terminal 2**, every 30 to 50 minutes from 8:30am to 10pm, every day. About an hour to Monaco, stopping at Place d’Armes, the Casino and Larvotto. €21.40, or €21.80 bought on board (pay by tapping your card).") + " " + tb("Travelling as a group of 3 to 9? A group ticket bought on board starts at €45.80 for everyone, which is much cheaper.") + "</p>" +
         (next.length ? '<p class="way-next">' + tb("Next buses from the airport: {times}", { times: "**" + next.map(hhmm).join(", ") + "**" }) + "</p>" : '<p class="way-next">' + tb("No more buses from the airport today. The first one tomorrow is at 08:30.") + "</p>") + "</li>" +
         '<li class="way"><div class="way-top"><strong>' + tb("Taxi") + '</strong><span class="way-tag">' + tb("Easiest with bags") + "</span></div>" +
@@ -315,7 +315,10 @@
         "<p>" + tb("About 7 minutes to Monaco Heliport in Fontvieille, usually with a car to your hotel included. Book ahead with an operator. Shared seats start at around €200.") + "</p></li></ol>" +
         '<p class="unchecked">' + tb("ZOU! times are from the timetable valid from 2 June 2026. Check zou.maregionsud.fr or SNCF Connect on the day.") + "</p></section>";
     },
-    mount: function () {}
+    mount: function (root) {
+      // Arriving from "Next buses from the airport": jump straight to the bus.
+      if (/^#\/airport\/bus/.test(location.hash)) setTimeout(function () { var b = root.querySelector("#way-bus"); if (b) { b.scrollIntoView({ block: "start" }); window.scrollBy(0, -80); b.classList.add("way-hl"); } }, 60);
+    }
   };
 
   // ---------- Monaco or France? ----------

@@ -878,3 +878,4 @@ h1 .pro-badge { margin-left: 4px; font-size: 14px; }
 .tr-trains.tr-sec { margin-top: 34px; }
 .tr-more { display: inline-block; margin-top: 10px; font-weight: 700; color: var(--red); }
 :root[data-theme="dark"] .tr-more { color: #ff8a95; }
+.way.way-hl { box-shadow: 0 0 0 3px var(--red); }
