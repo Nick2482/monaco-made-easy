@@ -222,7 +222,7 @@
       '<ul class="sos-list">' + call("112", t("Any emergency"), t("Free, from any phone")) + call("18", t("Fire and ambulance")) + call("17", t("Police")) + "</ul>" +
       '<h3 class="sos-h">' + esc(t("In Monaco")) + '</h3><ul class="sos-list">' +
       call("+377 97 98 97 69", t("Princess Grace Hospital, emergency department"), "Avenue Pasteur") + call("+377 93 15 30 15", t("Police (Sûreté Publique)")) + "</ul>" +
-      '<p class="sos-more"><a href="https://www.monacosante.mc/en/emergency-contacts" target="_blank" rel="noopener">' + esc(t("Today’s on-duty doctor and pharmacy in Monaco")) + "</a></p>" +
+      '<p class="sos-more"><a href="https://www.monacosante.mc/en/emergency-contact-numbers/emergency-contact-numbers" target="_blank" rel="noopener">' + esc(t("Today’s on-duty doctor and pharmacy in Monaco")) + "</a></p>" +
       '<h3 class="sos-h">' + esc(t("In Beausoleil, Cap d’Ail and Roquebrune (France)")) + '</h3><ul class="sos-list">' +
       call("15", t("Medical emergency (SAMU)")) + call("3237", t("On-duty pharmacy (French side)"), t("Paid call")) + "</ul>" +
       '<p class="sos-more">' + esc(t("Poison centre (Marseille): +33 4 91 75 25 25")) + "</p></section>";
