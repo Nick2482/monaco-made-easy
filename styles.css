@@ -771,7 +771,7 @@ h1 .pro-badge { margin-left: 4px; font-size: 14px; }
   --riva-pale: #142c3b; --blush: #c9d6e5;
 }
 :root[data-theme="dark"] .bar { background: #121d29; }
-:root[data-theme="dark"] .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(.92) contrast(.88); }
+:root[data-theme="dark"] .leaflet-tile-pane { filter: brightness(.82) contrast(.95) saturate(.9); }
 :root[data-theme="dark"] .leaflet-container { background: #1b2530; }
 :root[data-theme="dark"] .leaflet-control-attribution, :root[data-theme="dark"] .leaflet-bar a { background: #18232f; color: #c9d6e5; }
 :root[data-theme="dark"] .mk-place { text-shadow: 0 0 3px #0f1822, 0 0 3px #0f1822, 0 0 3px #0f1822; }
@@ -779,7 +779,7 @@ h1 .pro-badge { margin-left: 4px; font-size: 14px; }
 :root[data-theme="dark"] :focus-visible { outline-color: #9cc3ea; box-shadow: 0 0 0 5px #0f1822; }
 :root[data-theme="dark"] img { filter: brightness(.92); }
 :root[data-theme="dark"] input, :root[data-theme="dark"] select, :root[data-theme="dark"] textarea { background: #18232f; color: var(--ink); border-color: #2c3a49; }
-:root[data-theme="dark"] .sf-pill { background: #2e343d; }
+:root[data-theme="dark"] .sf-pill { background: #4a1820; color: #ffb3bb; }
 :root[data-theme="dark"] .unchecked { color: #b7c3cc; }
 :root[data-theme="dark"] .info dd { color: #bcc0c4; }
 :root[data-theme="dark"] .map { background: #2b343d; }
@@ -821,4 +821,12 @@ h1 .pro-badge { margin-left: 4px; font-size: 14px; }
 @media (max-width: 420px) { .brand-name { font-size: 19px; } .bar .theme-btn { width: 36px; height: 36px; margin-right: 6px; } .bar { gap: 8px; } }
 :root[data-theme="dark"] .mark { background: #24466f; }
 :root[data-theme="dark"] .map-key { background: rgba(24, 35, 47, 0.94); color: var(--ink); }
-:root[data-theme="dark"] .leaflet-overlay-pane path[stroke="#0b2545"], :root[data-theme="dark"] .leaflet-overlay-pane path[stroke="#0a1f3c"] { stroke: #8fb8e6; }
+
+:root[data-theme="dark"] .rc-art { background: linear-gradient(180deg, #1c2a39 0%, #18232f 100%); }
+:root[data-theme="dark"] .prof .ph, :root[data-theme="dark"] .hchart .pt text { fill: #e9f0f8; }
+:root[data-theme="dark"] .prof .pdot, :root[data-theme="dark"] .hchart .pt .dot { fill: #18232f; stroke: #c9d6e5; }
+:root[data-theme="dark"] .prof .base { stroke: #3d5068; }
+:root[data-theme="dark"] .prof .sea-l, :root[data-theme="dark"] .hchart .gl { fill: #a8b4c0; }
+:root[data-theme="dark"] .hchart .sea { fill: #16324a; }
+:root[data-theme="dark"] .hchart .arc { stroke: #8fb8e6; }
+:root[data-theme="dark"] .rc-ends { color: #a8b4c0; }
