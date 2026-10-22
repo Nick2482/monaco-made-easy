@@ -124,6 +124,81 @@
   // ---------- Screens ----------
   var LINE_ORDER = function () { return B.routes.map(function (r, i) { return i; }); };
 
+  // ---------- Trains (SNCF timetable, saved on the phone) ----------
+  var TR = window.MMETrains;
+  function trDay(ymd) {   // days since the timetable starts
+    var a = new Date(TR.start + "T12:00:00Z"), b = new Date(ymd.slice(0, 4) + "-" + ymd.slice(4, 6) + "-" + ymd.slice(6, 8) + "T12:00:00Z");
+    return Math.round((b - a) / 864e5);
+  }
+  function trRuns(svc, day) { if (day < 0 || day >= TR.days) return false; var h = TR.svc[svc]; var byte = parseInt(h.substr((day >> 3) * 2, 2), 16); return !!(byte >> (day & 7) & 1); }
+  // Every departure in the next ~26 hours that matches pick(o) -> time; returns [{o, at (minutes from today's midnight)}], soonest first.
+  function trNext(pick, now) {
+    var day = trDay(now.ymd), out = [];
+    if (!TR || day >= TR.days) return null;
+    TR.dep.forEach(function (o) {
+      var tm = pick(o); if (tm == null || tm < 0) return;
+      for (var dd = -1; dd <= 1; dd++) {
+        if (!trRuns(o[4], day + dd)) continue;
+        var at = tm + dd * 1440;
+        if (at >= now.min - 1 && at < now.min + 1560) out.push({ o: o, at: at, svcDay: dd });
+      }
+    });
+    out.sort(function (a, b) { return a.at - b.at; });
+    return out;
+  }
+  function trStationIdx(name) { return TR.places.indexOf(name); }
+  function trBoard(fromName, west, now) {
+    var esc = ui().esc, si = trStationIdx(fromName), K = TR.keys;
+    var list = trNext(function (o) { return o[0] === si && o[2] === west ? o[1] : null; }, now);
+    if (list === null) return '<p class="tr-none">' + tb("This timetable has expired. Check the SNCF Connect app.") + "</p>";
+    // Last train of tonight's service (trains after midnight still count as tonight).
+    var tonight = list.filter(function (x) { return x.at < now.min + (now.min < 240 ? 300 : 1440 + 240 - now.min); });
+    var last = tonight.length ? tonight[tonight.length - 1] : null;
+    var rows = list.slice(0, 5).map(function (x) {
+      var o = x.o, inMin = x.at - now.min;
+      var arr = west ? [o[5][0] >= 0 ? tb("Nice-Ville {t}", { t: hhmm(o[5][0]) }) : "", o[5][1] >= 0 ? tb("Nice Saint-Augustin (airport) {t}", { t: hhmm(o[5][1]) }) : ""].filter(Boolean).join(" · ")
+                     : (o[5][2] >= 0 ? tb("Menton {t}", { t: hhmm(o[5][2]) }) : "");
+      return '<li><b class="tr-time">' + hhmm(x.at) + '</b><span class="tr-to">' + (tb("to {place}", { place: TR.places[o[3]] })) + (arr ? "<small>" + arr + "</small>" : "") + "</span>" +
+        '<span class="tr-in">' + (inMin <= 0 ? tb("now") : inMin < 60 ? tb("in {n} min", { n: inMin }) : x.at >= 1440 + 240 || (now.min >= 240 && x.at >= 1440 && x.at - now.min > 300) ? tb("tomorrow") : "") + "</span></li>";
+    }).join("");
+    return (rows ? '<ul class="tr-board">' + rows + "</ul>" : '<p class="tr-none">' + tb("No more trains today.") + "</p>") +
+      (last ? '<p class="tr-last">' + tb("**Last train tonight:** {t} to {place}", { t: hhmm(last.at), place: TR.places[last.o[3]] }) + "</p>" : '<p class="tr-last">' + tb("**No more trains tonight.** The times above are tomorrow’s.") + "</p>");
+  }
+  // Trains from Nice airport (Nice Saint-Augustin) to Monaco, for the airport page.
+  function trFromAirport(now) {
+    var esc = ui().esc, mon = trStationIdx("Monaco-Monte-Carlo");
+    var list = trNext(function (o) { return o[0] === mon && o[2] === 0 && o[5][1] >= 0 && o[5][1] < o[1] ? o[5][1] : null; }, now);
+    if (!list) return "";
+    var tonight = list.filter(function (x) { return x.at < now.min + (now.min < 240 ? 300 : 1440 + 240 - now.min); });
+    var last = tonight.length ? tonight[tonight.length - 1] : null;
+    return '<div class="tr-trains"><h3>' + tb("Next trains from Nice Saint-Augustin to Monaco") + '</h3><ul class="tr-board">' + list.slice(0, 4).map(function (x) {
+      return '<li><b class="tr-time">' + hhmm(x.at) + '</b><span class="tr-to">' + (tb("Monaco-Monte-Carlo {t}", { t: hhmm(x.at - x.o[5][1] + x.o[1]) })) + "</span>" +
+        '<span class="tr-in">' + (x.at - now.min < 60 ? tb("in {n} min", { n: Math.max(0, x.at - now.min) }) : x.at - now.min > 300 && x.at >= 1440 ? tb("tomorrow") : "") + "</span></li>";
+    }).join("") + "</ul>" + (last ? '<p class="tr-last">' + tb("**Last train tonight:** {t} to {place}", { t: hhmm(last.at), place: "Monaco-Monte-Carlo" }) + "</p>" : "") +
+      '<p class="tr-note">' + tb("Planned SNCF timetable. Check the SNCF Connect app for delays.") + "</p></div>";
+  }
+  function trainsCard() {
+    if (!TR) return "";
+    var st = [["Monaco-Monte-Carlo", "Monaco"], ["Cap-d'Ail", "Cap d’Ail"], ["Roquebrune-Cap-Martin", "Roquebrune"]];
+    return '<section class="tr-trains" id="tr-trains"><h2 class="area-h">' + tb("Next trains") + "</h2>" +
+      '<div class="ess-chips" role="group" aria-label="' + tb("Station") + '">' + st.map(function (x, i) { return '<button type="button" class="chip' + (i ? "" : " on") + '" data-st="' + x[0] + '">' + tb(x[1]) + "</button>"; }).join("") + "</div>" +
+      '<div class="tr-dir" role="group"><button type="button" class="chip on" data-w="1">' + tb("Towards Nice") + '</button><button type="button" class="chip" data-w="0">' + tb("Towards Menton and Italy") + "</button></div>" +
+      '<div id="tr-board"></div><p class="tr-note">' + tb("Planned SNCF timetable, saved on your phone. Check the SNCF Connect app for delays and platforms.") + "</p></section>";
+  }
+  function mountTrains(root) {
+    var box = root.querySelector("#tr-trains"); if (!box) return;
+    var st = "Monaco-Monte-Carlo", w = 1;
+    function draw() { var b = root.querySelector("#tr-board"); if (b) b.innerHTML = trBoard(st, w, monacoNow()); }
+    box.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-st],[data-w]"); if (!b) return;
+      if (b.dataset.st) { st = b.dataset.st; box.querySelectorAll("[data-st]").forEach(function (x) { x.classList.toggle("on", x === b); }); }
+      else { w = +b.dataset.w; box.querySelectorAll("[data-w]").forEach(function (x) { x.classList.toggle("on", x === b); }); }
+      draw();
+    });
+    draw();
+    var tick = setInterval(function () { if (!document.body.contains(box)) { clearInterval(tick); return; } draw(); }, 30000);
+  }
+
   var transportScreen = {
     html: function () {
       var esc = ui().esc, now = monacoNow();
@@ -132,7 +207,7 @@
         '<a class="tr-card tr-cruise" href="#/cruise"><strong>' + tb("On a cruise?") + "</strong><span>" + tb("Set your all-aboard time and we’ll tell you when to head back.") + "</span></a>" +
         '<a class="tr-card tr-taxi" href="#/taxis"><strong>' + tb("Taxis") + "</strong><span>" + tb("Numbers, ranks, fixed fares, and the border rule for Beausoleil and Cap d’Ail") + "</span></a>" +
         '<div class="tr-card tr-train"><strong>' + tb("Bus 600: Nice, Monaco, Menton") + "</strong><span>" + tb("The coastal bus, about every 10 to 15 minutes (every 20 at weekends). It runs from Nice (Square Normandie-Niemen) through Villefranche, Beaulieu, Èze-sur-Mer and Cap d’Ail into Monaco, then on to Roquebrune and Menton. In Monaco it stops near the station (Sainte-Dévote), the Casino and Place des Moulins. €2.10 if you tap your card or phone on board, €2.50 in cash. Live times are in the ZOU! app. Night bus 601 runs Thursday to Saturday.") + "</span></div>" +
-        '<div class="tr-card tr-train"><strong>' + tb("Trains from Monaco") + "</strong><span>" + tb("Usually every 15 minutes through the day: about 26 minutes to Nice-Ville and about 35 minutes to Nice Saint-Augustin for the airport. Trains also run east to Menton and Ventimiglia in Italy. For live times and platforms, use the SNCF Connect app.") + "</span></div>" +
+        trainsCard() +
         '<h2 class="area-h">' + tb("Next buses near you") + '</h2><div id="tr-near"><button type="button" class="btn btn-red" id="tr-find"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-1-7h2v3.06A8 8 0 0 1 19.94 11H23v2h-3.06A8 8 0 0 1 13 19.94V23h-2v-3.06A8 8 0 0 1 4.06 13H1v-2h3.06A8 8 0 0 1 11 4.06zm1 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>' + tb("Show buses near me") + "</button></div>" +
         '<h2 class="area-h">' + tb("Monaco bus lines") + '</h2><p class="lede-dark">' + tb("Buses cover almost all of Monaco and climb the hills for you. Tickets cost a couple of euros and can be bought on board. Check the price on the day.") + "</p>" +
         '<ul class="lines">' + LINE_ORDER().map(function (i) {
@@ -145,6 +220,7 @@
     },
     mount: function (root) {
       var M = window.MMEMap, esc = ui().esc;
+      mountTrains(root);
       root.querySelector("#tr-find").addEventListener("click", function () {
         var box = root.querySelector("#tr-near");
         box.innerHTML = '<p class="lede-dark">' + tb("Finding where you are…") + "</p>";
@@ -224,6 +300,7 @@
         '<ol class="ways">' +
         '<li class="way"><div class="way-top"><strong>' + tb("Train") + '</strong><span class="way-tag">' + tb("Cheapest") + "</span></div>" +
         "<p>" + tb("Walk about 7 minutes from Terminal 1 to **Nice Saint-Augustin** station (from Terminal 2, take the free tram one stop). Trains to Monaco Monte-Carlo usually run every 15 minutes through the day and take about 35 minutes. A regional ticket costs a few euros. Evening and Sunday services can be thinner, so check the SNCF Connect app for live times.") + "</p>" +
+        (TR ? trFromAirport(monacoNow()) : "") +
         '<p class="way-tip">' + tb("At Monaco, the app picks the best station exit for where you’re staying. Tap “Just arrived?” on the home screen.") + "</p></li>" +
         '<li class="way"><div class="way-top"><strong>' + tb("Bus: ZOU! line 80") + '</strong><span class="way-tag">' + tb("Direct") + "</span></div>" +
         "<p>" + tb("From **Terminal 2**, every 30 to 50 minutes from 8:30am to 10pm, every day. About an hour to Monaco, stopping at Place d’Armes, the Casino and Larvotto. €21.40, or €21.80 bought on board (pay by tapping your card).") + "</p>" +
