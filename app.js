@@ -290,6 +290,26 @@
   if (window.MMEStats) window.MMEStats.track("App opened", { lang: window.MMEI18N.lang() });
   // Changing language redraws the current screen in the new language.
   window.addEventListener("mme-lang", function () { render(); });
+  // Dark mode: the moon/sun button in the top bar. Remembered on this phone.
+  (function () {
+    var b = document.getElementById("theme-btn"), root = document.documentElement;
+    if (!b) return;
+    function show() {
+      var dark = root.getAttribute("data-theme") === "dark";
+      b.setAttribute("aria-pressed", String(dark));
+      b.setAttribute("aria-label", t(dark ? "Light mode" : "Dark mode"));
+      var m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute("content", dark ? "#121d29" : "#ffffff");
+    }
+    b.addEventListener("click", function () {
+      var next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      try { localStorage.setItem("mme-theme", next); } catch (e) {}
+      show();
+      if (window.MMEStats) window.MMEStats.track("Theme", { theme: next });
+    });
+    window.addEventListener("mme-lang", show);
+    show();
+  })();
   // A newer bus timetable arrived: redraw the transport screens.
   window.addEventListener("mme-bus", function () { if (/^#\/(transport|bus)/.test(location.hash)) render(); });
   // Pro switched on (or off): redraw.

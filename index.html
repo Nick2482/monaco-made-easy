@@ -6,6 +6,11 @@
   <title>Monaco Made Easy | Lifts, escalators and step-free routes</title>
   <meta name="description" content="Get around Monaco, Beausoleil and Cap d’Ail without the climb. Step-by-step routes using the free public lifts, escalators and walkways.">
   <meta name="theme-color" content="#ffffff">
+  <script>/* Dark or light, before anything is drawn: the visitor's choice, otherwise the phone's setting. */
+  (function () { var t = null; try { t = localStorage.getItem("mme-theme"); } catch (e) {}
+    if (t !== "dark" && t !== "light") t = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", t);
+    if (t === "dark") document.querySelector('meta[name="theme-color"]').setAttribute("content", "#121d29"); })();</script>
   <link rel="canonical" href="https://www.monacomadeeasy.com/">
   <!-- How the link looks when shared on WhatsApp, Facebook and so on -->
   <meta property="og:type" content="website">
@@ -41,6 +46,10 @@
       <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4l6 7h-4v9h-4v-9H6z"/></svg></span>
       <span class="brand-name">Monaco Made Easy</span>
     </a>
+    <button type="button" class="theme-btn" id="theme-btn" data-t-label="Dark mode" aria-pressed="false">
+      <svg class="t-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 2.5a9.5 9.5 0 1 0 7 15.6A8 8 0 0 1 14.5 2.5z"/></svg>
+      <svg class="t-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M11 1h2v3h-2zm0 19h2v3h-2zM1 11h3v2H1zm19 0h3v2h-3zM3.5 5l1.4-1.4 2.1 2.1-1.4 1.4zm13.4 13.4 1.4-1.4 2.1 2.1-1.4 1.4zM3.5 19l2.1-2.1 1.4 1.4-2.1 2.1zM17 5.6l2.1-2.1 1.4 1.4-2.1 2.1z"/></svg>
+    </button>
     <div class="lang-wrap">
       <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="true" aria-expanded="false" aria-controls="lang-sheet" data-t-label="Language">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm6.9 6a8 8 0 0 0-3.4-3.3c.6 1 1 2.1 1.3 3.3zM12 4c-.8 1.1-1.5 2.5-1.9 4h3.8c-.4-1.5-1.1-2.9-1.9-4zM4.3 14h3.4a16 16 0 0 1 0-4H4.3a8 8 0 0 0 0 4zm.8 2a8 8 0 0 0 3.4 3.3c-.6-1-1-2.1-1.3-3.3zm2.1-8c.3-1.2.7-2.3 1.3-3.3A8 8 0 0 0 5.1 8zM12 20c.8-1.1 1.5-2.5 1.9-4h-3.8c.4 1.5 1.1 2.9 1.9 4zm2.3-6a14 14 0 0 0 0-4H9.7a14 14 0 0 0 0 4zm1.2 5.3a8 8 0 0 0 3.4-3.3h-2.1c-.3 1.2-.7 2.3-1.3 3.3zM16.3 14h3.4a8 8 0 0 0 0-4h-3.4a16 16 0 0 1 0 4z"/></svg>
