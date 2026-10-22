@@ -181,7 +181,9 @@
   function guideBlock() {
     var P = window.MMEPro, G = window.MMEGuide;
     return '<section class="block guide-block"><div class="block-head"><h2>' + esc(t("Eat, drink and see")) + "</h2>" + (P ? P.badge() : "") + '</div><p class="block-lede">' +
-      esc(t("Restaurants, bars, museums and more, each with the step-free way there.")) + '</p><nav class="g-quick">' + G.CATS.map(function (c) {
+      esc(t("Restaurants, bars, museums and more, each with the step-free way there.")) + '</p>' +
+      '<a class="g-searchlink" href="#/guide/find"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3a7 7 0 0 1 5.6 11.2l5.1 5.1-1.4 1.4-5.1-5.1A7 7 0 1 1 10 3zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10z"/></svg><span>' + esc(t("Search the guide")) + '</span></a>' +
+      '<nav class="g-quick"><a href="#/guide/saved"><span class="eq-ico" style="--c:#ce1126"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.5-9.2C1 8.3 3.2 5 6.6 5c2 0 3.4 1.1 4.4 2.5C12 6.1 13.4 5 15.4 5 18.8 5 21 8.3 19.5 11.8 17.5 16.4 12 21 12 21z"/></svg></span>' + esc(t("My places")) + "</a>" + G.CATS.map(function (c) {
         return '<a href="#/guide/' + c[0] + '"><span class="eq-ico" style="--c:' + G.COLOR[c[0]] + '">' + icon(c[0]) + "</span>" + esc(t(c[1])) + "</a>";
       }).join("") + "</nav></section>";
   }
@@ -191,7 +193,7 @@
     var items = [["toilets", "Toilets"], ["pharmacy", "Pharmacy"], ["atm", "Cash machine"], ["drinking_water", "Drinking water"]];
     return '<nav class="ess-quick" aria-label="' + esc(t("Nearest essentials")) + '">' + items.map(function (i) {
       return '<a href="#/map/' + i[0] + '"><span class="eq-ico" style="--c:' + window.MMEMap.CAT_COLOR[i[0]] + '">' + icon(i[0]) + "</span>" + esc(t(i[1])) + "</a>";
-    }).join("") + "</nav>";
+    }).join("") + "</nav>" + '<a class="sos-link" href="#/info"><span aria-hidden="true">☎</span> ' + esc(t("Emergency numbers")) + "</a>";
   }
 
   // Links to the visitor guide pages, in the visitor's language.
@@ -212,10 +214,19 @@
       [t("Accessible toilets"), t("There are accessible toilets at the Casino Square tourist office, the Oceanographic Museum, the Grimaldi Forum, Larvotto Beach and Port Hercule.")],
       [t("Cap d'Ail"), t("Cap d’Ail is in France, just west of Fontvieille, with no border checks. A flat seaside path links it to Monaco, and it has beaches, restaurants and a small harbour.")],
       [t("Beausoleil"), t("Beausoleil is in France, right behind Monte-Carlo. The border is just a street, with no checks. It’s steep, so plan to use the lifts on the way back up.")],
-      [t("Emergencies"), t("Call 112 from any phone.")],
       [t("Where our data comes from"), t("Streets, paths, lifts and escalators: © OpenStreetMap contributors (ODbL). Heights: Terrain Tiles from AWS Open Data (Mapzen and others). Map style: © CARTO. Buses: Compagnie des Autobus de Monaco open data.")]
     ];
-    return '<section class="page"><h1>' + esc(t("Good to know")) + "</h1>" + (X ? X.knowCard() + X.offlineCard() : "") +
+    // Emergency numbers first: one tap to call. Monaco numbers from the Monaco government; France from service-public.fr.
+    function call(tel, label, sub) { return '<li' + (tel.length > 5 ? ' class="sos-long"' : "") + '><a href="tel:' + tel.replace(/[^+\d]/g, "") + '"><b>' + esc(tel) + "</b><span>" + esc(label) + (sub ? "<small>" + esc(sub) + "</small>" : "") + "</span></a></li>"; }
+    var sos = '<section class="sos" id="emergency"><h2>' + esc(t("Emergency numbers")) + '</h2><p class="sos-lede">' + esc(t("Tap a number to call. 112 works from any phone, in Monaco and France.")) + "</p>" +
+      '<ul class="sos-list">' + call("112", t("Any emergency"), t("Free, from any phone")) + call("18", t("Fire and ambulance")) + call("17", t("Police")) + "</ul>" +
+      '<h3 class="sos-h">' + esc(t("In Monaco")) + '</h3><ul class="sos-list">' +
+      call("+377 97 98 97 69", t("Princess Grace Hospital, emergency department"), "Avenue Pasteur") + call("+377 93 15 30 15", t("Police (Sûreté Publique)")) + "</ul>" +
+      '<p class="sos-more"><a href="https://www.monacosante.mc/en/emergency-contacts" target="_blank" rel="noopener">' + esc(t("Today’s on-duty doctor and pharmacy in Monaco")) + "</a></p>" +
+      '<h3 class="sos-h">' + esc(t("In Beausoleil, Cap d’Ail and Roquebrune (France)")) + '</h3><ul class="sos-list">' +
+      call("15", t("Medical emergency (SAMU)")) + call("3237", t("On-duty pharmacy (French side)"), t("Paid call")) + "</ul>" +
+      '<p class="sos-more">' + esc(t("Poison centre (Marseille): +33 4 91 75 25 25")) + "</p></section>";
+    return '<section class="page"><h1>' + esc(t("Good to know")) + "</h1>" + sos + (X ? X.knowCard() + X.offlineCard() : "") +
       '<a class="pro-link" href="#/pro">' + (window.MMEPro ? window.MMEPro.badge() : "") + "<span><strong>" + esc(t("Monaco Made Easy Pro")) + "</strong><small>" + esc(t("What’s included, and how to get it")) + "</small></span></a>" +
       (window.MMEInstall ? window.MMEInstall.card("info") + window.MMEInstall.shareCard() : "") +
       '<p class="play-soon">' + esc(t("Coming soon to Google Play. You can already add this app to your home screen: in your browser’s menu, choose “Add to Home Screen”.")) + "</p>" + '<dl class="info">' + items.map(function (i) {

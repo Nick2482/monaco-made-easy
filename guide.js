@@ -93,6 +93,17 @@
     if (e.h) return niceHours(e.h);
     return "";
   }
+  // ---------- My places (saved on this phone) ----------
+  var FAVK = "mme-favs";
+  function favKey(e) { return e.n + "|" + (+e.lat).toFixed(4) + "|" + (+e.lng).toFixed(4); }
+  function favs() { try { return JSON.parse(localStorage.getItem(FAVK) || "[]"); } catch (x) { return []; } }
+  function isFav(e) { return favs().indexOf(favKey(e)) >= 0; }
+  function toggleFav(key) {
+    var f = favs(), i = f.indexOf(key);
+    if (i >= 0) f.splice(i, 1); else f.push(key);
+    try { localStorage.setItem(FAVK, JSON.stringify(f)); } catch (x) {}
+    return i < 0;
+  }
   function webHost(w) { return w.replace(/^https?:\/\/(www\.)?/, "").replace(/\/.*$/, ""); }
   function itemHtml(e, d, w) {
     var esc = ui().esc, open = e.hx ? null : openNow(e.h), hrs = hoursLine(e);
@@ -106,13 +117,26 @@
       (w ? "<small>" + esc(t("{d} away, about {n} min walk", { d: window.MMEMap.niceDistance(w.metres), n: w.minutes })) + "</small>" : "") +
       '<span class="g-links">' + (e.ph ? '<a href="tel:' + esc(e.ph.replace(/[^+\d]/g, "")) + '">' + esc(e.ph) + "</a>" : "") +
       (webUrl ? '<a href="' + esc(webUrl) + '" target="_blank" rel="noopener">' + esc(webHost(webUrl)) + "</a>" : "") +
+      '<button type="button" class="g-fav' + (isFav(e) ? " on" : "") + '" data-fav="' + esc(favKey(e)) + '" aria-pressed="' + isFav(e) + '">' + (isFav(e) ? "♥ " + esc(t("Saved")) : "♡ " + esc(t("Save"))) + "</button>" +
       '<button type="button" class="g-gm" data-gq="' + esc([e.n, e.addr, e.a].filter(Boolean).join(", ")) + '" data-ll="' + e.lat + "," + e.lng + '">' + esc(t("Reviews on Google")) + "</button></span></div>" +
       '<button type="button" class="map-mini" data-goto="' + e.lat + "," + e.lng + '" data-label="' + esc(e.n) + '">' + esc(t("Take me there")) + "</button></li>";
   }
 
-  function currentCat() { var c = (location.hash.split("/")[2] || "").split("?")[0]; return COLOR[c] ? c : "eat"; }
+  var VIRT = { find: "Search everything", saved: "My places" };
+  function currentCat() { var c = (location.hash.split("/")[2] || "").split("?")[0]; return COLOR[c] || VIRT[c] ? c : "eat"; }
   function currentGrp(cat) { var g = (location.hash.split("/")[3] || "").split("?")[0]; return cat === "eat" && GRPS.some(function (x) { return x[0] === g; }) ? g : ""; }
-  function inCat(e, cat, grp) { return e.k === cat && (!grp || (e.grp || []).indexOf(grp) >= 0); }
+  function inCat(e, cat, grp) {
+    if (cat === "find") return true;
+    if (cat === "saved") return isFav(e);
+    return e.k === cat && (!grp || (e.grp || []).indexOf(grp) >= 0);
+  }
+  function catName(k) { var c = CATS.filter(function (x) { return x[0] === k; })[0]; return c ? c[1] : ""; }
+  // Everything a visitor might type to find a place: name, kind, cuisine, section, area, street.
+  function hay(e) {
+    return [t(e.n), e.n, subtitle(e), t(catName(e.k)), catName(e.k), e.addr || "", e.d ? t(e.d) : "",
+      (e.grp || []).map(function (g) { var x = GRPS.filter(function (y) { return y[0] === g; })[0]; return x ? t(x[1]) + " " + x[1] : ""; }).join(" "),
+      (e.cu || "").replace(/[;_]/g, " "), e.sub || ""].join(" ").toLowerCase();
+  }
 
   // Google's own page for a place (rating, reviews, photos) in a sheet over the app, so the visitor never leaves it.
   function googleSheet(q, ll) {
@@ -141,16 +165,20 @@
       return '<section class="mapscreen guide g-' + cat + '">' +
         '<div class="map-wrap"><div id="g-map" class="map" role="application" aria-label="' + esc(t("Map")) + '"></div>' +
         '<button type="button" class="find-me" id="g-find"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-1-7h2v3.06A8 8 0 0 1 19.94 11H23v2h-3.06A8 8 0 0 1 13 19.94V23h-2v-3.06A8 8 0 0 1 4.06 13H1v-2h3.06A8 8 0 0 1 11 4.06zm1 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>' + esc(t("Find the nearest")) + "</button></div>" +
-        '<div class="near"><div class="ess-chips" role="group" aria-label="' + esc(t("Guide")) + '">' + CATS.map(function (c) {
+        '<div class="near"><div class="ess-chips" role="group" aria-label="' + esc(t("Guide")) + '">' +
+          [["find", "🔍 " + t("Search")], ["saved", "♥ " + t("My places")]].map(function (c) {
+            return '<a class="chip chip-virt' + (c[0] === cat ? " on" : "") + '" href="#/guide/' + c[0] + '"' + (c[0] === cat ? ' aria-current="true"' : "") + ">" + esc(c[1]) + "</a>";
+          }).join("") + CATS.map(function (c) {
           return '<a class="chip' + (c[0] === cat ? " on" : "") + '" href="#/guide/' + c[0] + '"' + (c[0] === cat ? ' aria-current="true"' : "") + ">" + esc(t(c[1])) + "</a>";
         }).join("") + "</div>" +
         (cat === "eat" ? '<div class="ess-chips g-grps" role="group" aria-label="' + esc(t("Restaurants")) + '"><a class="chip' + (!grp ? " on" : "") + '" href="#/guide/eat"' + (!grp ? ' aria-current="true"' : "") + ">" + esc(t("All")) + "</a>" +
           GRPS.map(function (g) { return '<a class="chip' + (g[0] === grp ? " on" : "") + '" href="#/guide/eat/' + g[0] + '"' + (g[0] === grp ? ' aria-current="true"' : "") + ">" + esc(t(g[1])) + "</a>"; }).join("") + "</div>" : "") +
-        "<h1>" + esc(t(grp ? GRPS.filter(function (g) { return g[0] === grp; })[0][1] : CATS.filter(function (c) { return c[0] === cat; })[0][1])) + (FREE[cat] ? "" : " " + (P ? P.badge() : "")) + "</h1>" +
+        "<h1>" + esc(t(VIRT[cat] || (grp ? GRPS.filter(function (g) { return g[0] === grp; })[0][1] : catName(cat)))) + (FREE[cat] ? "" : " " + (P ? P.badge() : "")) + "</h1>" +
         (grp === "fine" ? '<p class="lede-dark">' + esc(t("Stars from the Michelin Guide 2026. Book well ahead, and expect a dress code.")) + "</p>" : "") +
         (cat === "broker" ? '<aside class="note note-ess"><p>' + esc(t("These are offices. Call or email ahead to arrange a visit.")) + "</p></aside>" : "") +
-        '<p class="lede-dark" id="g-sub">' + esc(t("{n} in Monaco and nearby, each with the step-free way there.", { n: all.length })) + "</p>" +
-        (all.length > 12 && !locked ? '<input class="g-search" id="g-search" type="search" placeholder="' + esc(t("Search by name or food")) + '" aria-label="' + esc(t("Search by name or food")) + '">' : "") +
+        '<p class="lede-dark" id="g-sub">' + esc(cat === "saved" ? t("Places you’ve saved on this phone.") : cat === "find" ? t("Every place in the guide: restaurants, cafés, bars, shops, tabacs, museums and more.") : t("{n} in Monaco and nearby, each with the step-free way there.", { n: all.length })) + "</p>" +
+        ((all.length > 12 || cat === "find") && !locked ? '<input class="g-search" id="g-search" type="search" placeholder="' + esc(t(cat === "find" ? "Try “sushi”, “tabac” or a name" : "Search by name or food")) + '" aria-label="' + esc(t("Search by name or food")) + '"' + (cat === "find" ? " autofocus" : "") + ">" : "") +
+        (!locked && cat !== "saved" || (cat === "saved" && all.length) ? '<div class="g-tools"><button type="button" class="chip g-open-btn" id="g-open" aria-pressed="false">🕘 ' + esc(t("Open now")) + "</button></div>" : "") +
         '<p class="loc-error" id="g-err" hidden></p><ul class="lifts g-list" id="g-list"></ul>' +
         (locked && P ? P.lockCard("See every place, with opening hours and the step-free way there") : "") +
         '<p class="unchecked">' + esc(t("Places come from OpenStreetMap and local listings. Opening times change, so check before you go.")) + "</p>" +
@@ -167,13 +195,19 @@
         else mk.on("click", function () { location.hash = "#/pro"; });
       });
       if (all.length) { var b = L.latLngBounds(all.map(function (e) { return [e.lat, e.lng]; })); map.fitBounds(b.pad(0.1), { maxZoom: 17 }); }
-      var list = root.querySelector("#g-list"), pos = null, q = "";
+      var list = root.querySelector("#g-list"), pos = null, q = "", onlyOpen = false;
       function draw() {
+        var esc = ui().esc;
+        if (cat === "saved" && !all.length) { list.innerHTML = '<li class="more-note">' + esc(t("Nothing saved yet. Tap “♡ Save” on any place in the guide to keep it here.")) + "</li>"; return; }
+        if (cat === "find" && !q) { list.innerHTML = '<li class="more-note">' + esc(t("Type above to search all {n} places.", { n: all.length })) + "</li>"; return; }
+        var words = q.split(/\s+/).filter(Boolean);
         var items = all.filter(function (e) {
-          if (!q) return true;
-          var hay = (t(e.n) + " " + e.n + " " + subtitle(e)).toLowerCase();
-          return hay.indexOf(q) >= 0;
-        }).map(function (e) { return { e: e, d: pos ? M.distance(pos, e) : null }; });
+          if (cat === "saved" && !isFav(e)) return false;
+          if (!words.length) return true;
+          var h = hay(e);
+          return words.every(function (w) { return h.indexOf(w) >= 0; });
+        }).map(function (e) { return { e: e, d: pos ? M.distance(pos, e) : null, o: e.hx ? null : openNow(e.h) }; });
+        if (onlyOpen) items = items.filter(function (it) { return it.o !== false; });
         if (pos) {
           // Real walking times by the easiest route (lifts, escalators, the hills) for the nearer places;
           // the straight-line distance only decides which ones are worth working out.
@@ -182,14 +216,21 @@
           items.sort(function (a, b) { return (a.w ? a.w.minutes : 1e9) - (b.w ? b.w.minutes : 1e9) || a.d - b.d; });
         }
         else items.sort(function (a, b) { return (b.e.mich || 0) - (a.e.mich || 0) || (b.e.star || 0) - (a.e.star || 0) || (b.e.d ? 1 : 0) - (a.e.d ? 1 : 0); });
-        var shown = locked ? items.slice(0, 3) : items.slice(0, q ? 40 : 25);
-        list.innerHTML = shown.map(function (it) { return itemHtml(it.e, it.d, it.w); }).join("") +
+        // Open now: places we know are open first, then the ones whose hours we don't know (never hidden).
+        if (onlyOpen) { var kn = items.filter(function (it) { return it.o === true; }), un = items.filter(function (it) { return it.o !== true; }); items = kn.concat(un); }
+        var shown = locked ? items.slice(0, 3) : items.slice(0, q || cat === "saved" ? 60 : onlyOpen ? 40 : 25);
+        var firstUnknown = onlyOpen ? shown.findIndex(function (it) { return it.o !== true; }) : -1;
+        list.innerHTML = (onlyOpen && firstUnknown !== 0 ? '<li class="g-sec">' + esc(t("Open now")) + "</li>" : "") + shown.map(function (it, i) {
+            return (i === firstUnknown ? '<li class="g-sec">' + esc(t("Hours not known")) + '<small>' + esc(t("We don’t have opening hours for these yet. Call ahead or check the door.")) + "</small></li>" : "") + itemHtml(it.e, it.d, it.w);
+          }).join("") +
           (!locked && items.length > shown.length ? '<li class="more-note">' + ui().esc(t(pos ? "The {s} closest of {n}. All of them are on the map." : "{s} of {n}. All of them are on the map.", { s: shown.length, n: items.length })) + "</li>" : "") +
           (!items.length ? '<li class="more-note">' + ui().esc(t("Nothing matches that search.")) + "</li>" : "");
       }
       draw();
       var s = root.querySelector("#g-search");
       if (s) s.addEventListener("input", function () { q = s.value.trim().toLowerCase(); draw(); });
+      var ob = root.querySelector("#g-open");
+      if (ob) ob.addEventListener("click", function () { onlyOpen = !onlyOpen; ob.classList.toggle("on", onlyOpen); ob.setAttribute("aria-pressed", String(onlyOpen)); draw(); if (window.MMEStats && onlyOpen) window.MMEStats.track("Open now filter"); });
       var me = null, stop = null;
       function locate() {
         var errBox = root.querySelector("#g-err");
@@ -206,6 +247,8 @@
       root.querySelector("#g-find").addEventListener("click", locate);
       locate();
       root.addEventListener("click", function (e) {
+        var fv = e.target.closest("[data-fav]");
+        if (fv) { var added = toggleFav(fv.dataset.fav); if (window.MMEStats) window.MMEStats.track(added ? "Place saved" : "Place unsaved"); draw(); return; }
         var gm = e.target.closest("[data-gq]");
         if (gm) { googleSheet(gm.dataset.gq, gm.dataset.ll); return; }
         var b = e.target.closest("[data-goto]");
