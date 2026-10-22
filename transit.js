@@ -180,7 +180,7 @@
   function trainsCard() {
     if (!TR) return "";
     var st = [["Monaco-Monte-Carlo", "Monaco"], ["Cap-d'Ail", "Cap d’Ail"], ["Roquebrune-Cap-Martin", "Roquebrune"]];
-    return '<section class="tr-trains" id="tr-trains"><h2 class="area-h">' + tb("Next trains") + "</h2>" +
+    return '<section class="tr-trains tr-sec" id="tr-trains"><h2 class="tr-sec-h">' + tb("Trains") + "</h2>" +
       '<div class="ess-chips" role="group" aria-label="' + tb("Station") + '">' + st.map(function (x, i) { return '<button type="button" class="chip' + (i ? "" : " on") + '" data-st="' + x[0] + '">' + tb(x[1]) + "</button>"; }).join("") + "</div>" +
       '<div class="tr-dir" role="group"><button type="button" class="chip on" data-w="1">' + tb("Towards Nice") + '</button><button type="button" class="chip" data-w="0">' + tb("Towards Menton and Italy") + "</button></div>" +
       '<div id="tr-board"></div><p class="tr-note">' + tb("Planned SNCF timetable, saved on your phone. Check the SNCF Connect app for delays and platforms.") + "</p></section>";
@@ -206,14 +206,18 @@
         '<a class="tr-card tr-airport" href="#/airport"><strong>' + tb("From Nice airport") + "</strong><span>" + tb("Train, bus, taxi or helicopter, and how long each takes") + "</span></a>" +
         '<a class="tr-card tr-cruise" href="#/cruise"><strong>' + tb("On a cruise?") + "</strong><span>" + tb("Set your all-aboard time and we’ll tell you when to head back.") + "</span></a>" +
         '<a class="tr-card tr-taxi" href="#/taxis"><strong>' + tb("Taxis") + "</strong><span>" + tb("Numbers, ranks, fixed fares, and the border rule for Beausoleil and Cap d’Ail") + "</span></a>" +
-        '<div class="tr-card tr-train"><strong>' + tb("Bus 600: Nice, Monaco, Menton") + "</strong><span>" + tb("The coastal bus, about every 10 to 15 minutes (every 20 at weekends). It runs from Nice (Square Normandie-Niemen) through Villefranche, Beaulieu, Èze-sur-Mer and Cap d’Ail into Monaco, then on to Roquebrune and Menton. In Monaco it stops near the station (Sainte-Dévote), the Casino and Place des Moulins. €2.10 if you tap your card or phone on board, €2.50 in cash. Live times are in the ZOU! app. Night bus 601 runs Thursday to Saturday.") + "</span></div>" +
         trainsCard() +
-        '<h2 class="area-h">' + tb("Next buses near you") + '</h2><div id="tr-near"><button type="button" class="btn btn-red" id="tr-find"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-1-7h2v3.06A8 8 0 0 1 19.94 11H23v2h-3.06A8 8 0 0 1 13 19.94V23h-2v-3.06A8 8 0 0 1 4.06 13H1v-2h3.06A8 8 0 0 1 11 4.06zm1 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>' + tb("Show buses near me") + "</button></div>" +
-        '<h2 class="area-h">' + tb("Monaco bus lines") + '</h2><p class="lede-dark">' + tb("Buses cover almost all of Monaco and climb the hills for you. Tickets cost a couple of euros and can be bought on board. Check the price on the day.") + "</p>" +
+        '<section class="tr-sec"><h2 class="tr-sec-h">' + tb("Buses along the coast") + "</h2>" +
+        '<div class="tr-card tr-train"><strong>' + tb("Bus 600: Nice, Monaco, Menton") + "</strong><span>" + tb("The coastal bus, about every 10 to 15 minutes (every 20 at weekends). It runs from Nice (Square Normandie-Niemen) through Villefranche, Beaulieu, Èze-sur-Mer and Cap d’Ail into Monaco, then on to Roquebrune and Menton. In Monaco it stops near the station (Sainte-Dévote), the Casino and Place des Moulins. €2.10 if you tap your card or phone on board, €2.50 in cash. Live times are in the ZOU! app. Night bus 601 runs Thursday to Saturday.") + "</span></div>" +
+        '<div class="tr-card tr-train"><strong>' + tb("Bus 80: Nice airport, Monaco, Menton") + "</strong><span>" + tb("The express airport bus, every 25 to 50 minutes from early morning to about 10pm, every day. About an hour from **Terminal 2** to Monaco, stopping at Place d’Armes, the tourist office, the Casino and Larvotto. €21.40 if bought in advance, €21.80 on board (tap your card).") + '</span><a class="tr-more" href="#/airport">' + tb("Next buses from the airport") + "</a></div>" +
+        "</section>" +
+        '<section class="tr-sec"><h2 class="tr-sec-h">' + tb("Buses in Monaco") + "</h2>" +
+        '<h3 class="tr-sub">' + tb("Next buses near you") + '</h3><div id="tr-near"><button type="button" class="btn btn-red" id="tr-find"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-1-7h2v3.06A8 8 0 0 1 19.94 11H23v2h-3.06A8 8 0 0 1 13 19.94V23h-2v-3.06A8 8 0 0 1 4.06 13H1v-2h3.06A8 8 0 0 1 11 4.06zm1 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>' + tb("Show buses near me") + "</button></div>" +
+        '<h3 class="tr-sub">' + tb("Monaco bus lines") + '</h3><p class="lede-dark">' + tb("Buses cover almost all of Monaco and climb the hills for you. Tickets cost a couple of euros and can be bought on board. Check the price on the day.") + "</p>" +
         '<ul class="lines">' + LINE_ORDER().map(function (i) {
           var r = B.routes[i];
           return '<li><a href="#/bus/' + i + '">' + badge(i) + "<span>" + esc(r.name) + "</span></a></li>";
-        }).join("") + "</ul>" +
+        }).join("") + "</ul></section>" +
         '<p class="unchecked">' + (expired(now) ? tb("The bus timetable we have ran until {date}. Times shown are the usual pattern, so check at the stop.", { date: niceDate(B.valid[1]) })
           : tb("Timetable from the Compagnie des Autobus de Monaco, valid until {date}.", { date: niceDate(B.valid[1]) })) + "</p>" +
         "</section>";
