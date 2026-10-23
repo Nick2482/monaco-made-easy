@@ -71,6 +71,51 @@ def is_pro_payment(s):
     return not link or s.get("payment_link") == link
 
 
+# ---------- Google Play (purchases made inside the Play Store app) ----------
+PLAY_PACKAGE = "com.monacomadeeasy.www.twa"
+PLAY_SKUS = {"pro_unlock"}
+PLAY_API = "https://androidpublisher.googleapis.com/androidpublisher/v3/applications/%s/purchases/products/%s/tokens/%s"
+
+
+def b64u(b):
+    return base64.urlsafe_b64encode(b).rstrip(b"=").decode()
+
+
+def play_access_token():
+    """OAuth token for the Play Developer API, from the service-account key kept in Vercel (PLAY_SA_KEY)."""
+    raw = os.environ.get("PLAY_SA_KEY", "").strip()
+    if not raw:
+        raise RuntimeError("no-play-key")
+    key = json.loads(raw)
+    from cryptography.hazmat.primitives import hashes, serialization
+    from cryptography.hazmat.primitives.asymmetric import padding
+    import time
+    now = int(time.time())
+    head = b64u(json.dumps({"alg": "RS256", "typ": "JWT"}).encode())
+    claim = b64u(json.dumps({"iss": key["client_email"], "scope": "https://www.googleapis.com/auth/androidpublisher",
+                             "aud": "https://oauth2.googleapis.com/token", "iat": now, "exp": now + 600}).encode())
+    pk = serialization.load_pem_private_key(key["private_key"].encode(), password=None)
+    sig = b64u(pk.sign((head + "." + claim).encode(), padding.PKCS1v15(), hashes.SHA256()))
+    data = urllib.parse.urlencode({"grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer", "assertion": head + "." + claim + "." + sig}).encode()
+    with urllib.request.urlopen(urllib.request.Request("https://oauth2.googleapis.com/token", data=data), timeout=15) as r:
+        return json.loads(r.read())["access_token"]
+
+
+def play_check(sku, token):
+    """Checks a Play purchase is real and paid, acknowledges it (or Google refunds it after 3 days), returns the order id."""
+    at = play_access_token()
+    url = PLAY_API % (PLAY_PACKAGE, urllib.parse.quote(sku), urllib.parse.quote(token, safe=""))
+    hdr = {"Authorization": "Bearer " + at, "User-Agent": "MonacoMadeEasy/1.0"}
+    with urllib.request.urlopen(urllib.request.Request(url, headers=hdr), timeout=15) as r:
+        p = json.loads(r.read())
+    if p.get("purchaseState") != 0:      # 0 = purchased, 1 = cancelled, 2 = pending
+        return None, p.get("purchaseState")
+    if p.get("acknowledgementState") == 0:
+        req = urllib.request.Request(url + ":acknowledge", data=b"{}", headers=dict(hdr, **{"Content-Type": "application/json"}), method="POST")
+        urllib.request.urlopen(req, timeout=15).read()
+    return p.get("orderId") or token, 0
+
+
 def handle(body):
     action = body.get("action")
     if action == "redeem":
@@ -98,6 +143,18 @@ def handle(body):
                 if is_pro_payment(s):
                     return 200, {"ok": True, "code": code_for(s["id"])}
         return 404, {"ok": False, "error": "no-purchase"}
+    if action == "play":
+        sku, token = str(body.get("sku") or ""), str(body.get("token") or "")
+        if sku not in PLAY_SKUS or not re.fullmatch(r"[A-Za-z0-9._\-:]{20,600}", token):
+            return 400, {"ok": False, "error": "bad-purchase"}
+        secret()
+        try:
+            order, state = play_check(sku, token)
+        except urllib.error.HTTPError as e:
+            return 404, {"ok": False, "error": "play-%d" % e.code}
+        if not order:
+            return 402, {"ok": False, "error": "pending" if state == 2 else "not-paid"}
+        return 200, {"ok": True, "code": code_for("play:" + order)}
     return 400, {"ok": False, "error": "bad-action"}
 
 
@@ -133,4 +190,5 @@ class handler(BaseHTTPRequestHandler):
         sec = os.environ.get("PRO_SECRET", "").strip()
         self.reply(405, {"ok": False, "error": "use-post",
                          "stripe_key": "missing" if not key else ("test" if "_test_" in key else "live"),
-                         "pro_secret": "missing" if not sec else ("too short" if len(sec) < 16 else "ok")})
+                         "pro_secret": "missing" if not sec else ("too short" if len(sec) < 16 else "ok"),
+                         "play_key": "ok" if os.environ.get("PLAY_SA_KEY", "").strip().startswith("{") else "missing"})
