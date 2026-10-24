@@ -901,3 +901,21 @@ a.event-banner { text-decoration: none; }
 :root[data-theme="dark"] .wo-ev p { color: var(--head); }
 .page .know-link { color: var(--head); border-color: var(--edge); }
 .page .know-link svg { fill: var(--red); }
+/* Spoken directions */
+.voice-btn { display: inline-flex; align-items: center; gap: 10px; margin-top: 12px; padding: 12px 18px; border-radius: 999px; border: 0; background: var(--navy); color: #fff; font: inherit; font-weight: 700; font-size: 17px; cursor: pointer; }
+.voice-btn svg { width: 22px; height: 22px; fill: #fff; flex: none; }
+:root[data-theme="dark"] .voice-btn { background: var(--red); }
+.step.step-now { background: rgba(206, 17, 38, 0.08); border-radius: 14px; box-shadow: 0 0 0 8px rgba(206, 17, 38, 0.08); }
+.voice-bar { position: fixed; left: 8px; right: 8px; bottom: calc(80px + env(safe-area-inset-bottom)); z-index: 20; padding: 12px 14px 12px; border-radius: 16px; background: var(--navy); color: #fff; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+@media (min-width: 700px) { .voice-bar { left: 50%; right: auto; width: calc(var(--col) - 16px); transform: translateX(-50%); } }
+.voice-bar .vb-top { display: flex; justify-content: space-between; align-items: center; }
+.voice-bar .vb-count { font-weight: 700; font-size: 14px; color: var(--riva); }
+.voice-bar .vb-x { width: 36px; height: 36px; border: 0; background: transparent; color: #fff; font-size: 26px; cursor: pointer; }
+.voice-bar .vb-text { margin: 2px 0 10px; font-size: 18px; line-height: 1.35; font-weight: 700; }
+.voice-bar .vb-btns { display: grid; grid-template-columns: 1fr 1fr 1.3fr; gap: 8px; }
+.voice-bar .vb-btns button { padding: 11px 6px; border-radius: 12px; border: 1.5px solid rgba(255,255,255,.4); background: transparent; color: #fff; font: inherit; font-weight: 700; font-size: 16px; cursor: pointer; }
+.voice-bar .vb-btns .vb-next { background: var(--red); border-color: var(--red); }
+.voice-bar .vb-btns button:disabled { opacity: .4; }
+.voice-bar .vb-note, .voice-bar .vb-warn { margin-top: 8px; font-size: 13.5px; color: #c9d6e5; }
+.voice-bar .vb-warn { color: #ffd8a8; }
+body.voice-on main { padding-bottom: 240px; }

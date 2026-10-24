@@ -223,10 +223,10 @@
   function describe(legs, s, g, from, to) {
     var steps = [], secs = 0, metresTotal = 0, nSteps = 0, nLifts = 0, nEsc = 0, climbed = 0, saved = 0;
     var lines = []; // [{type, pts}]
-    function add(kind, data) {
+    function add(kind, data, at) {
       var last = steps[steps.length - 1];
       if (kind === "walk" && last && last.kind === "walk") { last.m += data.m; last.secs += data.secs; last.rise += data.rise || 0; addName(last, data.name, data.m); return; }
-      var st = { kind: kind, m: data.m || 0, secs: data.secs || 0, names: {}, up: data.up || 0, count: data.count || 0, lift: data.lift || null, rise: data.rise || 0 };
+      var st = { kind: kind, m: data.m || 0, secs: data.secs || 0, names: {}, up: data.up || 0, count: data.count || 0, lift: data.lift || null, rise: data.rise || 0, at: at };
       if (kind === "walk") addName(st, data.name, data.m);
       steps.push(st);
     }
@@ -240,16 +240,17 @@
       if (t === 3 || t === 4) { if (dh > 0) saved += dh; } else if (dh > 0) { climbed += dh; secs += dh * 4; }
       var kind = t === 2 ? "steps" : t === 3 ? "escalator" : t === 4 ? "lift" : "walk";
       lines.push({ kind: kind, pts: edgePoints(leg) });
-      if (kind === "steps") { nSteps++; add("steps", { m: e[2], secs: c.secs, up: up || (dh > 2 ? 1 : dh < -2 ? -1 : 0), count: e[7] }); }
-      else if (kind === "escalator") { nEsc++; add("escalator", { m: e[2], secs: c.secs, up: up }); }
-      else if (kind === "lift") { nLifts++; add("lift", { secs: c.secs, lift: { name: name } }); }
-      else add("walk", { m: e[2], secs: c.secs, name: name, rise: dh });
+      var at0 = [lat[leg.from], lng[leg.from]];
+      if (kind === "steps") { nSteps++; add("steps", { m: e[2], secs: c.secs, up: up || (dh > 2 ? 1 : dh < -2 ? -1 : 0), count: e[7] }, at0); }
+      else if (kind === "escalator") { nEsc++; add("escalator", { m: e[2], secs: c.secs, up: up }, at0); }
+      else if (kind === "lift") { nLifts++; add("lift", { secs: c.secs, lift: { name: name } }, at0); }
+      else add("walk", { m: e[2], secs: c.secs, name: name, rise: dh }, at0);
       // Passing through a lift between two different pieces of path = riding the lift.
       var lf = liftAt[leg.to];
       if (lf && i < legs.length - 1) {
         nLifts++; secs += LIFT_WAIT;
         var after = legs[i + 1], dl = climb(leg.to, after.to);
-        add("lift", { secs: LIFT_WAIT, lift: lf, up: dl > 3 ? 1 : dl < -3 ? -1 : 0 });
+        add("lift", { secs: LIFT_WAIT, lift: lf, up: dl > 3 ? 1 : dl < -3 ? -1 : 0 }, [lat[leg.to], lng[leg.to]]);
       }
     });
 
@@ -274,17 +275,17 @@
         var key = st.rise > 12 ? (streets ? "Walk {m} m uphill (about {h} m up) along {streets}." : "Walk {m} m uphill (about {h} m up) along the footpath.")
           : st.rise < -12 ? (streets ? "Walk {m} m downhill along {streets}." : "Walk {m} m downhill along the footpath.")
           : (streets ? "Walk {m} m along {streets}." : "Walk {m} m along the footpath.");
-        return { kind: "walk", text: T(key, { m: m, h: up, streets: streets }), m: st.m };
+        return { kind: "walk", text: T(key, { m: m, h: up, streets: streets }), m: st.m, at: st.at };
       }
       if (st.kind === "lift") {
         var l = st.lift || {};
         var dir = st.up > 0 ? " up" : st.up < 0 ? " down" : "";
         var line = l.name ? T("Take the public lift “{name}”" + dir + ".", { name: l.name }) : T("Take the public lift" + dir + ".");
-        return { kind: "lift", text: line + (l.desc ? " (" + l.desc + ")" : "") };
+        return { kind: "lift", text: line + (l.desc ? " (" + l.desc + ")" : ""), at: st.at };
       }
-      if (st.kind === "escalator") return { kind: "escalator", text: T("Take the escalator" + (st.up > 0 ? " up" : st.up < 0 ? " down" : "") + ".") };
+      if (st.kind === "escalator") return { kind: "escalator", text: T("Take the escalator" + (st.up > 0 ? " up" : st.up < 0 ? " down" : "") + "."), at: st.at };
       var sd = st.up > 0 ? " going up" : st.up < 0 ? " going down" : "";
-      return { kind: "steps", text: st.count ? T("{n} steps" + sd + ".", { n: st.count }) : T("Steps" + sd + ".") };
+      return { kind: "steps", text: st.count ? T("{n} steps" + sd + ".", { n: st.count }) : T("Steps" + sd + "."), at: st.at };
     });
 
     var pre = s.d > 40 ? Math.round(s.d) : 0, post = g.d > 40 ? Math.round(g.d) : 0;

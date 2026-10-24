@@ -201,7 +201,7 @@
       var to = state.to, layer = L.layerGroup().addTo(map), fromPt = null;
       L.marker([to.lat, to.lng], { icon: L.divIcon({ className: "", html: '<span class="mk-end mk-to"></span>', iconSize: [26, 26], iconAnchor: [13, 13] }) }).addTo(map);
 
-      var lastNote = null, blockedKey = "", tracked = false;
+      var lastNote = null, blockedKey = "", tracked = false, voiceList = [];
       function draw(from, note) {
         fromPt = from; lastNote = note;
         layer.clearLayers();
@@ -263,8 +263,9 @@
           if (exit) list.push({ kind: "walk", text: t("Inside the station, follow the signs for the “{exit}” exit.", { exit: exit.name }) });
           if (r.startGap > 40) list.push({ kind: "walk", text: t("Walk about {n} m to the start of the route.", { n: Math.round(r.startGap / 10) * 10 }) });
           list = list.concat(r.directions);
-          list.push({ kind: "arrive", text: (outside && r.endGap > 300 ? t("From here it’s about {n} min further, outside our mapped area.", { n: Math.round(r.endGap / 70) }) : t("Arrive at {place}.", { place: lbl(to) })) });
-          h += '<h2 class="steps-h">' + esc(t("Step by step")) + '</h2><ol class="steps">' + list.map(function (st) {
+          list.push({ kind: "arrive", text: (outside && r.endGap > 300 ? t("From here it’s about {n} min further, outside our mapped area.", { n: Math.round(r.endGap / 70) }) : t("Arrive at {place}.", { place: lbl(to) })), at: [to.lat, to.lng] });
+          voiceList = list;
+          h += '<h2 class="steps-h">' + esc(t("Step by step")) + "</h2>" + (Voice.ok() ? '<button type="button" class="voice-btn" id="voice-go"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg>' + esc(t("Read the directions aloud")) + "</button>" : "") + '<ol class="steps">' + list.map(function (st) {
             var k = st.kind === "steps" ? "steps" : st.kind;
             return '<li class="step step-' + k + '"><span class="step-ico" style="--c:' + (k === "steps" ? "#d9480f" : ui().COLORS[k] || "#0b2545") + '">' + icon(k === "steps" ? "steps" : k) + "</span>" +
               '<div><span class="step-type">' + esc(t(STEP_LABEL[k] || "Arrive")) + "</span><p>" + esc(st.text) + "</p></div></li>";
@@ -296,7 +297,10 @@
           '<div class="route-fb" id="route-fb"><span>' + esc(t("Was this route right?")) + '</span><button type="button" class="btn-small" data-fb="yes">' + esc(t("Yes")) + '</button><button type="button" class="btn-small" data-fb="no">' + esc(t("No")) + "</button></div>" +
           '<p class="unchecked">' + esc(t("Routes are worked out from OpenStreetMap. Lifts can be closed for repairs, so follow the blue “Ascenseur public” signs on the day.")) + "</p>";
         var body = root.querySelector("#plan-body");
+        Voice.stop();
         body.innerHTML = h;
+        var vg = body.querySelector("#voice-go");
+        if (vg) vg.addEventListener("click", function () { Voice.start(voiceList, body.querySelector("ol.steps")); });
         if (r && window.MMEPro) window.MMEPro.tipAfterRoute(body);
         var wcBox = body.querySelector("#wc-on");
         if (wcBox) wcBox.addEventListener("change", function () { setWheelchair(wcBox.checked); avoidSteps = true; draw0(fromPt, lastNote); });
@@ -497,6 +501,94 @@
     if (!c) return false;
     state.to = window.MMEExtras.shipPoint(c); state.from = null; state.arrival = null; return true;
   }
+
+  // ---------- Spoken directions ----------
+  // Reads each step aloud in the app's language with the phone's own voice (speechSynthesis), and moves on
+  // by itself when you reach the start of the next step. Back / Repeat / Next work by hand too.
+  var VOICE_LANG = { en: "en-GB", fr: "fr-FR", it: "it-IT", de: "de-DE", es: "es-ES", zh: "zh-CN", ja: "ja-JP", ko: "ko-KR", ru: "ru-RU" };
+  var Voice = (function () {
+    var list = [], ol = null, idx = 0, upto = 0, bar = null, stopLoc = null, wake = null, active = false;
+    function at(i) { return list[i] && list[i].at ? { lat: list[i].at[0], lng: list[i].at[1] } : null; }
+    function same(i, j) { var a = at(i), b = at(j); return !!(a && b && M().distance(a, b) < 15); }
+    function ok() { return typeof window.speechSynthesis !== "undefined" && typeof window.SpeechSynthesisUtterance !== "undefined"; }
+    function code() { return VOICE_LANG[window.MMEI18N.lang()] || "en-GB"; }
+    function voiceFor(c) {
+      var vs = window.speechSynthesis.getVoices() || [], base = c.split("-")[0];
+      return vs.filter(function (v) { return v.lang && v.lang.replace("_", "-") === c; })[0] || vs.filter(function (v) { return v.lang && v.lang.toLowerCase().indexOf(base) === 0; })[0] || null;
+    }
+    function say(text) {
+      var u = new SpeechSynthesisUtterance(text), c = code(), v = voiceFor(c);
+      u.lang = c; if (v) u.voice = v; u.rate = 0.95;
+      window.speechSynthesis.cancel(); window.speechSynthesis.speak(u);
+    }
+    function show(i) {
+      idx = Math.max(0, Math.min(list.length - 1, i));
+      var st = list[idx];
+      if (ol) [].forEach.call(ol.children, function (li, k) { li.classList.toggle("step-now", k === idx); });
+      var cur = ol && ol.children[idx]; if (cur) cur.scrollIntoView({ behavior: "smooth", block: "center" });
+      bar.querySelector(".vb-count").textContent = t("Step {n} of {total}", { n: idx + 1, total: list.length });
+      bar.querySelector("[data-v=back]").disabled = idx === 0;
+      bar.querySelector("[data-v=next]").disabled = false;
+      // Steps that start at the same spot (a lift, then the walk from its top) are read together.
+      var text = st.text; upto = idx;
+      while (upto + 1 < list.length && same(upto + 1, idx)) { upto++; text += " " + list[upto].text; }
+      bar.querySelector(".vb-text").textContent = text;
+      bar.querySelector("[data-v=next]").disabled = upto >= list.length - 1;
+      say(text);
+    }
+    function near(p) {
+      if (!active || upto >= list.length - 1) return;
+      var nx = at(upto + 1);
+      if (!nx) return;
+      var d = M().distance(p, nx), lim = Math.max(20, Math.min(p.acc || 25, 40));
+      if (d <= lim) show(upto + 1);
+    }
+    function start(l, olEl) {
+      if (!ok() || !l.length) return;
+      stop(); list = l; ol = olEl; active = true;
+      var esc = ui().esc;
+      bar = document.createElement("div");
+      bar.className = "voice-bar"; bar.setAttribute("role", "region"); bar.setAttribute("aria-label", t("Voice directions"));
+      bar.innerHTML = '<div class="vb-top"><span class="vb-count"></span><button type="button" class="vb-x" data-v="stop" aria-label="' + esc(t("Stop")) + '">×</button></div>' +
+        '<p class="vb-text" aria-live="polite"></p>' +
+        '<div class="vb-btns"><button type="button" data-v="back">' + esc(t("Back")) + '</button><button type="button" data-v="repeat">' + esc(t("Repeat")) + '</button><button type="button" class="vb-next" data-v="next">' + esc(t("Next")) + "</button></div>" +
+        '<p class="vb-note">' + esc(t("We’ll read the next step when you reach it.")) + "</p>";
+      document.body.appendChild(bar); document.body.classList.add("voice-on");
+      bar.addEventListener("click", function (e) {
+        var b = e.target.closest("[data-v]"); if (!b) return;
+        var v = b.dataset.v;
+        if (v === "stop") stop(); else if (v === "back") show(idx - 1); else if (v === "next") show(upto + 1); else say(bar.querySelector(".vb-text").textContent);
+      });
+      // Check there's a voice for this language (voices can load a moment later).
+      function checkVoice() {
+        if (!bar) return;
+        var c = code(), vs = window.speechSynthesis.getVoices() || [];
+        if (vs.length && !voiceFor(c) && !bar.querySelector(".vb-warn")) {
+          var w = document.createElement("p"); w.className = "vb-warn";
+          w.textContent = t("Your phone has no voice for this language yet. You can add one in its text-to-speech settings.");
+          bar.appendChild(w);
+        }
+      }
+      if (window.speechSynthesis.onvoiceschanged !== undefined) window.speechSynthesis.onvoiceschanged = checkVoice;
+      setTimeout(checkVoice, 800);
+      try { if (navigator.wakeLock) navigator.wakeLock.request("screen").then(function (w) { wake = w; }).catch(function () {}); } catch (e) {}
+      M().startLocating(function () {});
+      stopLoc = M().onLocation(near);
+      if (window.MMEStats) window.MMEStats.track("Voice directions", { lang: window.MMEI18N.lang() });
+      show(0);
+    }
+    function stop() {
+      active = false;
+      try { window.speechSynthesis.cancel(); } catch (e) {}
+      if (stopLoc) { var s0 = stopLoc; stopLoc = null; setTimeout(s0, 0); }
+      if (wake) { try { wake.release(); } catch (e) {} wake = null; }
+      if (bar) { bar.remove(); bar = null; }
+      document.body.classList.remove("voice-on");
+      if (ol) [].forEach.call(ol.children, function (li) { li.classList.remove("step-now"); });
+    }
+    window.addEventListener("hashchange", stop);
+    return { ok: ok, start: start, stop: stop };
+  })();
 
   window.MMEPlanner = { homeRoute: homeRoute, shipRoute: shipRoute, arriveScreen: arriveScreen, placeRef: placeRef, go: go, boxHtml: boxHtml, mountBox: mountBox, screen: screen, fromLink: fromLink, toLink: toLink, state: state };
 })();
