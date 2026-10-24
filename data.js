@@ -124,6 +124,7 @@ window.MME = {
     { id: "rex", name: "Rex lift", where: "Square Kraemer", links: "Lower Beausoleil ↔ upper Beausoleil", area: "Beausoleil", type: "lift", lat: 43.7420, lng: 7.4245, approx: true },
     { id: "liberation", name: "Libération lift", where: "Indigo car park, Place de la Libération", links: "Car park levels ↔ Place de la Libération", area: "Beausoleil", type: "lift", lat: 43.7430, lng: 7.4231, approx: true },
     { id: "josephine", name: "Palais Joséphine lift", where: "Palais Joséphine", links: "Street levels in central Beausoleil", area: "Beausoleil", type: "lift", lat: 43.7436, lng: 7.4214, approx: true },
+    { id: "riviera-lift", name: "Riviéra glass lift", where: "7 Avenue du Maréchal Foch", links: "Boulevard de la République ↔ Avenue du Maréchal Foch", area: "Beausoleil", type: "lift", lat: 43.74335, lng: 7.42470, approx: true, wheelchair: "yes" },
     { id: "noix", name: "Chemin de la Noix lift", where: "Chemin de la Noix", links: "Vallon de la Noix area", area: "Beausoleil", type: "lift", lat: 43.7452, lng: 7.4196, approx: true }
   ]
 };
