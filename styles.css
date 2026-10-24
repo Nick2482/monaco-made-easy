@@ -919,3 +919,11 @@ a.event-banner { text-decoration: none; }
 .voice-bar .vb-note, .voice-bar .vb-warn { margin-top: 8px; font-size: 13.5px; color: #c9d6e5; }
 .voice-bar .vb-warn { color: #ffd8a8; }
 body.voice-on main { padding-bottom: 240px; }
+/* Sightseeing tours */
+.tr-sight .tr-season { display: block; margin-top: 10px; font-weight: 700; color: #2b8a3e; }
+.tr-sight .tr-season.off { color: #c2410c; }
+.tr-sight .tr-small { display: block; margin-top: 6px; font-size: 15px; color: var(--grey); }
+.tr-sight .tr-acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.tr-sight .btn-small { text-decoration: none; }
+:root[data-theme="dark"] .tr-sight .tr-season { color: #8ce99a; }
+:root[data-theme="dark"] .tr-sight .tr-season.off { color: #ffd8a8; }

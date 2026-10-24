@@ -199,6 +199,22 @@
     var tick = setInterval(function () { if (!document.body.contains(box)) { clearInterval(tick); return; } draw(); }, 30000);
   }
 
+  // Sightseeing: the little tourist train from the Rock, and the hop-on hop-off bus (checked Oct 2026, visitmonaco.com / monacolegrandtour.com).
+  var TRAIN_STOP = [43.73085, 7.425];
+  function sightseeing(now) {
+    var md = +String(now.ymd).slice(4, 8), on = md >= 201 && md <= 1115;
+    return '<section class="tr-sec"><h2 class="tr-sec-h">' + tb("Sightseeing tours") + "</h2>" +
+      '<div class="tr-card tr-train tr-sight"><strong>' + tb("The little tourist train (Monaco Tours)") + "</strong><span>" +
+        tb("A 30 to 40 minute loop from the Rock: Place d’Armes, the harbour, the Grand Prix circuit and Casino Square, then back up past the Palace and the Cathedral. It leaves from opposite the Oceanographic Museum. €12, children aged 2 to 10 €6, cash or card.") + "</span>" +
+        '<span class="tr-season' + (on ? "" : " off") + '">' + tb(on ? "Runs every day from February to mid-November, weather and events permitting." : "Not running now: the little train is off for the winter and starts again in February.") + "</span>" +
+        '<span class="tr-small">' + tb("Wheelchair access depends on works, so call first: +377 92 05 64 38.") + "</span>" +
+        '<div class="tr-acts"><button type="button" class="btn-small" data-tr-go="' + TRAIN_STOP.join(",") + '" data-label="' + ui().esc(t("The little tourist train (Monaco Tours)")) + '">' + tb("Take me there") + "</button></div></div>" +
+      '<div class="tr-card tr-train tr-sight"><strong>' + tb("Monaco Le Grand Tour (hop-on, hop-off bus)") + "</strong><span>" +
+        tb("An open-top bus with 12 stops, including the Rock, the Casino, the station, Fontvieille and the cruise terminal. A bus every 30 minutes from 10:00 to 17:30, and your ticket lasts all day. Wheelchair space, and room for 2 folded pushchairs. Tickets from the driver.") + "</span>" +
+        '<span class="tr-small">' + tb("Closed on National Day (19 November).") + "</span>" +
+        '<div class="tr-acts"><a class="btn-small" href="https://www.monacolegrandtour.com/en/" target="_blank" rel="noopener">' + tb("More information") + "</a></div></div>" +
+      "</section>";
+  }
   var transportScreen = {
     html: function () {
       var esc = ui().esc, now = monacoNow();
@@ -211,6 +227,7 @@
         '<div class="tr-card tr-train"><strong>' + tb("Bus 600: Nice, Monaco, Menton") + "</strong><span>" + tb("The coastal bus, about every 10 to 15 minutes (every 20 at weekends). It runs from Nice (Square Normandie-Niemen) through Villefranche, Beaulieu, Èze-sur-Mer and Cap d’Ail into Monaco, then on to Roquebrune and Menton. In Monaco it stops near the station (Sainte-Dévote), the Casino and Place des Moulins. €2.10 if you tap your card or phone on board, €2.50 in cash. Live times are in the ZOU! app. Night bus 601 runs Thursday to Saturday.") + "</span></div>" +
         '<div class="tr-card tr-train"><strong>' + tb("Bus 80: Nice airport, Monaco, Menton") + "</strong><span>" + tb("The express airport bus, every 25 to 50 minutes from early morning to about 10pm, every day. About an hour from **Terminal 2** to Monaco, stopping at Place d’Armes, the tourist office, the Casino and Larvotto. €21.40 if bought in advance, €21.80 on board (tap your card).") + " " + tb("Travelling as a group of 3 to 9? A group ticket bought on board starts at €45.80 for everyone, which is much cheaper.") + '</span><a class="tr-more" href="#/airport/bus">' + tb("Next buses from the airport") + "</a></div>" +
         "</section>" +
+        sightseeing(now) +
         '<section class="tr-sec"><h2 class="tr-sec-h">' + tb("Buses in Monaco") + "</h2>" +
         '<h3 class="tr-sub">' + tb("Next buses near you") + '</h3><div id="tr-near"><button type="button" class="btn btn-red" id="tr-find"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-1-7h2v3.06A8 8 0 0 1 19.94 11H23v2h-3.06A8 8 0 0 1 13 19.94V23h-2v-3.06A8 8 0 0 1 4.06 13H1v-2h3.06A8 8 0 0 1 11 4.06zm1 5a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>' + tb("Show buses near me") + "</button></div>" +
         '<h3 class="tr-sub">' + tb("Monaco bus lines") + '</h3><p class="lede-dark">' + tb("Buses cover almost all of Monaco and climb the hills for you. Tickets cost a couple of euros and can be bought on board. Check the price on the day.") + "</p>" +
@@ -225,6 +242,13 @@
     mount: function (root) {
       var M = window.MMEMap, esc = ui().esc;
       mountTrains(root);
+      root.addEventListener("click", function (e) {
+        var b = e.target.closest("[data-tr-go]"); if (!b) return;
+        var ll = b.dataset.trGo.split(",");
+        window.MMEPlanner.state.to = { label: b.dataset.label, lat: +ll[0], lng: +ll[1], kind: "place" };
+        window.MMEPlanner.state.from = null; window.MMEPlanner.state.arrival = null;
+        location.hash = "#/plan";
+      });
       root.querySelector("#tr-find").addEventListener("click", function () {
         var box = root.querySelector("#tr-near");
         box.innerHTML = '<p class="lede-dark">' + tb("Finding where you are…") + "</p>";
