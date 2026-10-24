@@ -300,7 +300,7 @@
         if (r && window.MMEPro) window.MMEPro.tipAfterRoute(body);
         var wcBox = body.querySelector("#wc-on");
         if (wcBox) wcBox.addEventListener("change", function () { setWheelchair(wcBox.checked); avoidSteps = true; draw0(fromPt, lastNote); });
-        if (!tracked && window.MMEStats) { tracked = true; window.MMEStats.track("Route planned", { wheelchair: wc ? "yes" : "no", found: r ? "yes" : "no" }); }
+        if (!tracked) { tracked = true; if (r && window.MMEInstall && window.MMEInstall.routeUsed) window.MMEInstall.routeUsed(); if (window.MMEStats) window.MMEStats.track("Route planned", { wheelchair: wc ? "yes" : "no", found: r ? "yes" : "no" }); }
         // "Was this route right?" A "No" opens an email to us with the route details filled in.
         var fb = body.querySelector("#route-fb");
         if (fb) fb.addEventListener("click", function (e) {

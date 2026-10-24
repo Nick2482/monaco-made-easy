@@ -160,7 +160,7 @@
       '<p class="lede">' + esc(t("Around 80 free public lifts, 37 escalators and 8 moving walkways link Monaco, Beausoleil and Cap d’Ail. We show you how to use them.")) + "</p>" + (X ? X.knowLink() + essQuick() : "") +
       window.MMEPlanner.boxHtml() +
       "</section>" +
-      (window.MMEInstall ? window.MMEInstall.card("home") : "") +
+      (window.MMEInstall ? window.MMEInstall.card("home") + window.MMEInstall.rateCard() : "") +
       (window.MMEGuide ? guideBlock() : "") +
       (window.MMEWalks ? window.MMEWalks.walksBlock() : "") +
       guidesBlock(" block") +

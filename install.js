@@ -47,7 +47,7 @@
       '<p class="ic-steps"' + (deferred ? " hidden" : "") + ">" + esc(steps) + "</p></div></aside>";
   }
   function mount(root) {
-    root.querySelectorAll(".install-card").forEach(function (c) {
+    root.querySelectorAll(".install-card:not(.rate-card)").forEach(function (c) {
       var x = c.querySelector(".ic-x");
       if (x) x.addEventListener("click", function () { set("mme-install-x", "1"); c.remove(); });
       var go = c.querySelector(".ic-go");
@@ -100,5 +100,45 @@
   var mount0 = mount;
   mount = function (root) { mount0(root); mountShare(root); };
 
-  window.MMEInstall = { card: card, mount: mount, installed: installed, shareCard: shareCard };
+
+  // "Rate us": only inside the Google Play app, only after someone has used it on 2 different days
+  // and planned at least 3 routes. "Not now" asks again after 14 days; "Rate" or "No thanks" never asks again.
+  var PLAY_ID = "com.monacomadeeasy.www.twa";
+  (function countDay() {
+    var d = new Date(), today = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+    if (get("mme-lastday") !== today) { set("mme-lastday", today); set("mme-days", String((+get("mme-days") || 0) + 1)); }
+  })();
+  function routeUsed() { set("mme-routes", String((+get("mme-routes") || 0) + 1)); }
+  function rateDue() {
+    if (!(window.MMEPro && window.MMEPro.inPlayApp && window.MMEPro.inPlayApp())) return false;
+    if (get("mme-rate-done")) return false;
+    if ((+get("mme-days") || 0) < 2 || (+get("mme-routes") || 0) < 3) return false;
+    var later = +get("mme-rate-later") || 0;
+    return Date.now() - later > 14 * 864e5;
+  }
+  var STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>';
+  function rateCard() {
+    if (!rateDue()) return "";
+    return '<aside class="install-card rate-card"><button type="button" class="ic-x rt-later" aria-label="' + esc(t("Not now")) + '">×</button>' +
+      '<span class="ic-ico">' + STAR + "</span><div><strong>" + esc(t("Finding Monaco Made Easy useful?")) + "</strong>" +
+      "<p>" + esc(t("A quick review on Google Play helps other visitors find the app. It only takes a minute.")) + "</p>" +
+      '<div class="rt-actions"><a class="btn btn-red rt-go" href="market://details?id=' + PLAY_ID + '">' + esc(t("Rate on Google Play")) + "</a>" +
+      '<button type="button" class="btn btn-line rt-no">' + esc(t("No thanks")) + "</button></div></div></aside>";
+  }
+  function mountRate(root) {
+    root.querySelectorAll(".rate-card").forEach(function (c) {
+      if (window.MMEStats) window.MMEStats.track("Rate prompt shown");
+      c.querySelector(".rt-later").addEventListener("click", function () { set("mme-rate-later", String(Date.now())); c.remove(); });
+      c.querySelector(".rt-no").addEventListener("click", function () { set("mme-rate-done", "no"); c.remove(); if (window.MMEStats) window.MMEStats.track("Rate prompt", { answer: "no" }); });
+      c.querySelector(".rt-go").addEventListener("click", function () {
+        set("mme-rate-done", "yes");
+        if (window.MMEStats) window.MMEStats.track("Rate prompt", { answer: "rate" });
+        setTimeout(function () { c.innerHTML = '<p class="off-ok">' + esc(t("Thank you!")) + "</p>"; }, 400);
+      });
+    });
+  }
+  var mount1 = mount;
+  mount = function (root) { mount1(root); mountRate(root); };
+
+  window.MMEInstall = { card: card, mount: mount, installed: installed, shareCard: shareCard, rateCard: rateCard, routeUsed: routeUsed };
 })();
