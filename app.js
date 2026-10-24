@@ -193,7 +193,7 @@
     var items = [["toilets", "Toilets"], ["pharmacy", "Pharmacy"], ["atm", "Cash machine"], ["drinking_water", "Drinking water"]];
     return '<nav class="ess-quick" aria-label="' + esc(t("Nearest essentials")) + '">' + items.map(function (i) {
       return '<a href="#/map/' + i[0] + '"><span class="eq-ico" style="--c:' + window.MMEMap.CAT_COLOR[i[0]] + '">' + icon(i[0]) + "</span>" + esc(t(i[1])) + "</a>";
-    }).join("") + "</nav>" + '<a class="sos-link" href="#/info"><span aria-hidden="true">☎</span> ' + esc(t("Emergency numbers")) + "</a>";
+    }).join("") + "</nav>" + '<div class="quick-links"><a class="sos-link" href="#/info"><span aria-hidden="true">☎</span> ' + esc(t("Emergency numbers")) + '</a><a class="sos-link" href="#/whats-on"><span aria-hidden="true">✦</span> ' + esc(t("What’s on")) + "</a></div>";
   }
 
   // Links to the visitor guide pages, in the visitor's language.
@@ -251,6 +251,7 @@
     else if (parts[0] === "map" || parts[0] === "lifts") { screen = window.MMEMap.screen; tab = "map"; }
     else if (parts[0] === "survey") { screen = window.MMESurvey.screen; tab = ""; }
     else if (parts[0] === "info") { html = infoPage(); tab = "info"; }
+    else if (parts[0] === "whats-on" && X) { screen = X.whatsOnScreen; tab = "info"; }
     else if (parts[0] === "guide") { screen = window.MMEGuide.screen; tab = "guide"; }
     else if (parts[0].indexOf("pro") === 0) { window.MMEPro.previewSwitch(); screen = window.MMEPro.screen; }
     else if (parts[0] === "cruise") { screen = X.cruiseScreen; tab = "transport"; }

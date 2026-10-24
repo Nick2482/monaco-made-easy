@@ -883,3 +883,21 @@ h1 .pro-badge { margin-left: 4px; font-size: 14px; }
 .rate-card .ic-ico { background: var(--red); }
 .rate-card .rt-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .install-card .rt-actions .btn-line { border: 2px solid var(--edge); background: transparent; color: var(--head); }
+/* What's on */
+a.event-banner { text-decoration: none; }
+.quick-links { display: flex; flex-wrap: wrap; gap: 8px; }
+.whats-on h2 { margin-top: 26px; font-size: 26px; }
+.whats-on .wo-note { color: var(--grey); margin-top: 4px; }
+.wo-list { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 12px; }
+.wo-ev { padding: 14px 16px; border-radius: 14px; background: var(--stone); box-shadow: inset 4px 0 0 var(--red); color: var(--head); }
+.wo-ev strong { display: block; font-size: 19px; line-height: 1.25; }
+.wo-ev .ev-date { display: block; color: var(--red); font-weight: 700; font-size: 15px; margin-bottom: 2px; }
+.wo-ev .wo-where { display: block; color: var(--grey); font-size: 15px; margin-top: 2px; }
+.wo-ev p { margin-top: 6px; color: var(--ink); }
+.wo-acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.wo-acts .btn-small { text-decoration: none; }
+.whats-on .know-link { margin-top: 22px; }
+:root[data-theme="dark"] .wo-ev { background: var(--card); }
+:root[data-theme="dark"] .wo-ev p { color: var(--head); }
+.page .know-link { color: var(--head); border-color: var(--edge); }
+.page .know-link svg { fill: var(--red); }

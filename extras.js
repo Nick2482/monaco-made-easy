@@ -41,15 +41,31 @@
   // 2. Events. Dates checked against the organisers' announcements in October 2026.
   // ---------------------------------------------------------------------------
   var CIRCUIT_TEXT = "While cars are on track, the streets of the circuit are closed to anyone without a ticket. Cross at the footbridges and underpasses, and allow plenty of extra time around the harbour, Casino Square and the tunnel.";
+  var PORT = [43.73500, 7.42240], PALACE = [43.731296, 7.421445];
   var EVENTS = [
     { id: "national-day", name: "Monaco National Day", start: "2026-11-19", end: "2026-11-19", kind: "rock",
+      about: "Monaco’s national holiday, also called the Fête du Prince.", where: "Place du Palais", ll: PALACE,
       text: "Ceremonies at the Palace and the Cathedral make Monaco-Ville very busy, especially in the morning. Expect crowds and some road closures on the Rock, and allow extra time." },
+    { id: "christmas", name: "Christmas Village", start: "2026-12-04", end: "2027-01-03", kind: "festive", tbc: "December to early January",
+      about: "Chalets, festive food and shows along the harbour, usually with an ice rink.", where: "Quai Albert 1er, Port Hercule", ll: PORT,
+      text: "Busiest in the evenings and at weekends." },
+    { id: "rallye", name: "Rallye Monte-Carlo", start: "2027-01-21", end: "2027-01-24", kind: "outside",
+      about: "The opening round of the World Rally Championship.", where: "Port Hercule", ll: PORT,
+      text: "The official start is at Port Hercule on Thursday 21 January, and the prize-giving is there on Sunday 24 January. Most of the stages are in the mountains." },
+    { id: "circus", name: "Monte-Carlo International Circus Festival", start: "2027-01-22", end: "2027-01-31", kind: "show",
+      about: "Circus acts from around the world compete under the big top in Fontvieille.", where: "Chapiteau de Fontvieille", ll: [43.726307, 7.418773],
+      link: "https://montecarlosbm.com/en/agenda/festival-international-du-cirque-de-monte-carlo",
+      text: "Shows often sell out, so book ahead." },
+    { id: "sainte-devote", name: "Sainte-Dévote", start: "2027-01-26", end: "2027-01-27", kind: "tradition",
+      about: "The feast of Monaco’s patron saint.", where: "Église Sainte-Dévote", ll: [43.737561, 7.420849],
+      text: "On the evening of 26 January a boat is set alight in front of the Sainte-Dévote church, followed by fireworks. On the 27th there is a Mass and a procession." },
     { id: "masters", name: "Rolex Monte-Carlo Masters (tennis)", start: "2027-04-03", end: "2027-04-11", kind: "outside",
+      about: "One of tennis’s big clay-court tournaments.",
       text: "The tennis is at the Monte-Carlo Country Club, just over the border in Roquebrune-Cap-Martin (France). Roads and buses to the east of Monaco are busier than usual." },
-    { id: "eprix", name: "Monaco E-Prix", start: "2027-05-01", end: "2027-05-02", kind: "circuit", text: CIRCUIT_TEXT },
-    { id: "gp", name: "Formula 1 Monaco Grand Prix", start: "2027-06-04", end: "2027-06-06", kind: "circuit",
+    { id: "eprix", name: "Monaco E-Prix", start: "2027-05-01", end: "2027-05-02", kind: "circuit", about: "Electric single-seater racing on the Grand Prix circuit.", where: "Port Hercule", ll: PORT, text: CIRCUIT_TEXT },
+    { id: "gp", name: "Formula 1 Monaco Grand Prix", start: "2027-06-04", end: "2027-06-06", kind: "circuit", about: "The most famous race of the Formula 1 season.", where: "Port Hercule", ll: PORT,
       text: CIRCUIT_TEXT, extra: "Barriers and grandstands go up around the harbour in the weeks before, so some pavements are narrower or diverted." },
-    { id: "yacht", name: "Monaco Yacht Show", start: "2027-09-22", end: "2027-09-25", kind: "port",
+    { id: "yacht", name: "Monaco Yacht Show", start: "2027-09-22", end: "2027-09-25", kind: "port", about: "One of the world’s biggest superyacht shows.", where: "Port Hercule", ll: PORT,
       text: "The show takes over Port Hercule. Some quayside paths are open only to visitors with a ticket, so allow extra time to get around the harbour." }
   ];
   // Streets that form the Monaco circuit (as named in OpenStreetMap).
@@ -75,20 +91,74 @@
     var today = now().ymd;
     return EVENTS.filter(function (e) { return e.kind === "circuit" && ymdOf(e.start) <= today && ymdOf(e.end) >= today; })[0] || null;
   }
+  function evDate(e) { return e.tbc ? t(e.tbc) + " (" + t("dates to be confirmed") + ")" : dateRange(e.start, e.end); }
   function eventBanner() {
     var e = eventSoon();
     if (!e) return "";
     var on = ymdOf(e.start) <= now().ymd;
-    return '<aside class="event-banner"><span class="ev-tag">' + esc(t(on ? "On now" : "Coming up")) + "</span><strong>" + esc(t(e.name)) + '</strong><span class="ev-date">' + esc(dateRange(e.start, e.end)) + "</span>" +
-      "<p>" + esc(t(e.text)) + (e.extra ? " " + esc(t(e.extra)) : "") + "</p></aside>";
+    return '<a class="event-banner" href="#/whats-on"><span class="ev-tag">' + esc(t(on ? "On now" : "Coming up")) + "</span><strong>" + esc(t(e.name)) + '</strong><span class="ev-date">' + esc(evDate(e)) + "</span>" +
+      "<p>" + esc(t(e.text)) + (e.extra ? " " + esc(t(e.extra)) : "") + "</p></a>";
   }
-  function eventsInfo() {
-    var list = upcoming();
+  function eventsInfo() { // "Good to know": only the next few events that change how you get around
+    var list = upcoming().filter(function (e) { return ["rock", "circuit", "port", "outside"].indexOf(e.kind) !== -1; }).slice(0, 3);
     if (!list.length) return "";
     return '<section class="events-info"><h2>' + esc(t("Events in Monaco")) + '</h2><ul class="ev-list">' + list.map(function (e) {
-      return "<li><strong>" + esc(t(e.name)) + '</strong><span class="ev-date">' + esc(dateRange(e.start, e.end)) + "</span><p>" + esc(t(e.text)) + (e.extra ? " " + esc(t(e.extra)) : "") + "</p></li>";
-    }).join("") + '</ul><p class="unchecked">' + esc(t("Dates come from the organisers. Check before you travel.")) + "</p></section>";
+      return "<li><strong>" + esc(t(e.name)) + '</strong><span class="ev-date">' + esc(evDate(e)) + "</span><p>" + esc(t(e.text)) + (e.extra ? " " + esc(t(e.extra)) : "") + "</p></li>";
+    }).join("") + '</ul><a class="know-link" href="#/whats-on">' + esc(t("What’s on in Monaco: shows, concerts and events")) + ARROW + '</a><p class="unchecked">' + esc(t("Dates come from the organisers. Check before you travel.")) + "</p></section>";
   }
+
+  // "What's on": the big events above, the venues' own programmes, and the things that happen every day.
+  var VENUES = [
+    { name: "Opéra de Monte-Carlo & Les Ballets de Monte-Carlo", what: "Opera and ballet in the Salle Garnier, the theatre inside the Casino building.", ll: [43.73975, 7.4282],
+      links: [["Opera", "https://www.opera.mc"], ["Ballet", "https://www.balletsdemontecarlo.com"]] },
+    { name: "Monte-Carlo Philharmonic Orchestra", what: "Concerts at the Auditorium Rainier III, from September to July.", ll: [43.738352, 7.429406], links: [["See the programme", "https://www.opmc.mc"]] },
+    { name: "Grimaldi Forum", what: "Big shows, concerts and exhibitions by the sea at Larvotto.", ll: [43.7439, 7.431], links: [["See the programme", "https://www.grimaldiforum.com"]] },
+    { name: "Théâtre Princesse Grace", what: "Plays, comedy and music, mostly in French.", ll: [43.737651, 7.426034], links: [["See the programme", "https://www.tpgmonaco.mc"]] },
+    { name: "AS Monaco", what: "Football at the Stade Louis II in Fontvieille.", ll: [43.727506, 7.41551], links: [["Fixtures and tickets", "https://www.asmonaco.com"]] }
+  ];
+  var DAILY = [
+    { name: "Changing of the Guard", what: "Every day at 11:55 in front of the Prince’s Palace. Arrive by 11:30 for a good spot.", where: "Place du Palais", ll: PALACE },
+    { name: "Marché de la Condamine", what: "Fresh food stalls every morning on Place d’Armes, with lunch counters inside the market hall.", where: "Place d’Armes", ll: [43.732633, 7.41953] }
+  ];
+  function goBtn(label, ll) { return ll ? '<button type="button" class="btn-small" data-wo-go="' + ll[0] + "," + ll[1] + '" data-label="' + esc(label) + '">' + esc(t("Take me there")) + "</button>" : ""; }
+  function extLink(label, url) { return '<a class="btn-small wo-ext" href="' + url + '" target="_blank" rel="noopener">' + esc(t(label)) + "</a>"; }
+  var whatsOnScreen = {
+    html: function () {
+      var today = now().ymd, list = upcoming();
+      var on = list.filter(function (e) { return ymdOf(e.start) <= today; }), next = list.filter(function (e) { return ymdOf(e.start) > today; });
+      function card(e) {
+        return '<li class="wo-ev"><span class="ev-date">' + esc(evDate(e)) + "</span><strong>" + esc(t(e.name)) + "</strong>" +
+          (e.where ? '<span class="wo-where">' + esc(e.where) + "</span>" : "") +
+          "<p>" + (e.about ? esc(t(e.about)) + " " : "") + esc(t(e.text)) + (e.extra ? " " + esc(t(e.extra)) : "") + "</p>" +
+          '<div class="wo-acts">' + goBtn(t(e.name), e.ll) + (e.link ? extLink("More information", e.link) : "") + "</div></li>";
+      }
+      return '<section class="page whats-on"><h1>' + esc(t("What’s on")) + '</h1><p class="lede-dark">' + esc(t("Events, shows and concerts in Monaco, and the easy way to get there.")) + "</p>" +
+        (on.length ? "<h2>" + esc(t("On now")) + '</h2><ul class="wo-list">' + on.map(card).join("") + "</ul>" : "") +
+        (next.length ? "<h2>" + esc(t("Coming up")) + '</h2><ul class="wo-list">' + next.map(card).join("") + "</ul>" : "") +
+        "<h2>" + esc(t("Theatre, concerts and sport")) + '</h2><p class="wo-note">' + esc(t("Each venue’s own programme, always up to date.")) + '</p><ul class="wo-list">' + VENUES.map(function (v) {
+          return '<li class="wo-ev"><strong>' + esc(v.name) + "</strong><p>" + esc(t(v.what)) + '</p><div class="wo-acts">' + v.links.map(function (l) { return extLink(l[0], l[1]); }).join("") + goBtn(v.name, v.ll) + "</div></li>";
+        }).join("") + "</ul>" +
+        "<h2>" + esc(t("Every day")) + '</h2><ul class="wo-list">' + DAILY.map(function (d) {
+          return '<li class="wo-ev"><strong>' + esc(t(d.name)) + '</strong><span class="wo-where">' + esc(d.where) + "</span><p>" + esc(t(d.what)) + '</p><div class="wo-acts">' + goBtn(t(d.name), d.ll) + "</div></li>";
+        }).join("") + "</ul>" +
+        '<a class="know-link" href="https://monservicepublic.gouv.mc/en/administrative-diary" target="_blank" rel="noopener">' + esc(t("Full calendar of events and public holidays, from the Monaco government")) + ARROW + "</a>" +
+        '<p class="unchecked">' + esc(t("Dates come from the organisers. Check before you travel.")) + "</p></section>";
+    },
+    mount: function (el) {
+      if (window.MMEStats) window.MMEStats.track("Whats on opened");
+      el.addEventListener("click", function (e) {
+        var b = e.target.closest("[data-wo-go]");
+        if (b) {
+          var ll = b.dataset.woGo.split(",");
+          window.MMEPlanner.state.to = { label: b.dataset.label, lat: +ll[0], lng: +ll[1], kind: "place" };
+          window.MMEPlanner.state.from = null; window.MMEPlanner.state.arrival = null;
+          location.hash = "#/plan"; return;
+        }
+        var x = e.target.closest(".wo-ext");
+        if (x && window.MMEStats) window.MMEStats.track("Whats on link", { to: x.hostname });
+      });
+    }
+  };
   // A note for the plan screen when the route uses circuit streets on a race day.
   function routeEventNote(r) {
     var e = circuitToday();
@@ -367,7 +437,7 @@
 
   window.MMEExtras = { knowCard: knowCard, knowLink: knowLink,
     Home: Home, homeCard: homeCard,
-    eventBanner: eventBanner, eventsInfo: eventsInfo, routeEventNote: routeEventNote, EVENTS: EVENTS,
+    eventBanner: eventBanner, eventsInfo: eventsInfo, whatsOnScreen: whatsOnScreen, routeEventNote: routeEventNote, EVENTS: EVENTS,
     cruise: cruise, shipPoint: shipPoint, cruiseCard: cruiseCard, cruiseScreen: cruiseScreen, mountHome: mountHome,
     offlineCard: offlineCard, mountOffline: mountOffline, tileUrls: tileUrls,
     Reports: Reports, reportBox: reportBox, routeReportNote: routeReportNote
