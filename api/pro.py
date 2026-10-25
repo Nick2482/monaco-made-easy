@@ -7,7 +7,7 @@
 # Settings (Vercel > Project > Settings > Environment Variables), never put in the code or in GitHub:
 #   STRIPE_SECRET_KEY   a Stripe *restricted* key with only "Checkout Sessions: Read" permission
 #   PRO_SECRET          any long random text, used to sign the unlock codes (never change it once sales start)
-#   PRO_PAYMENT_LINK    optional: the Payment Link id (plink_...), so only Pro payments unlock Pro
+#   PRO_PAYMENT_LINK    optional: the Payment Link id(s) (plink_..., comma-separated), so only Pro payments unlock Pro
 from http.server import BaseHTTPRequestHandler
 import base64, hashlib, hmac, json, os, re, urllib.error, urllib.parse, urllib.request
 
@@ -67,8 +67,9 @@ def stripe_get(path, params=None):
 def is_pro_payment(s):
     if s.get("payment_status") != "paid":
         return False
-    link = os.environ.get("PRO_PAYMENT_LINK", "")
-    return not link or s.get("payment_link") == link
+    # One or more Payment Link ids, comma-separated (e.g. the old £ link and the new € link).
+    links = [x.strip() for x in os.environ.get("PRO_PAYMENT_LINK", "").split(",") if x.strip()]
+    return not links or s.get("payment_link") in links
 
 
 # ---------- Google Play (purchases made inside the Play Store app) ----------
