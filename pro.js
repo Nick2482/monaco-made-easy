@@ -8,8 +8,9 @@
     // (Set it when Stripe is ready; nobody keeps Pro free after it without buying.)
     launch: "2026-10-14",          // e.g. "2026-12-01"
     // The Stripe Payment Link. Until it is set, the buy button says "Coming soon".
-    payLink: "https://buy.stripe.com/bJe8wPcyC7mc11Z5FwgYU00",           // e.g. "https://buy.stripe.com/..."
-    price: "£2.99",
+    // One link, two currencies: Stripe charges €3.49, or £2.99 to buyers in the UK.
+    payLink: "https://buy.stripe.com/14A7sLaqu7mc2630lcgYU01",
+    price: (function () { try { return Intl.DateTimeFormat().resolvedOptions().timeZone === "Europe/London" ? "£2.99" : "€3.49"; } catch (e) { return "€3.49"; } })(),
     playSku: "pro_unlock"           // the in-app product id in Play Console
   };
   function t(s, v) { return window.MMEI18N.t(s, v); }
@@ -114,7 +115,7 @@
       var list = '<ul class="pro-list">' + FEATURES.map(function (f) { return "<li><strong>" + esc(t(f[0])) + "</strong><span>" + esc(t(f[1])) + "</span></li>"; }).join("") + "</ul>";
       var buy = "";
       if (st === "locked") {
-        buy = '<div class="pro-buy"><p class="pro-price"><strong>' + esc(CONFIG.price) + "</strong> " + esc(t("one-off payment. No subscription, no account.")) + "</p>" +
+        buy = '<div class="pro-buy"><p class="pro-price"><strong>' + esc((inPlayApp() && play.price) || CONFIG.price) + "</strong> " + esc(t("one-off payment. No subscription, no account.")) + "</p>" +
           (inPlayApp() ? (play.ready ? '<button type="button" class="btn btn-red" id="pro-play">' + esc(t("Get Pro for {price}, once", { price: play.price || CONFIG.price })) + "</button>" : '<p class="pro-soon">' + esc(t("Coming soon.")) + "</p>") : CONFIG.payLink ? '<a class="btn btn-red" id="pro-buy" href="' + esc(CONFIG.payLink) + '">' + esc(t("Get Pro")) + "</a>" : '<p class="pro-soon">' + esc(t("Coming soon.")) + "</p>") +
           '<p class="pro-small">' + esc(inPlayApp() ? t("Secure payment by Google Play. Pro switches on as soon as you’ve paid, and comes back if you reinstall the app on the same Google account.") : t("Secure payment by Stripe. Pro switches on as soon as you’ve paid. Not right for you? Email us within 14 days for a full refund.")) + "</p></div>";
       }

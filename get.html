@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Get Monaco Made Easy | the app for getting around Monaco</title>
+  <meta name="description" content="The free app for getting around Monaco without the climb: public lifts, escalators, step-free routes, buses, trains and what's on. Add it to your iPhone or Android in a minute.">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { background: #fff; }
+    .tp { max-width: 560px; margin: 0 auto; padding: 24px 16px 48px; color: var(--ink); }
+    .tp h1 { font-size: 32px; line-height: 1.15; }
+    .tp h2 { font-size: 24px; margin-top: 28px; }
+    .tp .lede { color: var(--grey); margin-top: 8px; font-size: 17px; }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .pill-row button { padding: 6px 14px; border-radius: 999px; border: 1px solid #c9d2dc; background: #fff; font: inherit; font-weight: 700; color: var(--navy); cursor: pointer; }
+    .pill-row button[aria-pressed="true"] { background: var(--navy); color: #fff; border-color: var(--navy); }
+    .os { margin-top: 22px; }
+    .os-tabs button { font-size: 17px; padding: 9px 18px; }
+    ol.steps { list-style: none; padding: 0; margin: 14px 0 0; counter-reset: s; }
+    ol.steps li { counter-increment: s; position: relative; padding: 16px 16px 16px 64px; border-radius: 16px; background: var(--stone); margin-top: 12px; }
+    ol.steps li::before { content: counter(s); position: absolute; left: 16px; top: 16px; width: 34px; height: 34px; border-radius: 50%; background: var(--red); color: #fff; font-weight: 700; display: grid; place-items: center; font-size: 18px; }
+    ol.steps strong { display: block; font-size: 18px; color: var(--navy); }
+    ol.steps p { margin: 4px 0 0; color: var(--grey); }
+    .ico { display: inline-block; width: 22px; height: 22px; vertical-align: -5px; fill: #0a84ff; }
+    .go { display: inline-block; margin-top: 12px; padding: 12px 18px; border-radius: 12px; background: var(--navy); color: #fff; font-weight: 700; text-decoration: none; }
+    .go.red { background: var(--red); }
+    .note { margin-top: 16px; padding: 14px 16px; border-left: 5px solid var(--red); background: #fff6f6; border-radius: 0 12px 12px 0; }
+    .feats { margin: 10px 0 0; padding-left: 20px; }
+    .feats li { margin-top: 4px; }
+    .pro-box { margin-top: 22px; padding: 4px 18px 18px; border-radius: 16px; background: var(--navy); color: #fff; }
+    .pro-box h2 { color: #fff; margin-top: 14px; }
+    .pro-box .feats li { color: #e6edf5; }
+    .pro-small { margin-top: 10px; color: #c9d6e5; font-size: 15px; }
+    .small { margin-top: 22px; font-size: 15px; color: var(--grey); }
+    [data-l] { display: none; }
+    html[lang="fr"] [data-l="fr"], html[lang="it"] [data-l="it"], html[lang="en-GB"] [data-l="en"] { display: revert; }
+    [data-os] { display: none; }
+    .tp[data-show="ios"] [data-os="ios"], .tp[data-show="android"] [data-os="android"] { display: block; }
+  </style>
+</head>
+<body>
+<main class="tp" data-show="ios">
+  <h1><span data-l="en">Get Monaco Made Easy</span><span data-l="fr">Installez Monaco Made Easy</span><span data-l="it">Scarica Monaco Made Easy</span></h1>
+  <p class="lede"><span data-l="en">The app for getting around Monaco without the climb. Add it to your phone in one minute.</span><span data-l="fr">L’appli pour se déplacer à Monaco sans grimper. Une minute pour l’ajouter à votre téléphone.</span><span data-l="it">L’app per muoversi a Monaco senza fatica. Basta un minuto per aggiungerla al telefono.</span></p>
+  <div class="pill-row" aria-label="Language"><button type="button" data-set="en" aria-pressed="true">English</button><button type="button" data-set="fr" aria-pressed="false">Français</button><button type="button" data-set="it" aria-pressed="false">Italiano</button></div>
+
+  <h2><span data-l="en">Free for everyone</span><span data-l="fr">Gratuit pour tous</span><span data-l="it">Gratis per tutti</span></h2>
+  <ul class="feats">
+    <li><span data-l="en">Around 80 public lifts and 37 escalators, and the easiest way between them</span><span data-l="fr">Environ 80 ascenseurs publics et 37 escalators, et le chemin le plus facile</span><span data-l="it">Circa 80 ascensori pubblici e 37 scale mobili, e il percorso più facile</span></li>
+    <li><span data-l="en">Step-free routes for wheelchairs and pushchairs, read aloud as you walk</span><span data-l="fr">Itinéraires sans marches pour fauteuils et poussettes, lus à voix haute en marchant</span><span data-l="it">Percorsi senza gradini per sedie a rotelle e passeggini, letti ad alta voce mentre cammini</span></li>
+    <li><span data-l="en">Next buses and trains, taxis, what’s on, emergency numbers, toilets and pharmacies</span><span data-l="fr">Prochains bus et trains, taxis, agenda, numéros d’urgence, toilettes et pharmacies</span><span data-l="it">Prossimi autobus e treni, taxi, eventi, numeri di emergenza, bagni e farmacie</span></li>
+  </ul>
+  <div class="pro-box">
+    <h2><span data-l="en">Pro: €3.49, once</span><span data-l="fr">Pro : 3,49 €, une seule fois</span><span data-l="it">Pro: 3,49 €, una volta sola</span></h2>
+    <ul class="feats">
+      <li><span data-l="en">The guide: 360+ restaurants, cafés, bars and museums, from Michelin stars to beach bars, with what’s open now</span><span data-l="fr">Le guide : plus de 360 restaurants, cafés, bars et musées, des étoilés Michelin aux plages, avec ce qui est ouvert maintenant</span><span data-l="it">La guida: oltre 360 ristoranti, caffè, bar e musei, dagli stellati Michelin ai lidi, con cosa è aperto ora</span></li>
+      <li><span data-l="en">Step-free sightseeing walks, cruise mode and “Take me home”</span><span data-l="fr">Balades sans marches, mode croisière et « Ramenez-moi »</span><span data-l="it">Passeggiate senza gradini, modalità crociera e «Portami a casa»</span></li>
+      <li><span data-l="en">The map saved on your phone for when there’s no signal</span><span data-l="fr">La carte enregistrée sur votre téléphone, pour quand il n’y a pas de réseau</span><span data-l="it">La mappa salvata sul telefono, per quando non c’è rete</span></li>
+    </ul>
+    <p class="pro-small"><span data-l="en">No subscription, no account. Pay once and it’s yours. (£2.99 in the UK.)</span><span data-l="fr">Sans abonnement ni compte. Un seul paiement, et c’est à vous. (2,99 £ au Royaume-Uni.)</span><span data-l="it">Nessun abbonamento, nessun account. Paghi una volta ed è tuo. (2,99 £ nel Regno Unito.)</span></p>
+    <a class="go red" href="/#/pro"><span data-l="en">See what Pro includes</span><span data-l="fr">Voir ce que contient Pro</span><span data-l="it">Scopri cosa include Pro</span></a>
+  </div>
+  <h2><span data-l="en">Add it to your phone</span><span data-l="fr">Ajoutez-la à votre téléphone</span><span data-l="it">Aggiungila al telefono</span></h2>
+
+  <section class="os" style="margin-top:12px">
+    <div class="pill-row os-tabs"><button type="button" data-osset="ios" aria-pressed="true">iPhone</button><button type="button" data-osset="android" aria-pressed="false">Android</button></div>
+
+    <div data-os="ios">
+      <ol class="steps">
+        <li>
+          <strong><span data-l="en">Open the website in Safari</span><span data-l="fr">Ouvrez le site dans Safari</span><span data-l="it">Apri il sito in Safari</span></strong>
+          <p><span data-l="en">Tap the button below. Reading this inside Facebook? Tap <b>⋯</b> at the top and choose <b>Open in browser</b> first.</span><span data-l="fr">Touchez le bouton ci-dessous. Vous lisez ceci dans Facebook ? Touchez d’abord <b>⋯</b> en haut puis <b>Ouvrir dans le navigateur</b>.</span><span data-l="it">Tocca il pulsante qui sotto. Stai leggendo dentro Facebook? Tocca prima <b>⋯</b> in alto e scegli <b>Apri nel browser</b>.</span></p>
+          <a class="go" href="/"><span data-l="en">Open monacomadeeasy.com</span><span data-l="fr">Ouvrir monacomadeeasy.com</span><span data-l="it">Apri monacomadeeasy.com</span></a>
+        </li>
+        <li>
+          <strong><span data-l="en">Tap Share</span><span data-l="fr">Touchez Partager</span><span data-l="it">Tocca Condividi</span></strong>
+          <p><span data-l="en">The square with an arrow</span><span data-l="fr">Le carré avec une flèche</span><span data-l="it">Il quadrato con la freccia</span> <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6 7.8 6.8l1.4 1.4L11 6.4V15h2V6.4l1.8 1.8 1.4-1.4zM5 10v11h14V10h-4v2h2v7H7v-7h2v-2z"/></svg> <span data-l="en">at the bottom of the screen (at the top on iPad).</span><span data-l="fr">en bas de l’écran (en haut sur iPad).</span><span data-l="it">in fondo allo schermo (in alto su iPad).</span></p>
+        </li>
+        <li>
+          <strong><span data-l="en">Add to Home Screen</span><span data-l="fr">Sur l’écran d’accueil</span><span data-l="it">Aggiungi alla schermata Home</span></strong>
+          <p><span data-l="en">Scroll down, tap <b>Add to Home Screen</b>, then <b>Add</b>. Monaco Easy is now on your home screen, opens full screen and works without signal.</span><span data-l="fr">Faites défiler, touchez <b>Sur l’écran d’accueil</b>, puis <b>Ajouter</b>. Monaco Easy est sur votre écran d’accueil, s’ouvre en plein écran et marche sans réseau.</span><span data-l="it">Scorri, tocca <b>Aggiungi alla schermata Home</b>, poi <b>Aggiungi</b>. Monaco Easy è ora sulla schermata Home, si apre a schermo intero e funziona anche senza rete.</span></p>
+        </li>
+      </ol>
+    </div>
+
+    <div data-os="android">
+      <ol class="steps">
+        <li>
+          <strong><span data-l="en">Help us launch on Google Play</span><span data-l="fr">Aidez-nous à lancer l’appli sur Google Play</span><span data-l="it">Aiutaci a lanciare l’app su Google Play</span></strong>
+          <p><span data-l="en">The Android app is in its final test. Become a tester in 3 quick steps and keep it for 14 days.</span><span data-l="fr">L’appli Android est en phase de test finale. Devenez testeur en 3 étapes et gardez-la 14 jours.</span><span data-l="it">L’app Android è nell’ultima fase di test. Diventa tester in 3 passaggi e tienila per 14 giorni.</span></p>
+          <a class="go red" id="test-link" href="test.html"><span data-l="en">Become a tester</span><span data-l="fr">Devenir testeur</span><span data-l="it">Diventa tester</span></a>
+        </li>
+        <li>
+          <strong><span data-l="en">Or use it in Chrome now</span><span data-l="fr">Ou utilisez-la dans Chrome</span><span data-l="it">Oppure usala subito in Chrome</span></strong>
+          <p><span data-l="en">Open the website, tap the menu <b>⋮</b> and choose <b>Install app</b> or <b>Add to Home screen</b>.</span><span data-l="fr">Ouvrez le site, touchez le menu <b>⋮</b> et choisissez <b>Installer l’application</b> ou <b>Ajouter à l’écran d’accueil</b>.</span><span data-l="it">Apri il sito, tocca il menu <b>⋮</b> e scegli <b>Installa app</b> o <b>Aggiungi a schermata Home</b>.</span></p>
+          <a class="go" href="/"><span data-l="en">Open monacomadeeasy.com</span><span data-l="fr">Ouvrir monacomadeeasy.com</span><span data-l="it">Apri monacomadeeasy.com</span></a>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <h2><span data-l="en">Know a shortcut we’ve missed?</span><span data-l="fr">Un raccourci qu’on a oublié ?</span><span data-l="it">Conosci una scorciatoia che ci manca?</span></h2>
+  <div class="note">
+    <p><span data-l="en">You know Monaco better than any map. Is there a lift or shortcut we’ve missed, a route that’s wrong, or a place you love that isn’t in the guide? Tap <b>“Spotted something wrong? Tell us”</b> in the app, or email us. Every message is read.</span><span data-l="fr">Vous connaissez Monaco mieux que n’importe quelle carte. Un ascenseur ou un raccourci oublié, un itinéraire faux, une adresse que vous aimez absente du guide ? Touchez <b>« Une erreur ? Dites-le-nous »</b> dans l’appli, ou écrivez-nous. Chaque message est lu.</span><span data-l="it">Conosci Monaco meglio di qualsiasi mappa. Un ascensore o una scorciatoia che ci manca, un percorso sbagliato, un locale che ami e che non è nella guida? Tocca <b>«Hai notato un errore? Diccelo»</b> nell’app, oppure scrivici. Leggiamo ogni messaggio.</span></p>
+    <a class="go" id="fb-mail" href="mailto:hello@monacomadeeasy.com?subject=Monaco%20Made%20Easy%20feedback"><span data-l="en">Email hello@monacomadeeasy.com</span><span data-l="fr">Écrire à hello@monacomadeeasy.com</span><span data-l="it">Scrivi a hello@monacomadeeasy.com</span></a>
+  </div>
+  <p class="small"><a href="/"><span data-l="en">Open Monaco Made Easy</span><span data-l="fr">Ouvrir Monaco Made Easy</span><span data-l="it">Apri Monaco Made Easy</span></a> · <a href="privacy.html">Privacy</a></p>
+</main>
+<script>
+(function () {
+  var html = document.documentElement, main = document.querySelector(".tp"), lang = "en";
+  function set(l) {
+    lang = l; html.lang = l === "fr" ? "fr" : l === "it" ? "it" : "en-GB";
+    document.querySelectorAll("[data-set]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.set === l)); });
+    document.getElementById("test-link").href = "test.html?lang=" + l;
+  }
+  function os(o) {
+    main.setAttribute("data-show", o);
+    document.querySelectorAll("[data-osset]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.osset === o)); });
+  }
+  var q = /[?&]lang=(fr|it|en)\b/.exec(location.search), nl = navigator.language || "";
+  set(q ? q[1] : (/^fr/i.test(nl) ? "fr" : /^it/i.test(nl) ? "it" : "en"));
+  var ua = navigator.userAgent || "";
+  os(/android/i.test(ua) ? "android" : "ios");
+  document.querySelectorAll("[data-set]").forEach(function (b) { b.addEventListener("click", function () { set(b.dataset.set); }); });
+  document.querySelectorAll("[data-osset]").forEach(function (b) { b.addEventListener("click", function () { os(b.dataset.osset); }); });
+})();
+</script>
+</body>
+</html>
