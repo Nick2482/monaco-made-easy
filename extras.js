@@ -138,6 +138,7 @@
       return '<section class="page whats-on"><h1>' + esc(t("What’s on")) + '</h1><p class="lede-dark">' + esc(t("Events, shows and concerts in Monaco, and the easy way to get there.")) + "</p>" +
         (on.length ? "<h2>" + esc(t("On now")) + '</h2><ul class="wo-list">' + on.map(card).join("") + "</ul>" : "") +
         (next.length ? "<h2>" + esc(t("Coming up")) + '</h2><ul class="wo-list">' + next.map(card).join("") + "</ul>" : "") +
+        yachtsBox() +
         "<h2>" + esc(t("Theatre, concerts and sport")) + '</h2><p class="wo-note">' + esc(t("Each venue’s own programme, always up to date.")) + '</p><ul class="wo-list">' + VENUES.map(function (v) {
           return '<li class="wo-ev"><strong>' + esc(v.name) + "</strong><p>" + esc(t(v.what)) + '</p><div class="wo-acts">' + v.links.map(function (l) { return extLink(l[0], l[1]); }).join("") + goBtn(v.name, v.ll) + "</div></li>";
         }).join("") + "</ul>" +
@@ -149,6 +150,7 @@
     },
     mount: function (el) {
       if (window.MMEStats) window.MMEStats.track("Whats on opened");
+      mountYachts(el);
       el.addEventListener("click", function (e) {
         var b = e.target.closest("[data-wo-go]");
         if (b) {
@@ -439,11 +441,43 @@
     return '<a class="know-link" href="#/info">' + esc(t("Know before you go: phone roaming, dress rules and the Casino")) + ARROW + "</a>";
   }
 
+  // ---------------------------------------------------------------------------
+  // 6. Biggest yachts in port today (from the yachts' own public AIS signals, via /api/yachts)
+  // ---------------------------------------------------------------------------
+  var FLAG_ISO = { "Albania": "AL", "Antigua and Barbuda": "AG", "Australia": "AU", "Bahamas": "BS", "Barbados": "BB", "Belgium": "BE", "Bermuda": "BM", "British Virgin Islands": "VG",
+    "Canada": "CA", "Cayman Islands": "KY", "Cook Islands": "CK", "Croatia": "HR", "Cyprus": "CY", "Denmark": "DK", "France": "FR", "Germany": "DE", "Gibraltar": "GI", "Greece": "GR",
+    "Ireland": "IE", "Italy": "IT", "Jamaica": "JM", "Liberia": "LR", "Luxembourg": "LU", "Malta": "MT", "Marshall Islands": "MH", "Mexico": "MX", "Monaco": "MC", "Netherlands": "NL",
+    "New Zealand": "NZ", "Norway": "NO", "Panama": "PA", "Poland": "PL", "Portugal": "PT", "Qatar": "QA", "Russia": "RU", "Saudi Arabia": "SA", "Spain": "ES", "St Kitts and Nevis": "KN",
+    "St Vincent": "VC", "Sweden": "SE", "Switzerland": "CH", "Turkey": "TR", "United Arab Emirates": "AE", "United Kingdom": "GB", "United States": "US" };
+  function flagName(f) {
+    var iso = FLAG_ISO[f];
+    if (!iso) return f || "";
+    try { return new Intl.DisplayNames([window.MMEI18N.lang()], { type: "region" }).of(iso) || f; } catch (e) { return f; }
+  }
+  function placeName(p) { return p === "At anchor" || !p ? t("At anchor off Monaco") : t(p); }
+  function yachtsBox() { return '<section class="yachts" id="yachts-box" hidden></section>'; }
+  function mountYachts(root) {
+    var box = root.querySelector("#yachts-box");
+    if (!box || !window.fetch) return;
+    fetch("/api/yachts").then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+      if (!d || !d.ok || !d.top || !d.top.length || !document.body.contains(box)) return;
+      var mins = d.updated ? Math.max(1, Math.round((Date.now() - new Date(d.updated).getTime()) / 60000)) : null;
+      box.innerHTML = "<h2>" + esc(t("Biggest yachts in port today")) + '</h2><ol class="yt-list">' + d.top.map(function (y) {
+        return '<li><span class="yt-len">' + esc(t("{n} m", { n: y.length })) + "</span><span><strong>" + esc(y.name) + "</strong><small>" +
+          esc([flagName(y.flag), placeName(y.place)].filter(Boolean).join(" · ")) + "</small></span></li>";
+      }).join("") + "</ol>" +
+        '<p class="wo-note">' + esc(t("From the yachts’ own public AIS signals. Some switch theirs off in port, so not every yacht shows.")) +
+        (mins && mins < 180 ? " " + esc(t("Updated {n} min ago.", { n: mins })) : "") + "</p>";
+      box.hidden = false;
+    }).catch(function () {});
+  }
+
   window.MMEExtras = { knowCard: knowCard, knowLink: knowLink,
     Home: Home, homeCard: homeCard,
     eventBanner: eventBanner, eventsInfo: eventsInfo, whatsOnScreen: whatsOnScreen, routeEventNote: routeEventNote, EVENTS: EVENTS,
     cruise: cruise, shipPoint: shipPoint, cruiseCard: cruiseCard, cruiseScreen: cruiseScreen, mountHome: mountHome,
     offlineCard: offlineCard, mountOffline: mountOffline, tileUrls: tileUrls,
-    Reports: Reports, reportBox: reportBox, routeReportNote: routeReportNote
+    Reports: Reports, reportBox: reportBox, routeReportNote: routeReportNote,
+    yachtsBox: yachtsBox, mountYachts: mountYachts
   };
 })();

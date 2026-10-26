@@ -944,3 +944,11 @@ body.voice-on main { padding-bottom: 240px; }
 @media (max-width: 350px) { .brand-name { font-size: 16.5px; } .bar { gap: 6px; } .bar .theme-btn { width: 34px; height: 34px; margin-right: 4px; } }
 .arrive-btn > span, .home-btn > span { min-width: 0; overflow-wrap: anywhere; }
 @media (max-width: 350px) { .bar .brand { min-width: 0; } .bar .brand .mark { width: 34px; height: 34px; } }
+
+/* Biggest yachts in port today */
+.yachts { margin-top: 22px; }
+.yt-list { list-style: none; margin: 10px 0 0; padding: 0; border-top: 1px solid var(--line); }
+.yt-list li { display: flex; align-items: baseline; gap: 14px; padding: 10px 2px; border-bottom: 1px solid var(--line); }
+.yt-len { flex: none; min-width: 3.6em; font-family: var(--serif); font-size: 22px; color: var(--head); font-variant-numeric: tabular-nums; }
+.yt-list strong { display: block; letter-spacing: 0.02em; color: var(--head); }
+.yt-list small { display: block; color: var(--grey); font-size: 14.5px; margin-top: 1px; }

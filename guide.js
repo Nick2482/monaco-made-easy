@@ -176,6 +176,7 @@
         "<h1>" + esc(t(VIRT[cat] || (grp ? GRPS.filter(function (g) { return g[0] === grp; })[0][1] : catName(cat)))) + (FREE[cat] ? "" : " " + (P ? P.badge() : "")) + "</h1>" +
         (grp === "fine" ? '<p class="lede-dark">' + esc(t("Stars from the Michelin Guide 2026. Book well ahead, and expect a dress code.")) + "</p>" : "") +
         (cat === "broker" ? '<aside class="note note-ess"><p>' + esc(t("These are offices. Call or email ahead to arrange a visit.")) + "</p></aside>" : "") +
+        ((cat === "yacht" || cat === "broker" || cat === "club") && window.MMEExtras ? window.MMEExtras.yachtsBox() : "") +
         '<p class="lede-dark" id="g-sub">' + esc(cat === "saved" ? t("Places you’ve saved on this phone.") : cat === "find" ? t("Every place in the guide: restaurants, cafés, bars, shops, tabacs, museums and more.") : t("{n} in Monaco and nearby, each with the step-free way there.", { n: all.length })) + "</p>" +
         ((all.length > 12 || cat === "find") && !locked ? '<input class="g-search" id="g-search" type="search" placeholder="' + esc(t(cat === "find" ? "Try “sushi”, “tabac” or a name" : "Search by name or food")) + '" aria-label="' + esc(t("Search by name or food")) + '"' + (cat === "find" ? " autofocus" : "") + ">" : "") +
         (!locked && cat !== "saved" || (cat === "saved" && all.length) ? '<div class="g-tools"><button type="button" class="chip g-open-btn" id="g-open" aria-pressed="false">🕘 ' + esc(t("Open now")) + "</button></div>" : "") +
@@ -187,6 +188,7 @@
     mount: function (root) {
       var M = window.MMEMap, cat = currentCat(), grp = currentGrp(cat), P = window.MMEPro, locked = !FREE[cat] && P && !P.isPro();
       var all = places().filter(function (e) { return inCat(e, cat, grp); });
+      if (window.MMEExtras) window.MMEExtras.mountYachts(root);
       var map = M.makeMap(root.querySelector("#g-map"));
       var icon = function (e) { return L.divIcon({ className: "", html: '<span class="mk mk-ess' + (all.length > 30 ? " mk-g" : "") + '" style="background:' + COLOR[e.k] + '">' + ui().icon(e.k) + "</span>", iconSize: all.length > 30 ? [22, 22] : [30, 30], iconAnchor: all.length > 30 ? [11, 11] : [15, 15], popupAnchor: [0, -12] }); };
       all.forEach(function (e, i) {
