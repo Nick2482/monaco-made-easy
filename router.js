@@ -9,6 +9,11 @@
   var lat = new Float64Array(N), lng = new Float64Array(N);
   for (var i = 0; i < N; i++) { lat[i] = G.n[2 * i] / 1e6; lng[i] = G.n[2 * i + 1] / 1e6; }
   var liftAt = G.lifts; // node index -> { name, level, ... }
+  // Underground walkways (1) and covered passages (2), by edge index.
+  var under = {};
+  (G.tun || []).forEach(function (k) { under[k] = 1; });
+  (G.cov || []).forEach(function (k) { under[k] = 2; });
+  (G.rtun || []).forEach(function (k) { under[k] = 3; });
 
   // Edge fields: [a, b, metres, type, nameIdx, dir, up, stepCount, geometry]
   // type: 0 road, 1 footpath, 2 steps, 3 escalator, 4 lift, 5 indoor corridor
@@ -193,7 +198,7 @@
     var legs = [], n = g.node;
     while (prev[n] !== 0) {
       var pk = prev[n], fw = pk > 0, ed = G.e[fw ? pk - 1 : -pk - 1];
-      legs.push({ e: ed, fwd: fw, to: n, from: fw ? ed[0] : ed[1] });
+      legs.push({ e: ed, k: fw ? pk - 1 : -pk - 1, fwd: fw, to: n, from: fw ? ed[0] : ed[1] });
       n = fw ? ed[0] : ed[1];
     }
     legs.reverse();
@@ -225,8 +230,8 @@
     var lines = []; // [{type, pts}]
     function add(kind, data, at) {
       var last = steps[steps.length - 1];
-      if (kind === "walk" && last && last.kind === "walk") { last.m += data.m; last.secs += data.secs; last.rise += data.rise || 0; addName(last, data.name, data.m); return; }
-      var st = { kind: kind, m: data.m || 0, secs: data.secs || 0, names: {}, up: data.up || 0, count: data.count || 0, lift: data.lift || null, rise: data.rise || 0, at: at };
+      if (kind === "walk" && last && last.kind === "walk" && (last.under || 0) === (data.under || 0)) { last.m += data.m; last.secs += data.secs; last.rise += data.rise || 0; addName(last, data.name, data.m); return; }
+      var st = { kind: kind, m: data.m || 0, secs: data.secs || 0, names: {}, up: data.up || 0, count: data.count || 0, lift: data.lift || null, rise: data.rise || 0, at: at, under: data.under || 0 };
       if (kind === "walk") addName(st, data.name, data.m);
       steps.push(st);
     }
@@ -244,7 +249,7 @@
       if (kind === "steps") { nSteps++; add("steps", { m: e[2], secs: c.secs, up: up || (dh > 2 ? 1 : dh < -2 ? -1 : 0), count: e[7] }, at0); }
       else if (kind === "escalator") { nEsc++; add("escalator", { m: e[2], secs: c.secs, up: up }, at0); }
       else if (kind === "lift") { nLifts++; add("lift", { secs: c.secs, lift: { name: name } }, at0); }
-      else add("walk", { m: e[2], secs: c.secs, name: name, rise: dh }, at0);
+      else add("walk", { m: e[2], secs: c.secs, name: name, rise: dh, under: under[leg.k] || 0 }, at0);
       // Passing through a lift between two different pieces of path = riding the lift.
       var lf = liftAt[leg.to];
       if (lf && i < legs.length - 1) {
@@ -254,11 +259,13 @@
       }
     });
 
+    // Short tunnels and passages (under 40 m) aren't worth a step of their own.
+    steps.forEach(function (st) { if (st.kind === "walk" && st.under && st.m < 40) st.under = 0; });
     // Merge repeated steps/escalators that follow each other.
     var merged = [];
     steps.forEach(function (st) {
       var last = merged[merged.length - 1];
-      if (last && last.kind === st.kind && st.kind !== "lift") { last.m += st.m; last.secs += st.secs; last.count += st.count; last.up = last.up || st.up; last.rise += st.rise; return; }
+      if (last && last.kind === st.kind && st.kind !== "lift" && (st.kind !== "walk" || (last.under || 0) === (st.under || 0))) { if (st.kind === "walk") { Object.keys(st.names).forEach(function (n) { addName(last, n, st.names[n]); }); } last.m += st.m; last.secs += st.secs; last.count += st.count; last.up = last.up || st.up; last.rise += st.rise; return; }
       if (last && last.kind === "lift" && st.kind === "lift" && !st.lift.name) return; // same lift, two levels
       merged.push(st);
     });
@@ -272,6 +279,13 @@
         var m = Math.max(10, Math.round(st.m / 10) * 10);
         var streets = top.length === 2 ? T("{a}, then {b}", { a: top[0], b: top[1] }) : top[0];
         var up = Math.round(st.rise / 5) * 5;
+        if (st.under) {
+          var tn = top[0];
+          if (st.under === 3) return { kind: "walk", text: T(tn ? "Walk {m} m through the road tunnel on {name}, on the pavement." : "Walk {m} m through the road tunnel, on the pavement.", { m: m, name: tn }), m: st.m, at: st.at };
+          var ukey = st.under === 1 ? (tn ? "Walk {m} m through the underground walkway ({name})." : "Walk {m} m through the underground walkway.")
+            : (tn ? "Walk {m} m through the covered passage ({name})." : "Walk {m} m through the covered passage.");
+          return { kind: "walk", text: T(ukey, { m: m, name: tn }), m: st.m, at: st.at };
+        }
         var key = st.rise > 12 ? (streets ? "Walk {m} m uphill (about {h} m up) along {streets}." : "Walk {m} m uphill (about {h} m up) along the footpath.")
           : st.rise < -12 ? (streets ? "Walk {m} m downhill along {streets}." : "Walk {m} m downhill along the footpath.")
           : (streets ? "Walk {m} m along {streets}." : "Walk {m} m along the footpath.");
