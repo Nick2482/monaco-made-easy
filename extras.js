@@ -459,6 +459,13 @@
   function mountYachts(root) {
     var box = root.querySelector("#yachts-box");
     if (!box || !window.fetch) return;
+    // A Pro feature: without Pro, show what it is and how to get it.
+    var P = window.MMEPro;
+    if (P && !P.isPro()) {
+      box.innerHTML = P.lockCard("Biggest yachts in port today").replace("<p>", "<p>" + esc(t("The biggest yachts in Monaco’s harbours right now, with their length and flag, updated every 10 minutes.")) + " ");
+      box.hidden = false;
+      return;
+    }
     fetch("/api/yachts").then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
       if (!d || !d.ok || !d.top || !d.top.length || !document.body.contains(box)) return;
       var mins = d.updated ? Math.max(1, Math.round((Date.now() - new Date(d.updated).getTime()) / 60000)) : null;

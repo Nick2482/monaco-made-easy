@@ -98,6 +98,7 @@
     ["Eat, drink and see", "Restaurants, cafés, bakeries, bars, supermarkets, museums and galleries, with opening hours and the step-free way there."],
     ["Yachting", "Chandleries, yacht brokers, clubs and harbour offices around the ports."],
     ["Walks", "Sightseeing walks that use the lifts, and coastal walks from Cap d’Ail and round Cap Martin."],
+    ["Biggest yachts in port today", "The biggest yachts in Monaco’s harbours right now, with their length and flag, updated every 10 minutes."],
     ["Cruise day", "Set your all-aboard time and we’ll tell you when to head back."],
     ["Use it without mobile data", "Save the map on your phone for when roaming is off."]
   ];
