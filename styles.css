@@ -927,3 +927,8 @@ body.voice-on main { padding-bottom: 240px; }
 .tr-sight .btn-small { text-decoration: none; }
 :root[data-theme="dark"] .tr-sight .tr-season { color: #8ce99a; }
 :root[data-theme="dark"] .tr-sight .tr-season.off { color: #ffd8a8; }
+/* Where I'm staying */
+.home-btn.home-set { background: var(--card); box-shadow: inset 5px 0 0 var(--red); }
+.home-btn.home-set strong { font-size: 22px; }
+.home-change { display: inline-block; margin-top: 6px; color: #c9d6e5; font-size: 14.5px; font-weight: 700; }
+.st-here { margin-top: 12px; width: 100%; }

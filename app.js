@@ -263,6 +263,7 @@
     else if (parts[0] === "home-route") { location.replace(window.MMEPlanner.homeRoute() ? "#/plan" : "#/arrive"); return; }
     else if (parts[0] === "ship") { location.replace(window.MMEPlanner.shipRoute() ? "#/plan" : "#/cruise"); return; }
     else if (parts[0] === "plan") { screen = window.MMEPlanner.screen; }
+    else if (parts[0] === "stay") { screen = window.MMEPlanner.stayScreen; }
     else if (parts[0] === "arrive") { screen = window.MMEPlanner.arriveScreen; }
     else if (parts[0] === "transport" && window.MMETransit.ready) { screen = window.MMETransit.transportScreen; tab = "transport"; }
     else if (parts[0] === "taxis") { screen = window.MMETransit.taxiScreen; tab = "transport"; }

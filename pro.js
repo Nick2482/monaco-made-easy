@@ -1,4 +1,4 @@
-// Monaco Made Easy Pro: a one-off unlock for the guide, walks, cruise mode, the offline map and "Take me home".
+// Monaco Made Easy Pro: a one-off unlock for the guide, walks, cruise mode and the offline map. ("Take me home" is free.)
 // Getting around (lifts, step-free routes, wheelchair mode, buses, toilets, pharmacies, defibrillators, tourist
 // information) is always free. No accounts: a purchase gives an unlock code that is kept on the phone.
 (function () {
@@ -89,7 +89,7 @@
   // The card shown in place of a Pro feature.
   function lockCard(what) {
     return '<aside class="pro-lock"><div class="pl-head">' + badge() + "<strong>" + esc(t(what)) + "</strong></div>" +
-      "<p>" + esc(t("Part of Monaco Made Easy Pro: the guide to restaurants, bars, museums and more, step-free walks, cruise mode, the offline map and “Take me home”.")) + "</p>" +
+      "<p>" + esc(t("Part of Monaco Made Easy Pro: the guide to restaurants, bars, museums and more, step-free walks, cruise mode and the offline map.")) + "</p>" +
       '<a class="btn btn-red" href="#/pro">' + esc(inPlayApp() && !play.ready ? t("What’s included, and how to get it") : t("Get Pro for {price}, once", { price: play.price || CONFIG.price })) + "</a>" +
       '<p class="pl-free">' + esc(t("Lifts, step-free routes, buses and essentials stay free.")) + "</p></aside>";
   }
@@ -99,8 +99,7 @@
     ["Yachting", "Chandleries, yacht brokers, clubs and harbour offices around the ports."],
     ["Walks", "Sightseeing walks that use the lifts, and the sea path from Cap d’Ail to Monaco."],
     ["Cruise day", "Set your all-aboard time and we’ll tell you when to head back."],
-    ["Use it without mobile data", "Save the map on your phone for when roaming is off."],
-    ["Take me home", "Save where you’re staying and get back there from anywhere in one tap."]
+    ["Use it without mobile data", "Save the map on your phone for when roaming is off."]
   ];
 
   var screen = {

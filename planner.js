@@ -325,7 +325,6 @@
         });
         var sh = body.querySelector("#save-home");
         if (sh) sh.addEventListener("click", function () {
-          if (window.MMEPro && !window.MMEPro.isPro()) { location.hash = "#/pro"; return; }
           window.MMEExtras.Home.set(to);
           var ok = document.createElement("p"); ok.className = "off-ok"; ok.setAttribute("role", "status");
           ok.textContent = t("Saved. Tap “Back to {name}” on the home screen any time.", { name: lbl(to) });
@@ -502,6 +501,60 @@
     state.to = window.MMEExtras.shipPoint(c); state.from = null; state.arrival = null; return true;
   }
 
+  // ---------- Where I'm staying (for "Back to …" on the home screen) ----------
+  var stayScreen = {
+    html: function () {
+      var esc = ui().esc;
+      return '<section class="arrive"><a class="back" href="#/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + esc(t("Home")) + "</a>" +
+        "<h1>" + esc(t("Where are you staying?")) + '</h1><p class="lede-dark">' + esc(t("Save it once, then one tap gets you back from anywhere.")) + "</p>" +
+        '<div class="ar-q"><div class="ar-search"><input id="st-stay" type="search" autocomplete="off" placeholder="' + esc(t("Hotel name or address")) + '" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="st-list"><ul class="pl-sugg" id="st-list" role="listbox" hidden></ul></div>' +
+        '<p class="ar-hint">' + esc(t("Type the hotel name or the apartment address from your booking. You can also paste the location link your host sent you.")) + "</p></div>" +
+        '<p class="form-err" id="st-err" role="alert" hidden></p>' +
+        '<button type="button" class="btn btn-red ar-go" id="st-go">' + esc(t("Save")) + "</button>" +
+        '<button type="button" class="btn btn-line st-here" id="st-here">' + esc(t("I’m there now: use where I am")) + "</button></section>";
+    },
+    mount: function (root) {
+      var esc = ui().esc, input = root.querySelector("#st-stay"), list = root.querySelector("#st-list"), items = [], picked = null, timer = null;
+      var cur = window.MMEExtras && window.MMEExtras.Home.get();
+      if (cur) input.value = t(cur.label);
+      function show(res) {
+        items = res;
+        list.innerHTML = res.map(function (it, i) { return '<li role="option" data-i="' + i + '"><strong>' + esc(t(it.label)) + "</strong>" + (it.sub ? "<small>" + esc(it.sub) + "</small>" : "") + "</li>"; }).join("") || '<li class="pl-none">' + esc(t("No matches in Monaco, Beausoleil or Cap d’Ail yet.")) + "</li>";
+        list.hidden = false; input.setAttribute("aria-expanded", "true");
+      }
+      function hide() { list.hidden = true; input.setAttribute("aria-expanded", "false"); }
+      input.addEventListener("input", function () {
+        var q = input.value.trim(); picked = null; clearTimeout(timer);
+        if (q.length < 2) { hide(); return; }
+        var pin = parseCoords(q);
+        if (pin) { show([{ label: "Your accommodation", sub: pin.lat.toFixed(5) + ", " + pin.lng.toFixed(5), lat: pin.lat, lng: pin.lng, kind: "pin" }]); return; }
+        timer = setTimeout(function () { remoteMatches(q).then(function (r) { if (input.value.trim() === q) show(localMatches(q).concat(r).slice(0, 8)); }); }, 280);
+      });
+      input.addEventListener("blur", function () { setTimeout(hide, 180); });
+      list.addEventListener("mousedown", function (e) { e.preventDefault(); });
+      list.addEventListener("click", function (e) { var li = e.target.closest("[data-i]"); if (!li) return; picked = items[+li.dataset.i]; input.value = t(picked.label); hide(); });
+      function done(p) {
+        window.MMEExtras.Home.set(p);
+        if (window.MMEStats) window.MMEStats.track("Home saved");
+        location.hash = "#/";
+      }
+      root.querySelector("#st-go").addEventListener("click", function () {
+        var err = root.querySelector("#st-err");
+        if (!picked) { err.textContent = input.value.trim() ? t("Pick your accommodation from the list as you type.") : t("Tell us where you’re staying."); err.hidden = false; return; }
+        done(picked);
+      });
+      root.querySelector("#st-here").addEventListener("click", function () {
+        var err = root.querySelector("#st-err"), b = this;
+        b.disabled = true;
+        M().startLocating(function (msg) { err.textContent = msg; err.hidden = false; b.disabled = false; });
+        var got = false, stop = M().onLocation(function (pos) {
+          if (got) return; got = true; setTimeout(function () { stop(); }, 0);
+          done({ label: "Your accommodation", lat: pos.lat, lng: pos.lng, kind: "pin" });
+        });
+      });
+    }
+  };
+
   // ---------- Spoken directions ----------
   // Reads each step aloud in the app's language with the phone's own voice (speechSynthesis), and moves on
   // by itself when you reach the start of the next step. Back / Repeat / Next work by hand too.
@@ -590,5 +643,5 @@
     return { ok: ok, start: start, stop: stop };
   })();
 
-  window.MMEPlanner = { homeRoute: homeRoute, shipRoute: shipRoute, arriveScreen: arriveScreen, placeRef: placeRef, go: go, boxHtml: boxHtml, mountBox: mountBox, screen: screen, fromLink: fromLink, toLink: toLink, state: state };
+  window.MMEPlanner = { stayScreen: stayScreen, homeRoute: homeRoute, shipRoute: shipRoute, arriveScreen: arriveScreen, placeRef: placeRef, go: go, boxHtml: boxHtml, mountBox: mountBox, screen: screen, fromLink: fromLink, toLink: toLink, state: state };
 })();
