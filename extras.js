@@ -66,7 +66,7 @@
       about: "One of tennis’s big clay-court tournaments.",
       text: "The tennis is at the Monte-Carlo Country Club, just over the border in Roquebrune-Cap-Martin (France). Roads and buses to the east of Monaco are busier than usual." },
     { id: "eprix", name: "Monaco E-Prix", start: "2027-05-01", end: "2027-05-02", kind: "circuit", about: "Electric single-seater racing on the Grand Prix circuit.", where: "Port Hercule", ll: PORT, text: CIRCUIT_TEXT },
-    { id: "gp", name: "Formula 1 Monaco Grand Prix", start: "2027-06-04", end: "2027-06-06", kind: "circuit", about: "The most famous race of the Formula 1 season.", where: "Port Hercule", ll: PORT,
+    { id: "gp", name: "Formula 1 Monaco Grand Prix", start: "2027-06-04", end: "2027-06-06", kind: "circuit", about: "The most famous race of the Formula 1 season. In 2027 it has a sprint race for the first time.", where: "Port Hercule", ll: PORT,
       text: CIRCUIT_TEXT, extra: "Barriers and grandstands go up around the harbour in the weeks before, so some pavements are narrower or diverted." },
     { id: "yacht", name: "Monaco Yacht Show", start: "2027-09-22", end: "2027-09-25", kind: "port", about: "One of the world’s biggest superyacht shows.", where: "Port Hercule", ll: PORT,
       text: "The show takes over Port Hercule. Some quayside paths are open only to visitors with a ticket, so allow extra time to get around the harbour." }

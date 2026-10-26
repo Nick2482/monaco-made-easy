@@ -89,7 +89,7 @@
   // The card shown in place of a Pro feature.
   function lockCard(what) {
     return '<aside class="pro-lock"><div class="pl-head">' + badge() + "<strong>" + esc(t(what)) + "</strong></div>" +
-      "<p>" + esc(t("Part of Monaco Made Easy Pro: the guide to restaurants, bars, museums and more, step-free walks, cruise mode and the offline map.")) + "</p>" +
+      "<p>" + esc(t("Part of Monaco Made Easy Pro: the guide to restaurants, bars, museums and more, guided walks, cruise mode and the offline map.")) + "</p>" +
       '<a class="btn btn-red" href="#/pro">' + esc(inPlayApp() && !play.ready ? t("What’s included, and how to get it") : t("Get Pro for {price}, once", { price: play.price || CONFIG.price })) + "</a>" +
       '<p class="pl-free">' + esc(t("Lifts, step-free routes, buses and essentials stay free.")) + "</p></aside>";
   }
@@ -97,7 +97,7 @@
   var FEATURES = [
     ["Eat, drink and see", "Restaurants, cafés, bakeries, bars, supermarkets, museums and galleries, with opening hours and the step-free way there."],
     ["Yachting", "Chandleries, yacht brokers, clubs and harbour offices around the ports."],
-    ["Walks", "Sightseeing walks that use the lifts, and the sea path from Cap d’Ail to Monaco."],
+    ["Walks", "Sightseeing walks that use the lifts, and coastal walks from Cap d’Ail and round Cap Martin."],
     ["Cruise day", "Set your all-aboard time and we’ll tell you when to head back."],
     ["Use it without mobile data", "Save the map on your phone for when roaming is off."]
   ];

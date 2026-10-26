@@ -164,6 +164,39 @@
     return (rows ? '<ul class="tr-board">' + rows + "</ul>" : '<p class="tr-none">' + tb("No more trains today.") + "</p>") +
       (last ? '<p class="tr-last">' + tb("**Last train tonight:** {t} to {place}", { t: hhmm(last.at), place: TR.places[last.o[3]] }) + "</p>" : '<p class="tr-last">' + tb("**No more trains tonight.** The times above are tomorrow’s.") + "</p>");
   }
+  // Best train for a journey along the coast: walk to one of our four stations, ride, walk on.
+  var TR_ST = { "Monaco-Monte-Carlo": [43.7393, 7.4199, "Monaco Monte-Carlo station"], "Cap-d'Ail": [43.7206, 7.39438, "Cap d’Ail station"], "Roquebrune-Cap-Martin": [43.76062, 7.45734, "Roquebrune-Cap-Martin station"], "Carnoles": [43.76204, 7.48143, "Carnolès station"] };
+  function trainOption(from, to, now) {
+    if (!TR || !TR.dep) return null;
+    now = now || monacoNow();
+    var st = TR.home.map(function (i) { var n = TR.places[i], c = TR_ST[n]; return c ? { i: i, pt: { lat: c[0], lng: c[1] }, label: c[2], k: TR.keys.indexOf(i) } : null; }).filter(Boolean);
+    var cands = [];
+    st.forEach(function (a) {
+      var da = metres(from, a.pt); if (da > 1800) return;
+      st.forEach(function (b) {
+        if (a === b || b.k < 0) return;
+        var db = metres(b.pt, to); if (db > 1800) return;
+        cands.push({ a: a, b: b, rough: Math.ceil(da * 1.3 / 70) + Math.ceil(db * 1.3 / 70) });
+      });
+    });
+    if (!cands.length) return null;
+    cands.sort(function (x, y) { return x.rough - y.rough; });
+    var best = null, cache = {};
+    function walk(key, a, b) { if (!cache[key]) cache[key] = walkMins(a, b); return cache[key]; }
+    cands.slice(0, 4).forEach(function (c) {
+      var wa = walk("a" + c.a.i, from, c.a.pt), wz = walk("z" + c.b.i, c.b.pt, to);
+      var ready = now.min + wa.m + 3;   // a few minutes to get to the platform
+      var list = trNext(function (o) { return o[0] === c.a.i && o[5][c.b.k] > o[1] ? o[1] : null; }, now);
+      if (!list) return;
+      var x = list.filter(function (y) { return y.at >= ready; })[0];
+      if (!x) return;
+      var ride = x.o[5][c.b.k] - x.o[1], arrive = x.at + ride + 2 + wz.m;
+      if (!best || arrive < best.arrive) best = { from: c.a.label, to: c.b.label, fromPt: c.a.pt, toPt: c.b.pt, dep: x.at, ride: ride, walkTo: wa.m, walkFrom: wz.m, wait: x.at - now.min, arrive: arrive };
+    });
+    if (best) best.minutes = best.arrive - now.min;
+    return best;
+  }
+
   // Trains from Nice airport (Nice Saint-Augustin) to Monaco, for the airport page.
   function trFromAirport(now) {
     var esc = ui().esc, mon = trStationIdx("Monaco-Monte-Carlo");
@@ -408,5 +441,5 @@
   }
   setTimeout(refreshBus, 300);
 
-  window.MMETransit = { refreshBus: refreshBus, inMonaco: inMonaco, taxiScreen: taxiScreen, busOption: busOption, departures: departures, monacoNow: monacoNow, hhmm: hhmm, badge: badge, stopName: function (i) { return B.stops[i][0]; }, stopPt: stopPt, transportScreen: transportScreen, lineScreen: lineScreen, airportScreen: airportScreen, ready: !!B };
+  window.MMETransit = { refreshBus: refreshBus, inMonaco: inMonaco, taxiScreen: taxiScreen, busOption: busOption, trainOption: trainOption, departures: departures, monacoNow: monacoNow, hhmm: hhmm, badge: badge, stopName: function (i) { return B.stops[i][0]; }, stopPt: stopPt, transportScreen: transportScreen, lineScreen: lineScreen, airportScreen: airportScreen, ready: !!B };
 })();

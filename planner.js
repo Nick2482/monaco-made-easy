@@ -26,6 +26,10 @@
       var p = D.places[id];
       if ((p.name + " " + p.short + " " + p.area + " " + t(p.name) + " " + t(p.short) + (id === "station" ? " train gare railway" : "")).toLowerCase().indexOf(q) !== -1) out.push({ label: p.name, sub: id === "station" ? t("We’ll pick the best exit for you") : t(p.area), lat: p.lat, lng: p.lng, kind: id === "station" ? "station" : "place", placeId: id });
     });
+    Object.keys(EXTRA).forEach(function (id) {
+      var p = EXTRA[id];
+      if ((p.name + " " + p.short + " " + p.area + " " + t(p.name) + " " + t(p.short)).toLowerCase().indexOf(q) !== -1) out.push({ label: p.name, sub: t(p.area), lat: p.lat, lng: p.lng, kind: "place" });
+    });
     D.lifts.forEach(function (l) {
       if ((l.name + " " + l.where).toLowerCase().indexOf(q) !== -1) out.push({ label: l.name, sub: l.where + ", " + l.area, lat: l.lat, lng: l.lng, kind: l.type });
     });
@@ -61,8 +65,15 @@
   }
 
   // ---------- The planner box on the home screen ----------
-  var POPULAR = ["casino", "palace", "port", "larvotto", "museum", "beausoleil", "fontvieille", "station", "exotic"];
-  function shortName(id) { var s = D.places[id].short; return t(s === "Museum" ? "Oceanographic Museum" : s === "Palace" ? "Prince’s Palace" : s); }
+  // Places outside the height chart (so not in data.js), for the Popular buttons and search.
+  var EXTRA = {
+    capdail: { name: "Port de Cap d’Ail", short: "Cap d’Ail", area: "Cap d’Ail (France)", lat: 43.72602, lng: 7.41344 },
+    roquebrune: { name: "Roquebrune old village", short: "Roquebrune", area: "Roquebrune-Cap-Martin (France)", lat: 43.765206, lng: 7.459182 },
+    capmartin: { name: "Parc du Cap-Martin", short: "Cap Martin", area: "Roquebrune-Cap-Martin (France)", lat: 43.755111, lng: 7.474712 }
+  };
+  function place(id) { return D.places[id] || EXTRA[id]; }
+  var POPULAR = ["casino", "palace", "port", "larvotto", "museum", "beausoleil", "fontvieille", "station", "exotic", "capdail", "roquebrune", "capmartin"];
+  function shortName(id) { var s = place(id).short; return t(s === "Museum" ? "Oceanographic Museum" : s === "Palace" ? "Prince’s Palace" : s); }
   // Labels are stored in English (or as the place's own name) and translated when shown.
   function lbl(x) { return x ? t(x.label) : t("My location"); }
 
@@ -139,7 +150,7 @@
     box.addEventListener("click", function (e) {
       var b = e.target.closest("[data-to-place]");
       if (b) {
-        var p = D.places[b.dataset.toPlace];
+        var p = place(b.dataset.toPlace);
         state.to = { label: p.name, sub: p.area, lat: p.lat, lng: p.lng, kind: "place", placeId: b.dataset.toPlace };
         box.querySelector("#pl-to").value = t(p.name);
         box.querySelectorAll("[data-to-place]").forEach(function (x) { x.classList.toggle("on", x === b); });
@@ -283,6 +294,15 @@
               "<small>" + esc(now.ymd > window.MMEBus.valid[1] ? t("Times from the Monaco bus timetable (may have changed).") : t("Times from the Monaco bus timetable.")) + "</small></div>";
             var a = T.stopPt(bus.from), z = T.stopPt(bus.to);
             [a, z].forEach(function (p) { L.circleMarker([p.lat, p.lng], { radius: 9, color: "#fff", weight: 3, fillColor: window.MMEBus.routes[bus.p.r].c, fillOpacity: 1 }).addTo(layer); });
+          }
+          var tr = T && T.trainOption && r.minutes >= 25 ? T.trainOption(from, to) : null;
+          if (tr && tr.minutes + 5 < r.minutes) {
+            var Bt = function (x) { return "<b>" + esc(x) + "</b>"; };
+            h += '<div class="bus-opt tr-opt"><div class="bus-opt-top"><span class="bus-badge" style="background:#0b2545;color:#fff">' + esc(t("Train")) + "</span><span>" + esc(t("Or take the train: about {n} min in total", { n: tr.minutes })) + "</span></div>" +
+              "<p>" + esc(t("Walk {a} min to {stop}.", { a: Math.max(1, tr.walkTo), stop: "\u0001" })).replace("\u0001", Bt(t(tr.from))) + " " +
+              esc(t("Train at {time} ({wait}), {r} min to {stop}, then walk {w} min.", { time: "\u0002", wait: tr.wait <= 0 ? t("now") : t("in {n} min", { n: tr.wait }), r: tr.ride, stop: "\u0003", w: Math.max(1, tr.walkFrom) })).replace("\u0002", Bt(T.hhmm(tr.dep))).replace("\u0003", Bt(t(tr.to))) + "</p>" +
+              "<small>" + esc(t("Planned SNCF timetable. Check the SNCF Connect app for delays.")) + "</small></div>";
+            [tr.fromPt, tr.toPt].forEach(function (p) { L.circleMarker([p.lat, p.lng], { radius: 9, color: "#fff", weight: 3, fillColor: "#0b2545", fillOpacity: 1 }).addTo(layer); });
           }
           if (X) h = X.routeReportNote(avoided) + X.routeEventNote(r) + h;
           if (state.arrival) h = '<aside class="note note-welcome"><strong>' + esc(t("Welcome to Monaco")) + "</strong><p>" + esc(t(arrivalTip())) + (r.minutes > 20 || !r.stepFree ? " " + esc(t("With heavy bags, a taxi may be easier for this one.")) : "") + "</p>" + (state.arrival === "ship" ? '<a class="btn btn-navy ship-link" href="#/cruise">' + esc(t("Set your all-aboard time")) + "</a>" : "") + "</aside>" + h;

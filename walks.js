@@ -93,14 +93,14 @@
   }
   function walksBlock() {
     var esc = ui().esc;
-    return '<section class="block walks-block"><div class="block-head"><h2>' + esc(t("Walks")) + "</h2>" + (window.MMEPro ? window.MMEPro.badge() : "") + '</div><p class="block-lede">' + esc(t("Sightseeing walks that use the lifts, so you see the best of Monaco without the climb.")) + '</p><ul class="walk-list">' + WALKS.map(walkCard).join("") + "</ul></section>";
+    return '<section class="block walks-block"><div class="block-head"><h2>' + esc(t("Walks")) + "</h2>" + (window.MMEPro ? window.MMEPro.badge() : "") + '</div><p class="block-lede">' + esc(t("Sightseeing walks that use the lifts, and two coastal walks right by the sea.")) + '</p><ul class="walk-list">' + WALKS.map(walkCard).join("") + "</ul></section>";
   }
 
   var walkScreen = {
     html: function (id) {
       var w = WALKS.filter(function (x) { return x.id === id; })[0], esc = ui().esc;
-      if (!w) return '<section class="page"><h1>' + esc(t("Step-free walks")) + '</h1><ul class="walk-list">' + WALKS.map(walkCard).join("") + "</ul></section>";
-      if (window.MMEPro && !window.MMEPro.isPro()) return '<section class="plan walk"><a class="back" href="#/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + esc(t("Home")) + "</a><h1>" + esc(t(w.title)) + '</h1><p class="lede-dark">' + esc(t(w.sub)) + "</p>" + window.MMEPro.lockCard("Step-free walks") + "</section>";
+      if (!w) return '<section class="page"><h1>' + esc(t("Walks")) + '</h1><ul class="walk-list">' + WALKS.map(walkCard).join("") + "</ul></section>";
+      if (window.MMEPro && !window.MMEPro.isPro()) return '<section class="plan walk"><a class="back" href="#/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + esc(t("Home")) + "</a><h1>" + esc(t(w.title)) + '</h1><p class="lede-dark">' + esc(t(w.sub)) + "</p>" + window.MMEPro.lockCard("Walks") + "</section>";
       return '<section class="plan walk"><a class="back" href="#/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + esc(t("Home")) + "</a>" +
         "<h1>" + esc(t(w.title)) + '</h1><p class="lede-dark">' + esc(t(w.sub)) + "</p>" +
         (w.photos ? '<div class="wk-photos wk-p' + w.photos.length + (w.coast ? " wk-portrait" : "") + '">' + w.photos.map(function (p) { return '<img src="' + p + '" alt="" loading="lazy">'; }).join("") + "</div>" : "") +
