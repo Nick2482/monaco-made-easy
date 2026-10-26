@@ -270,7 +270,7 @@
   // 4. Save the map for use without mobile data
   // ---------------------------------------------------------------------------
   var TILES = "mme-map-tiles";
-  var BOX = { s: 43.712, n: 43.756, w: 7.385, e: 7.450 }; // Monaco, Beausoleil and Cap d'Ail edge
+  var BOX = { s: 43.712, n: 43.776, w: 7.385, e: 7.495 }; // Cap d'Ail to Roquebrune-Cap-Martin
   function tileUrls() {
     var r = (window.devicePixelRatio || 1) > 1 ? "@2x" : "", out = [];
     function tx(lng, z) { return Math.floor((lng + 180) / 360 * Math.pow(2, z)); }
@@ -280,7 +280,8 @@
         out.push("https://" + "abcd"[Math.abs(x + y) % 4] + ".basemaps.cartocdn.com/rastertiles/voyager/" + z + "/" + x + "/" + y + r + ".png?key=" + window.MMEMap.CARTO_KEY);
       }
     }
-    [8528, 8529, 8530].forEach(function (x) { [5972, 5973, 5974, 5975].forEach(function (y) { out.push("https://s3.amazonaws.com/elevation-tiles-prod/terrarium/14/" + x + "/" + y + ".png"); }); });
+    [[8528, 5974], [8528, 5975], [8529, 5973], [8529, 5974], [8529, 5975], [8530, 5971], [8530, 5972], [8530, 5973], [8530, 5974],
+      [8531, 5971], [8531, 5972], [8532, 5971], [8532, 5972], [8532, 5973], [8533, 5971], [8533, 5972]].forEach(function (xy) { out.push("https://s3.amazonaws.com/elevation-tiles-prod/terrarium/14/" + xy[0] + "/" + xy[1] + ".png"); });
     return out;
   }
   function offlineSize() { return Math.max(1, Math.round(tileUrls().length * ((window.devicePixelRatio || 1) > 1 ? 0.045 : 0.018))); }

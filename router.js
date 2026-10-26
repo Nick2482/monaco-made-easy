@@ -64,7 +64,9 @@
   // ---------- Heights: free terrain tiles (AWS Terrain Tiles, Terrarium format) ----------
   // Each pixel stores height above sea level. Loaded once, then kept offline by the service worker.
   var height = null;
-  var TZ = 14, TILES_X = [8528, 8529, 8530], TILES_Y = [5972, 5973, 5974, 5975];
+  // Zoom-14 tiles that cover the walking network (Cap d'Ail to Roquebrune-Cap-Martin).
+  var TZ = 14, TILES = [[8528, 5974], [8528, 5975], [8529, 5973], [8529, 5974], [8529, 5975], [8530, 5971], [8530, 5972], [8530, 5973], [8530, 5974],
+    [8531, 5971], [8531, 5972], [8532, 5971], [8532, 5972], [8532, 5973], [8533, 5971], [8533, 5972]];
   var TILE_URL = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/";
   function loadTile(x, y) {
     return new Promise(function (resolve) {
@@ -84,8 +86,8 @@
   var ready = new Promise(function (resolve) {
     if (typeof document === "undefined") { resolve(false); return; }
     var jobs = [];
-    TILES_X.forEach(function (x) { TILES_Y.forEach(function (y) { jobs.push(loadTile(x, y)); }); });
-    var timer = setTimeout(function () { resolve(false); }, 8000);
+    TILES.forEach(function (xy) { jobs.push(loadTile(xy[0], xy[1])); });
+    var timer = setTimeout(function () { resolve(false); }, 10000);
     Promise.all(jobs).then(function (tiles) {
       var byKey = {};
       tiles.forEach(function (t) { if (t) byKey[t.x + "/" + t.y] = t.px; });

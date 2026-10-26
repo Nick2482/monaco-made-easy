@@ -177,7 +177,7 @@
           return '<li><span class="step-ico" style="--c:' + CAT_COLOR[e.k] + '">' + ui.icon(e.k) + "</span><div><strong>" + ui.esc(essTitle(e)) + "</strong>" +
             (det ? "<span>" + ui.esc(det) + "</span>" : "") + "<small>" + ui.esc(it.w ? walkText(it.w) : e.a) + "</small></div>" +
             '<button type="button" class="map-mini" data-goto="' + e.lat + "," + e.lng + '" data-label="' + CAT_ONE[e.k] + '">' + ui.esc(t("Take me there")) + "</button></li>";
-        }).join("") + '<li class="more-note">' + ui.esc(t(pos ? "The 15 closest of {n}. All of them are on the map." : "{n} in Monaco, Beausoleil and Cap d’Ail. All of them are on the map.", { n: all.length })) + "</li>";
+        }).join("") + '<li class="more-note">' + ui.esc(t(pos ? "The 15 closest of {n}. All of them are on the map." : "{n} in Monaco, Beausoleil, Cap d’Ail and Roquebrune-Cap-Martin. All of them are on the map.", { n: all.length })) + "</li>";
       }
 
       function drawList(pos) {

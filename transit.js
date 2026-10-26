@@ -179,7 +179,7 @@
   }
   function trainsCard() {
     if (!TR) return "";
-    var st = [["Monaco-Monte-Carlo", "Monaco"], ["Cap-d'Ail", "Cap d’Ail"], ["Roquebrune-Cap-Martin", "Roquebrune"]];
+    var st = [["Monaco-Monte-Carlo", "Monaco"], ["Cap-d'Ail", "Cap d’Ail"], ["Roquebrune-Cap-Martin", "Roquebrune"], ["Carnoles", "Carnolès"]];
     return '<section class="tr-trains tr-sec" id="tr-trains"><h2 class="tr-sec-h">' + tb("Trains") + "</h2>" +
       '<div class="ess-chips" role="group" aria-label="' + tb("Station") + '">' + st.map(function (x, i) { return '<button type="button" class="chip' + (i ? "" : " on") + '" data-st="' + x[0] + '">' + tb(x[1]) + "</button>"; }).join("") + "</div>" +
       '<div class="tr-dir" role="group"><button type="button" class="chip on" data-w="1">' + tb("Towards Nice") + '</button><button type="button" class="chip" data-w="0">' + tb("Towards Menton and Italy") + "</button></div>" +
@@ -221,7 +221,7 @@
       return '<section class="page transport"><h1>' + tb("Getting around") + "</h1>" +
         '<a class="tr-card tr-airport" href="#/airport"><strong>' + tb("From Nice airport") + "</strong><span>" + tb("Train, bus, taxi or helicopter, and how long each takes") + "</span></a>" +
         '<a class="tr-card tr-cruise" href="#/cruise"><strong>' + tb("On a cruise?") + "</strong><span>" + tb("Set your all-aboard time and we’ll tell you when to head back.") + "</span></a>" +
-        '<a class="tr-card tr-taxi" href="#/taxis"><strong>' + tb("Taxis") + "</strong><span>" + tb("Numbers, ranks, fixed fares, and the border rule for Beausoleil and Cap d’Ail") + "</span></a>" +
+        '<a class="tr-card tr-taxi" href="#/taxis"><strong>' + tb("Taxis") + "</strong><span>" + tb("Numbers, ranks, fixed fares, and the border rule for the French towns next door") + "</span></a>" +
         trainsCard() +
         '<section class="tr-sec"><h2 class="tr-sec-h">' + tb("Buses along the coast") + "</h2>" +
         '<div class="tr-card tr-train"><strong>' + tb("Bus 600: Nice, Monaco, Menton") + "</strong><span>" + tb("The coastal bus, about every 10 to 15 minutes (every 20 at weekends). It runs from Nice (Square Normandie-Niemen) through Villefranche, Beaulieu, Èze-sur-Mer and Cap d’Ail into Monaco, then on to Roquebrune and Menton. In Monaco it stops near the station (Sainte-Dévote), the Casino and Place des Moulins. €2.10 if you tap your card or phone on board, €2.50 in cash. Live times are in the ZOU! app. Night bus 601 runs Thursday to Saturday.") + "</span></div>" +

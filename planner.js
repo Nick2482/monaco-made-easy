@@ -6,7 +6,7 @@
   var D = window.MME;
   var t = function (s, v) { return window.MMEI18N.t(s, v); };
   var SEARCH_URL = "https://photon.komoot.io/api/";
-  var AREA = { minLng: 7.383, minLat: 43.710, maxLng: 7.455, maxLat: 43.760 }; // Monaco, Beausoleil and Cap d'Ail
+  var AREA = { minLng: 7.383, minLat: 43.710, maxLng: 7.495, maxLat: 43.776 }; // Cap d'Ail, Monaco, Beausoleil and Roquebrune-Cap-Martin
   var CENTRE = { lat: 43.7385, lng: 7.4240 };
 
   var state = { from: null, to: null }; // null "from" means "my location"
@@ -99,7 +99,7 @@
         if (which === "from") items = [{ label: "My location", sub: t("Use where I am now"), kind: "me" }].concat(items);
         list.innerHTML = items.map(function (it, i) {
           return '<li role="option" id="pl-' + which + "-o" + i + '" data-i="' + i + '"><strong>' + esc(t(it.label)) + "</strong>" + (it.sub ? "<small>" + esc(it.sub) + "</small>" : "") + "</li>";
-        }).join("") || '<li class="pl-none">' + esc(t("No matches in Monaco, Beausoleil or Cap d’Ail yet.")) + "</li>";
+        }).join("") || '<li class="pl-none">' + esc(t("No matches in Monaco, Beausoleil, Cap d’Ail or Roquebrune-Cap-Martin yet.")) + "</li>";
         list.hidden = false; input.setAttribute("aria-expanded", "true");
       }
       function hide() { list.hidden = true; input.setAttribute("aria-expanded", "false"); }
@@ -271,7 +271,7 @@
               '<div><span class="step-type">' + esc(t(STEP_LABEL[k] || "Arrive")) + "</span><p>" + esc(st.text) + "</p></div></li>";
           }).join("") + "</ol>";
           if (!r.stepFree) h += '<aside class="note"><strong>' + esc(t("Steps on this route")) + "</strong><p>" + esc(t("This is the easiest way we can find, but it still has some steps. A taxi may be easier with heavy bags.")) + "</p></aside>";
-          if (outside) h += '<aside class="note"><strong>' + esc(t("Beyond our map")) + "</strong><p>" + esc(t("Part of this journey is outside the area we cover (Monaco, Beausoleil and Cap d’Ail). Use Google Maps for that part.")) + "</p></aside>";
+          if (outside) h += '<aside class="note"><strong>' + esc(t("Beyond our map")) + "</strong><p>" + esc(t("Part of this journey is outside the area we cover (Monaco, Beausoleil, Cap d’Ail and Roquebrune-Cap-Martin). Use Google Maps for that part.")) + "</p></aside>";
           var T = window.MMETransit, bus = T && T.ready ? T.busOption(from, to) : null;
           if (bus && (bus.minutes + 2 < r.minutes || (r.climbed > 30 && bus.minutes < r.minutes + 8) || (!r.stepFree && bus.minutes < r.minutes + 8))) {
             var now = T.monacoNow();
@@ -355,7 +355,7 @@
           if (!inArea(pos)) {
             root.querySelector("#plan-from").textContent = t("Monaco station (you’re not in Monaco yet)");
             state.from = { label: "Monaco Monte-Carlo station", lat: D.places.station.lat, lng: D.places.station.lng, kind: "station" };
-            draw(state.from, esc(t("You’re not in Monaco, Beausoleil or Cap d’Ail right now, so we’ve started from the train station. When you’re here, we’ll use where you are.")));
+            draw(state.from, esc(t("You’re not in Monaco, Beausoleil, Cap d’Ail or Roquebrune-Cap-Martin right now, so we’ve started from the train station. When you’re here, we’ll use where you are.")));
             state.from = null;
             return;
           }
@@ -405,7 +405,7 @@
       var esc = ui().esc, input = root.querySelector("#ar-stay"), list = root.querySelector("#ar-list"), items = [], picked = null, timer = null;
       function show(res) {
         items = res;
-        list.innerHTML = res.map(function (it, i) { return '<li role="option" data-i="' + i + '"><strong>' + esc(t(it.label)) + "</strong>" + (it.sub ? "<small>" + esc(it.sub) + "</small>" : "") + "</li>"; }).join("") || '<li class="pl-none">' + esc(t("No matches in Monaco, Beausoleil or Cap d’Ail yet.")) + "</li>";
+        list.innerHTML = res.map(function (it, i) { return '<li role="option" data-i="' + i + '"><strong>' + esc(t(it.label)) + "</strong>" + (it.sub ? "<small>" + esc(it.sub) + "</small>" : "") + "</li>"; }).join("") || '<li class="pl-none">' + esc(t("No matches in Monaco, Beausoleil, Cap d’Ail or Roquebrune-Cap-Martin yet.")) + "</li>";
         list.hidden = false; input.setAttribute("aria-expanded", "true");
       }
       function hide() { list.hidden = true; input.setAttribute("aria-expanded", "false"); }
@@ -519,7 +519,7 @@
       if (cur) input.value = t(cur.label);
       function show(res) {
         items = res;
-        list.innerHTML = res.map(function (it, i) { return '<li role="option" data-i="' + i + '"><strong>' + esc(t(it.label)) + "</strong>" + (it.sub ? "<small>" + esc(it.sub) + "</small>" : "") + "</li>"; }).join("") || '<li class="pl-none">' + esc(t("No matches in Monaco, Beausoleil or Cap d’Ail yet.")) + "</li>";
+        list.innerHTML = res.map(function (it, i) { return '<li role="option" data-i="' + i + '"><strong>' + esc(t(it.label)) + "</strong>" + (it.sub ? "<small>" + esc(it.sub) + "</small>" : "") + "</li>"; }).join("") || '<li class="pl-none">' + esc(t("No matches in Monaco, Beausoleil, Cap d’Ail or Roquebrune-Cap-Martin yet.")) + "</li>";
         list.hidden = false; input.setAttribute("aria-expanded", "true");
       }
       function hide() { list.hidden = true; input.setAttribute("aria-expanded", "false"); }
