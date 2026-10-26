@@ -20,13 +20,14 @@ def is_yacht(v):
 
 def load():
     since = (datetime.datetime.utcnow() - datetime.timedelta(hours=WINDOW_H)).strftime("%Y-%m-%dT%H:%M:%SZ")
-    q = urllib.parse.urlencode({"select": "name,length,beam,flag,ship_type,place,last_seen", "last_seen": "gte." + since,
+    q = urllib.parse.urlencode({"select": "name,length,beam,flag,ship_type,place,lat,lng,last_seen", "last_seen": "gte." + since,
                                 "order": "length.desc.nullslast", "limit": "200"})
     req = urllib.request.Request(SB + "?" + q, headers={"apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY, "User-Agent": "MonacoMadeEasy/1.0"})
     with urllib.request.urlopen(req, timeout=10) as r:
         rows = json.loads(r.read())
     big = [v for v in rows if is_yacht(v) and (v.get("length") or 0) >= MIN_LEN and v.get("name")]
-    top = [{"name": v["name"], "length": v["length"], "beam": v.get("beam"), "flag": v.get("flag"), "place": v.get("place")} for v in big[:12]]
+    top = [{"name": v["name"], "length": v["length"], "beam": v.get("beam"), "flag": v.get("flag"), "place": v.get("place"),
+            "lat": round(v["lat"], 4) if v.get("lat") is not None else None, "lng": round(v["lng"], 4) if v.get("lng") is not None else None} for v in big[:12]]
     updated = max([v["last_seen"] for v in rows], default=None)
     return {"ok": True, "top": top, "heard": len(rows), "updated": updated}
 

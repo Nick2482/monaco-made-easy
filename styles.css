@@ -952,3 +952,9 @@ body.voice-on main { padding-bottom: 240px; }
 .yt-len { flex: none; min-width: 3.6em; font-family: var(--serif); font-size: 22px; color: var(--head); font-variant-numeric: tabular-nums; }
 .yt-list strong { display: block; letter-spacing: 0.02em; color: var(--head); }
 .yt-list small { display: block; color: var(--grey); font-size: 14.5px; margin-top: 1px; }
+.yt-map { position: relative; z-index: 0; isolation: isolate; height: 240px; border-radius: 14px; overflow: hidden; margin-top: 12px; border: 1px solid var(--line); }
+.yt-mk { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--navy, #0b2545); color: #fff; font-weight: 700; font-size: 13px; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35); }
+.yt-num { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--navy, #0b2545); color: #fff; font-size: 12px; margin-right: 7px; vertical-align: 2px; letter-spacing: 0; }
+.yt-list li[data-yt] { cursor: pointer; }
+.yt-main { min-width: 0; }
+.yt-main .btn-small { margin-top: 6px; }

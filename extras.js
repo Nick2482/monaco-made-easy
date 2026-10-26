@@ -469,13 +469,43 @@
     fetch("/api/yachts").then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
       if (!d || !d.ok || !d.top || !d.top.length || !document.body.contains(box)) return;
       var mins = d.updated ? Math.max(1, Math.round((Date.now() - new Date(d.updated).getTime()) / 60000)) : null;
-      box.innerHTML = "<h2>" + esc(t("Biggest yachts in port today")) + '</h2><ol class="yt-list">' + d.top.map(function (y) {
-        return '<li><span class="yt-len">' + esc(t("{n} m", { n: y.length })) + "</span><span><strong>" + esc(y.name) + "</strong><small>" +
-          esc([flagName(y.flag), placeName(y.place)].filter(Boolean).join(" · ")) + "</small></span></li>";
-      }).join("") + "</ol>" +
+      var top = d.top, onMap = top.filter(function (y) { return y.lat != null && y.lng != null; });
+      box.innerHTML = "<h2>" + esc(t("Biggest yachts in port today")) + "</h2>" +
+        (onMap.length && window.L && window.MMEMap ? '<div class="yt-map" id="yt-map" role="application" aria-label="' + esc(t("Map")) + '"></div>' : "") +
+        '<ol class="yt-list">' + top.map(function (y, i) {
+          var inPort = y.place && y.place !== "At anchor" && y.lat != null;
+          return '<li data-yt="' + i + '"><span class="yt-len">' + esc(t("{n} m", { n: y.length })) + "</span><span class=\"yt-main\"><strong>" + (y.lat != null ? '<span class="yt-num">' + (i + 1) + "</span>" : "") + esc(y.name) + "</strong><small>" +
+            esc([flagName(y.flag), placeName(y.place)].filter(Boolean).join(" · ")) + "</small>" +
+            (inPort ? '<button type="button" class="btn-small" data-yt-go="' + i + '">' + esc(t("Take me there")) + "</button>" : "") + "</span></li>";
+        }).join("") + "</ol>" +
         '<p class="wo-note">' + esc(t("From the yachts’ own public AIS signals. Some switch theirs off in port, so not every yacht shows.")) +
         (mins && mins < 180 ? " " + esc(t("Updated {n} min ago.", { n: mins })) : "") + "</p>";
       box.hidden = false;
+      var map = null, marks = {};
+      var mapEl = box.querySelector("#yt-map");
+      if (mapEl) {
+        map = window.MMEMap.makeMap(mapEl);
+        onMap.forEach(function (y) {
+          var i = top.indexOf(y);
+          marks[i] = L.marker([y.lat, y.lng], { icon: L.divIcon({ className: "", html: '<span class="yt-mk">' + (i + 1) + "</span>", iconSize: [26, 26], iconAnchor: [13, 13] }), title: y.name, keyboard: true })
+            .addTo(map).bindPopup("<strong>" + esc(y.name) + "</strong><br>" + esc(t("{n} m", { n: y.length })) + (y.place ? " · " + esc(placeName(y.place)) : ""));
+        });
+        var b = L.latLngBounds(onMap.map(function (y) { return [y.lat, y.lng]; }));
+        map.fitBounds(b.pad(0.25), { maxZoom: 17 });
+        setTimeout(function () { map.invalidateSize(); }, 200);
+      }
+      box.addEventListener("click", function (e) {
+        var go = e.target.closest("[data-yt-go]");
+        if (go) {
+          var y = top[+go.dataset.ytGo];
+          window.MMEPlanner.state.to = { label: y.name + " (" + t(y.place) + ")", lat: y.lat, lng: y.lng, kind: "place" };
+          window.MMEPlanner.state.from = null; window.MMEPlanner.state.arrival = null;
+          if (window.MMEStats) window.MMEStats.track("Yacht take me there");
+          location.hash = "#/plan"; return;
+        }
+        var li = e.target.closest("[data-yt]");
+        if (li && map && marks[li.dataset.yt]) { map.setView(marks[li.dataset.yt].getLatLng(), 17); marks[li.dataset.yt].openPopup(); mapEl.scrollIntoView({ behavior: "smooth", block: "center" }); }
+      });
     }).catch(function () {});
   }
 
