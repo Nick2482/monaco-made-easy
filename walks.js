@@ -36,6 +36,15 @@
         { name: "Plage Marquet", lat: 43.72395, lng: 7.41095, text: "A sandy beach in a sheltered bay, with a beach restaurant." },
         { name: "Port de Cap d’Ail", lat: 43.72602, lng: 7.41344, text: "Cap d’Ail’s marina, with cafés and restaurants on the quay." },
         { name: "Monaco Heliport", lat: 43.72634, lng: 7.41755, text: "You’re in Monaco. Fontvieille’s shops and restaurants are a few minutes further on." }
+      ] },
+    { id: "corbusier", title: "Promenade Le Corbusier", sub: "Round Cap Martin by the sea, from Roquebrune station to Carnolès", coast: true,
+      stops: [
+        { name: "Roquebrune-Cap-Martin station", lat: 43.76073, lng: 7.45765, text: "Start at the station. The path begins just below it, by the sea." },
+        { name: "Cap Moderne", lat: 43.75991, lng: 7.46317, text: "Le Corbusier’s Cabanon and Eileen Gray’s Villa E-1027 sit right beside the path. Visits are guided only and must be booked ahead." },
+        { name: "La Dragonnière", lat: 43.75632, lng: 7.46896, text: "The path hugs the rocks round Cap Martin, with views back to Monaco." },
+        { name: "Cap Martin point", lat: 43.75095, lng: 7.4772, text: "The tip of the cape, among pines and villas, looking out to sea." },
+        { name: "Empress Elisabeth monument", lat: 43.75179, lng: 7.48637, text: "A monument to Empress Elisabeth of Austria, “Sissi”, who loved to stay on Cap Martin." },
+        { name: "Carnolès seafront", lat: 43.7578, lng: 7.4818, text: "Finish by the beaches and cafés of Carnolès. Carnolès station is about 10 minutes’ walk inland." }
       ] }
   ];
 
@@ -43,7 +52,8 @@
     var R = window.MMERouter, X = window.MMEExtras, wc = wheelchair();
     var blocked = X ? X.Reports.blockedPoints() : [];
     var legs = [];
-    for (var i = 1; i < w.stops.length; i++) legs.push(R ? R.route(w.stops[i - 1], w.stops[i], { avoidSteps: true, wheelchair: wc, blocked: blocked }) : null);
+    // Coastal paths have steps of their own, so follow the path rather than detouring by road to avoid them.
+    for (var i = 1; i < w.stops.length; i++) legs.push(R ? R.route(w.stops[i - 1], w.stops[i], { avoidSteps: !w.coast, wheelchair: wc, blocked: blocked }) : null);
     return legs;
   }
   function summary(legs) {
