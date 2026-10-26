@@ -157,7 +157,7 @@
       "<h1>" + esc(t("Monaco, without the climb.")) + "</h1>" + (window.MMEWeather ? window.MMEWeather.strip() : "") +
       (X ? X.eventBanner() + X.cruiseCard() : "") + (window.MMEWalks ? window.MMEWalks.guardCard() : "") +
       '<a class="arrive-btn" href="#/arrive"><span><strong>' + esc(t("Just arrived?")) + "</strong><small>" + esc(t("The easiest way to where you’re staying, with your bags")) + '</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.6 5.4 10 4l8 8-8 8-1.4-1.4 6.6-6.6z"/></svg></a>' +
-      '<p class="lede">' + esc(t("Around 80 free public lifts, 37 escalators and 8 moving walkways link Monaco, Beausoleil and Cap d’Ail. We show you how to use them.")) + "</p>" + (X ? X.knowLink() + essQuick() + X.homeCard() : "") +
+      '<p class="lede">' + esc(t("Around 80 free public lifts, 37 escalators and 8 moving walkways link Monaco, Beausoleil and Cap d’Ail. We show you how to use them, and we cover Roquebrune and Cap Martin too.")) + "</p>" + (X ? X.knowLink() + essQuick() + X.homeCard() : "") +
       window.MMEPlanner.boxHtml() +
       "</section>" +
       (window.MMEInstall ? window.MMEInstall.card("home") + window.MMEInstall.rateCard() : "") +
@@ -199,7 +199,7 @@
   // Links to the visitor guide pages, in the visitor's language.
   function guidesBlock(cls) {
     var L = window.MMEI18N.lang(), G = window.MMEGuideTitles && window.MMEGuideTitles[L];
-    return '<section class="gp-links' + cls + '"><h2>' + esc(t("Guides for visitors")) + '</h2><ul>' + [["monaco-public-lifts.html", "Monaco’s free public lifts and escalators"], ["step-free-monaco.html", "Step-free Monaco: wheelchairs and pushchairs"], ["monaco-train-station.html", "Monaco Monte-Carlo station: which exit?"], ["cap-dail-sea-path.html", "The sea path from Cap d’Ail to Monaco"], ["beausoleil.html", "Getting around Beausoleil"]].map(function (g) {
+    return '<section class="gp-links' + cls + '"><h2>' + esc(t("Guides for visitors")) + '</h2><ul>' + [["monaco-public-lifts.html", "Monaco’s free public lifts and escalators"], ["step-free-monaco.html", "Step-free Monaco: wheelchairs and pushchairs"], ["monaco-train-station.html", "Monaco Monte-Carlo station: which exit?"], ["cap-dail-sea-path.html", "The sea path from Cap d’Ail to Monaco"], ["beausoleil.html", "Getting around Beausoleil"], ["roquebrune-cap-martin.html", "Roquebrune-Cap-Martin and the Promenade Le Corbusier"]].map(function (g) {
       return '<li><a href="' + (L === "en" ? "" : L + "/") + g[0] + '">' + esc(G ? G[g[0]] : g[1]) + "</a></li>";
     }).join("") + "</ul></section>";
   }
@@ -213,6 +213,7 @@
       [t("Across the harbour"), t("The small electric Bateau-Bus ferry crosses Port Hercule and has a boarding ramp.")],
       [t("Accessible toilets"), t("There are accessible toilets at the Casino Square tourist office, the Oceanographic Museum, the Grimaldi Forum, Larvotto Beach and Port Hercule.")],
       [t("Cap d'Ail"), t("Cap d’Ail is in France, just west of Fontvieille, with no border checks. A flat seaside path links it to Monaco, and it has beaches, restaurants and a small harbour.")],
+      [t("Roquebrune and Cap Martin"), t("Roquebrune-Cap-Martin is in France, just east of Monaco. Its medieval village and castle sit on the hill, and the Promenade Le Corbusier runs round Cap Martin by the sea. Trains stop at Roquebrune-Cap-Martin and Carnolès.")],
       [t("Beausoleil"), t("Beausoleil is in France, right behind Monte-Carlo. The border is just a street, with no checks. It’s steep, so plan to use the lifts on the way back up.")],
       [t("Where our data comes from"), t("Streets, paths, lifts and escalators: © OpenStreetMap contributors (ODbL). Heights: Terrain Tiles from AWS Open Data (Mapzen and others). Map style: © CARTO. Buses: Compagnie des Autobus de Monaco open data.")]
     ];
