@@ -927,8 +927,11 @@ body.voice-on main { padding-bottom: 240px; }
 .tr-sight .btn-small { text-decoration: none; }
 :root[data-theme="dark"] .tr-sight .tr-season { color: #8ce99a; }
 :root[data-theme="dark"] .tr-sight .tr-season.off { color: #ffd8a8; }
-/* Where I'm staying */
-.home-btn.home-set { background: var(--card); box-shadow: inset 5px 0 0 var(--red); }
-.home-btn.home-set strong { font-size: 22px; }
-.home-change { display: inline-block; margin-top: 6px; color: #c9d6e5; font-size: 14.5px; font-weight: 700; }
+/* Where I'm staying: a slim red bar below the quick links */
+.home-btn.home-red { margin-top: 14px; padding: 10px 14px; gap: 12px; border-radius: 12px; background: var(--red); color: #fff; box-shadow: none; }
+.home-btn.home-red .home-ico { width: 22px; height: 22px; fill: #fff; }
+.home-btn.home-red strong { font-family: inherit; font-weight: 700; font-size: 17px; line-height: 1.25; }
+.home-btn.home-red small { display: block; color: #ffe3e3; font-size: 14px; font-weight: 400; margin-top: 1px; }
+.home-btn.home-red svg:not(.home-ico) { width: 20px; height: 20px; fill: #fff; flex: none; }
+.home-change { display: inline-block; margin-top: 6px; color: #c9d6e5; font-size: 14px; font-weight: 700; }
 .st-here { margin-top: 12px; width: 100%; }

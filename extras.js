@@ -33,9 +33,9 @@
   var HOUSE = '<svg class="home-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 11.5h3V21h5.5v-6h3v6H19v-9.5h3z"/></svg>';
   function homeCard() {
     var h = Home.get();
-    if (!h) return '<a class="home-btn home-set" href="#/stay">' + HOUSE + "<span><strong>" + esc(t("Where are you staying?")) + "</strong><small>" +
+    if (!h) return '<a class="home-btn home-red" href="#/stay">' + HOUSE + "<span><strong>" + esc(t("Where are you staying?")) + "</strong><small>" +
       esc(t("Save it once, then one tap gets you back from anywhere.")) + "</small></span>" + ARROW + "</a>";
-    return '<a class="home-btn" href="#/home-route">' + HOUSE + "<span><strong>" +
+    return '<a class="home-btn home-red" href="#/home-route">' + HOUSE + "<span><strong>" +
       esc(t("Back to {name}", { name: t(h.label) })) + "</strong><small>" + esc(t("The easiest way from where you are now")) + "</small></span>" + ARROW + "</a>" +
       '<a class="home-change" href="#/stay">' + esc(t("Change where I’m staying")) + "</a>";
   }
