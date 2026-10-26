@@ -28,5 +28,10 @@
         }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "api/yachts.py": {
+      "maxDuration": 60
+    }
+  }
 }
