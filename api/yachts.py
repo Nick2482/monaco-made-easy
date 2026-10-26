@@ -26,7 +26,7 @@ def load():
     with urllib.request.urlopen(req, timeout=10) as r:
         rows = json.loads(r.read())
     big = [v for v in rows if is_yacht(v) and (v.get("length") or 0) >= MIN_LEN and v.get("name")]
-    top = [{"name": v["name"], "length": v["length"], "beam": v.get("beam"), "flag": v.get("flag"), "place": v.get("place") or "At anchor"} for v in big[:12]]
+    top = [{"name": v["name"], "length": v["length"], "beam": v.get("beam"), "flag": v.get("flag"), "place": v.get("place")} for v in big[:12]]
     updated = max([v["last_seen"] for v in rows], default=None)
     return {"ok": True, "top": top, "heard": len(rows), "updated": updated}
 

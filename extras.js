@@ -454,7 +454,7 @@
     if (!iso) return f || "";
     try { return new Intl.DisplayNames([window.MMEI18N.lang()], { type: "region" }).of(iso) || f; } catch (e) { return f; }
   }
-  function placeName(p) { return p === "At anchor" || !p ? t("At anchor off Monaco") : t(p); }
+  function placeName(p) { return !p ? "" : p === "At anchor" ? t("At anchor off Monaco") : t(p); }
   function yachtsBox() { return '<section class="yachts" id="yachts-box" hidden></section>'; }
   function mountYachts(root) {
     var box = root.querySelector("#yachts-box");
