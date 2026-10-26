@@ -38,6 +38,7 @@
         { name: "Monaco Heliport", lat: 43.72634, lng: 7.41755, text: "You’re in Monaco. Fontvieille’s shops and restaurants are a few minutes further on." }
       ] },
     { id: "corbusier", title: "Promenade Le Corbusier", sub: "Round Cap Martin by the sea, from Roquebrune station to Carnolès", coast: true,
+      photos: ["img/corbusier-waves.jpg", "img/corbusier-carnoles.jpg"],
       stops: [
         { name: "Roquebrune-Cap-Martin station", lat: 43.76073, lng: 7.45765, text: "Start at the station. The path begins just below it, by the sea." },
         { name: "Cap Moderne", lat: 43.75991, lng: 7.46317, text: "Le Corbusier’s Cabanon and Eileen Gray’s Villa E-1027 sit right beside the path. Visits are guided only and must be booked ahead." },
@@ -102,7 +103,7 @@
       if (window.MMEPro && !window.MMEPro.isPro()) return '<section class="plan walk"><a class="back" href="#/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + esc(t("Home")) + "</a><h1>" + esc(t(w.title)) + '</h1><p class="lede-dark">' + esc(t(w.sub)) + "</p>" + window.MMEPro.lockCard("Step-free walks") + "</section>";
       return '<section class="plan walk"><a class="back" href="#/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + esc(t("Home")) + "</a>" +
         "<h1>" + esc(t(w.title)) + '</h1><p class="lede-dark">' + esc(t(w.sub)) + "</p>" +
-        (w.photos ? '<div class="wk-photos wk-p' + w.photos.length + (w.id === "seapath" ? " wk-portrait" : "") + '">' + w.photos.map(function (p) { return '<img src="' + p + '" alt="" loading="lazy">'; }).join("") + "</div>" : "") +
+        (w.photos ? '<div class="wk-photos wk-p' + w.photos.length + (w.coast ? " wk-portrait" : "") + '">' + w.photos.map(function (p) { return '<img src="' + p + '" alt="" loading="lazy">'; }).join("") + "</div>" : "") +
         (w.id === "rock" ? guardCard() : "") +
         '<div class="map plan-map" id="walk-map"></div><div id="walk-body"><p class="lede-dark" role="status">' + esc(t("Working out the easiest way…")) + "</p></div></section>";
     },
