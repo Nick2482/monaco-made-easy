@@ -8,7 +8,7 @@ import datetime, json, urllib.parse, urllib.request
 
 SB = "https://oimcxmlewxjtcvrbpzop.supabase.co/rest/v1/mme_yachts"
 SB_KEY = "sb_publishable_D1uaOD08d5u6aepRYDXetw_MrLZ2k9r"   # the public (publishable) key: read-only here
-WINDOW_H = 3          # heard in the last 3 hours = still here
+WINDOW_H = 3          # heard in the last 3 hours = still here (cruise ships too)
 MIN_LEN = 20          # metres: smaller boats aren't what people come to see
 
 
@@ -28,8 +28,11 @@ def load():
     big = [v for v in rows if is_yacht(v) and (v.get("length") or 0) >= MIN_LEN and v.get("name")]
     top = [{"name": v["name"], "length": v["length"], "beam": v.get("beam"), "flag": v.get("flag"), "place": v.get("place"),
             "lat": round(v["lat"], 4) if v.get("lat") is not None else None, "lng": round(v["lng"], 4) if v.get("lng") is not None else None} for v in big[:12]]
+    # Cruise ships (AIS passenger types 60-69, 80 m or more): useful for cruise visitors, and a sign the Rock will be busy.
+    cruise = [{"name": v["name"], "length": v.get("length"), "place": v.get("place")} for v in rows
+              if v.get("ship_type") is not None and 60 <= v["ship_type"] <= 69 and (v.get("length") or 0) >= 80 and v.get("name")]
     updated = max([v["last_seen"] for v in rows], default=None)
-    return {"ok": True, "top": top, "heard": len(rows), "updated": updated}
+    return {"ok": True, "top": top, "cruise": cruise[:6], "heard": len(rows), "updated": updated}
 
 
 class handler(BaseHTTPRequestHandler):

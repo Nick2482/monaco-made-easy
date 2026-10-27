@@ -456,6 +456,20 @@
   }
   function placeName(p) { return !p ? "" : p === "At anchor" ? t("At anchor off Monaco") : t(p); }
   function yachtsBox() { return '<section class="yachts" id="yachts-box" hidden></section>'; }
+  // Its own screen, from the "Yachts in port" button on the home screen.
+  var yachtsScreen = {
+    html: function () {
+      return '<section class="page yachts-page"><a class="back" href="#/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + esc(t("Home")) + "</a>" +
+        yachtsBox() + '<p class="wo-note yt-wait" id="yt-wait">' + esc(t("Listening for yachts…")) + "</p></section>";
+    },
+    mount: function (el) {
+      if (window.MMEStats) window.MMEStats.track("Yachts opened");
+      mountYachts(el);
+      var w = el.querySelector("#yt-wait"), box = el.querySelector("#yachts-box");
+      var check = setInterval(function () { if (!document.body.contains(el)) return clearInterval(check); if (box && !box.hidden && w) { w.remove(); clearInterval(check); } }, 300);
+      setTimeout(function () { clearInterval(check); if (w && document.body.contains(w) && box && box.hidden) w.textContent = t("No yachts heard in the last few hours. Try again later."); }, 8000);
+    }
+  };
   function mountYachts(root) {
     var box = root.querySelector("#yachts-box");
     if (!box || !window.fetch) return;
@@ -478,6 +492,9 @@
             esc([flagName(y.flag), placeName(y.place)].filter(Boolean).join(" · ")) + "</small>" +
             (inPort ? '<button type="button" class="btn-small" data-yt-go="' + i + '">' + esc(t("Take me there")) + "</button>" : "") + "</span></li>";
         }).join("") + "</ol>" +
+        (d.cruise && d.cruise.length ? '<h3 class="yt-cruise-h">' + esc(t("Cruise ships here today")) + '</h3><ul class="yt-cruise">' + d.cruise.map(function (c) {
+          return "<li><strong>" + esc(c.name) + "</strong> " + (c.length ? esc(t("{n} m", { n: c.length })) : "") + (c.place ? " · " + esc(placeName(c.place)) : "") + "</li>";
+        }).join("") + '</ul><p class="wo-note">' + esc(t("Cruise days are busy on the Rock and around the Palace in the late morning. Go early or late for a quieter visit.")) + "</p>" : "") +
         '<p class="wo-note">' + esc(t("From the yachts’ own public AIS signals. Some switch theirs off in port, so not every yacht shows.")) +
         (mins && mins < 180 ? " " + esc(t("Updated {n} min ago.", { n: mins })) : "") + "</p>";
       box.hidden = false;
@@ -515,6 +532,6 @@
     cruise: cruise, shipPoint: shipPoint, cruiseCard: cruiseCard, cruiseScreen: cruiseScreen, mountHome: mountHome,
     offlineCard: offlineCard, mountOffline: mountOffline, tileUrls: tileUrls,
     Reports: Reports, reportBox: reportBox, routeReportNote: routeReportNote,
-    yachtsBox: yachtsBox, mountYachts: mountYachts
+    yachtsBox: yachtsBox, mountYachts: mountYachts, yachtsScreen: yachtsScreen
   };
 })();

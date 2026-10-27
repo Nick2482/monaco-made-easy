@@ -193,7 +193,7 @@
     var items = [["toilets", "Toilets"], ["pharmacy", "Pharmacy"], ["atm", "Cash machine"], ["drinking_water", "Drinking water"]];
     return '<nav class="ess-quick" aria-label="' + esc(t("Nearest essentials")) + '">' + items.map(function (i) {
       return '<a href="#/map/' + i[0] + '"><span class="eq-ico" style="--c:' + window.MMEMap.CAT_COLOR[i[0]] + '">' + icon(i[0]) + "</span>" + esc(t(i[1])) + "</a>";
-    }).join("") + "</nav>" + '<div class="quick-links"><a class="sos-link" href="#/info"><span aria-hidden="true">☎</span> ' + esc(t("Emergency numbers")) + '</a><a class="sos-link" href="#/whats-on"><span aria-hidden="true">✦</span> ' + esc(t("What’s on")) + "</a></div>";
+    }).join("") + "</nav>" + '<div class="quick-links"><a class="sos-link" href="#/info"><span aria-hidden="true">☎</span> ' + esc(t("Emergency numbers")) + '</a><a class="sos-link" href="#/whats-on"><span aria-hidden="true">✦</span> ' + esc(t("What’s on")) + '</a><a class="sos-link" href="#/yachts"><span aria-hidden="true">⚓</span> ' + esc(t("Yachts in port")) + "</a></div>";
   }
 
   // Links to the visitor guide pages, in the visitor's language.
@@ -234,7 +234,7 @@
       return "<div><dt>" + esc(i[0]) + "</dt><dd>" + esc(i[1]) + "</dd></div>";
     }).join("") + "</dl>" + (X ? X.eventsInfo() : "") +
       guidesBlock("") + '<p class="unchecked">' + esc(t("This is a preview. Details are gathered from published sources and are being checked on the ground before launch.")) + "</p>" +
-      '<p class="legal-links"><a href="mailto:hello@monacomadeeasy.com?subject=Monaco%20Made%20Easy">' + esc(t("Report a problem with the app")) + '</a><a href="privacy.html">' + esc(t("Privacy policy")) + '</a><a href="terms.html">' + esc(t("Terms of sale")) + "</a></p></section>";
+      '<p class="legal-links"><a href="mailto:hello@monacomadeeasy.com?subject=Monaco%20Made%20Easy">' + esc(t("Report a problem with the app")) + '</a><a href="https://www.instagram.com/monacomadeeasy/" target="_blank" rel="noopener">Instagram</a><a href="privacy.html">' + esc(t("Privacy policy")) + '</a><a href="terms.html">' + esc(t("Terms of sale")) + "</a></p></section>";
   }
 
   // ---------- Router ----------
@@ -253,6 +253,7 @@
     else if (parts[0] === "survey") { screen = window.MMESurvey.screen; tab = ""; }
     else if (parts[0] === "info") { html = infoPage(); tab = "info"; }
     else if (parts[0] === "whats-on" && X) { screen = X.whatsOnScreen; tab = "info"; }
+    else if (parts[0] === "yachts" && X) { screen = X.yachtsScreen; tab = "info"; }
     else if (parts[0] === "guide") { screen = window.MMEGuide.screen; tab = "guide"; }
     else if (parts[0].indexOf("pro") === 0) { window.MMEPro.previewSwitch(); screen = window.MMEPro.screen; }
     else if (parts[0] === "cruise") { screen = X.cruiseScreen; tab = "transport"; }
@@ -334,6 +335,13 @@
   // Works offline once opened: cache the app on the phone.
   try { localStorage.removeItem("mme-first-open"); } catch (e) {}
   if ("serviceWorker" in navigator && location.protocol === "https:") {
-    window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+    window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).catch(function () {}); });
+    // The app opens from the saved copy. If a newer version arrives in the first few seconds,
+    // reload once on the home screen so people get it straight away (never in the middle of a route).
+    var hadSW = !!navigator.serviceWorker.controller, openedAt = Date.now(), reloaded = false;
+    navigator.serviceWorker.addEventListener("controllerchange", function () {
+      if (!hadSW || reloaded) return;
+      if (Date.now() - openedAt < 15000 && (!location.hash || location.hash === "#/")) { reloaded = true; location.reload(); }
+    });
   }
 })();

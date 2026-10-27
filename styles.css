@@ -958,3 +958,7 @@ body.voice-on main { padding-bottom: 240px; }
 .yt-list li[data-yt] { cursor: pointer; }
 .yt-main { min-width: 0; }
 .yt-main .btn-small { margin-top: 6px; }
+.yt-cruise-h { margin-top: 18px; font-size: 18px; }
+.yt-cruise { list-style: none; padding: 0; margin: 6px 0 0; }
+.yt-cruise li { padding: 6px 0; border-bottom: 1px solid var(--line); }
+.yt-wait { margin-top: 16px; }
