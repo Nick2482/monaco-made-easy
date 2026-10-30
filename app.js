@@ -336,7 +336,7 @@
       var dark = root.getAttribute("data-theme") === "dark";
       b.setAttribute("aria-pressed", String(dark));
       b.setAttribute("aria-label", t(dark ? "Light mode" : "Dark mode"));
-      var m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute("content", dark ? "#121d29" : "#ffffff");
+      var m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute("content", dark ? "#121d29" : "#fffdf8");
     }
     b.addEventListener("click", function () {
       var next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
