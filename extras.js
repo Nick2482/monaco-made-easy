@@ -97,9 +97,9 @@
   function evDate(e) { return e.tbc ? t(e.tbc) + " (" + t("dates to be confirmed") + ")" : dateRange(e.start, e.end); }
   function eventBanner() {
     var e = eventSoon();
-    if (!e) return "";
+    if (!e || (e.id === "christmas" && xmasSeason())) return "";
     var on = ymdOf(e.start) <= now().ymd;
-    return '<a class="event-banner" href="#/whats-on"><span class="ev-tag">' + esc(t(on ? "On now" : "Coming up")) + "</span><strong>" + esc(t(e.name)) + '</strong><span class="ev-date">' + esc(evDate(e)) + "</span>" +
+    return '<a class="event-banner" href="' + (e.id === "christmas" ? "#/christmas" : "#/whats-on") + '"><span class="ev-tag">' + esc(t(on ? "On now" : "Coming up")) + "</span><strong>" + esc(t(e.name)) + '</strong><span class="ev-date">' + esc(evDate(e)) + "</span>" +
       "<p>" + esc(t(e.text)) + (e.extra ? " " + esc(t(e.extra)) : "") + "</p></a>";
   }
   function eventsInfo() { // "Good to know": only the next few events that change how you get around
@@ -133,7 +133,7 @@
         return '<li class="wo-ev"><span class="ev-date">' + esc(evDate(e)) + "</span><strong>" + esc(t(e.name)) + "</strong>" +
           (e.where ? '<span class="wo-where">' + esc(e.where) + "</span>" : "") +
           "<p>" + (e.about ? esc(t(e.about)) + " " : "") + esc(t(e.text)) + (e.extra ? " " + esc(t(e.extra)) : "") + "</p>" +
-          '<div class="wo-acts">' + goBtn(t(e.name), e.ll) + (e.link ? extLink("More information", e.link) : "") + "</div></li>";
+          '<div class="wo-acts">' + goBtn(t(e.name), e.ll) + (e.id === "christmas" ? '<a class="btn-small" href="#/christmas">' + esc(t("Christmas in Monaco")) + "</a>" : "") + (e.link ? extLink("More information", e.link) : "") + "</div></li>";
       }
       return '<section class="page whats-on"><h1>' + esc(t("What’s on")) + '</h1><p class="lede-dark">' + esc(t("Events, shows and concerts in Monaco, and the easy way to get there.")) + "</p>" +
         (on.length ? "<h2>" + esc(t("On now")) + '</h2><ul class="wo-list">' + on.map(card).join("") + "</ul>" : "") +
@@ -526,12 +526,89 @@
     }).catch(function () {});
   }
 
+  // ---------------------------------------------------------------------------
+  // 7. Christmas in Monaco: the village, the ice rink, the tree and New Year, and the easy way between them.
+  // Dates follow the usual pattern until Monaco announces this year's programme (usually mid-November).
+  // ---------------------------------------------------------------------------
+  var XMAS_SEASON = ["20261030", "20270106"];
+  function xmasSeason() { var d = now().ymd; return d >= XMAS_SEASON[0] && d <= XMAS_SEASON[1]; }
+  var XMAS = [
+    { name: "Christmas Village", where: "Quai Albert 1er, Port Hercule", ll: PORT, when: "Early December to early January",
+      what: "Wooden chalets with gifts and festive food, a big wheel over the harbour, a carousel and street parades. Open every day from 11:00.",
+      tip: "Busiest in the evenings and at weekends. Lunchtime is quieter." },
+    { name: "Ice rink", where: "Stade Nautique Rainier III", ll: [43.7359, 7.4226], when: "Early December to early March",
+      what: "In winter the harbour’s open-air pool becomes an ice rink, right next to the Christmas village. Skates are included in the price." },
+    { name: "Christmas tree and Casino lights", where: "Place du Casino", ll: [43.7397, 7.4277], when: "December to early January",
+      what: "A giant Christmas tree in front of the Casino, with light shows on the Casino front in the evenings in the second half of December.",
+      tip: "From the Christmas village, the public lifts by the Auditorium take you straight up. No climb.", route: "port-casino" },
+    { name: "Christmas Eve Mass", where: "Monaco Cathedral, Monaco-Ville", ll: [43.7303, 7.4230], when: "24 December",
+      what: "Usually a vigil at 23:30 followed by Midnight Mass, in the Cathedral on the Rock where Princess Grace is buried. It fills up, so arrive early.",
+      tip: "Lifts from the harbour take you up to the Rock.", route: "port-palace" },
+    { name: "New Year’s Eve", where: "Port Hercule", ll: [43.7343, 7.4214], when: "31 December",
+      what: "Fireworks over the harbour at midnight, and the Christmas village stays open late with music.",
+      tip: "The quays get very crowded. The Rock, above the harbour, has a good view of the fireworks." }
+  ];
+  var XMAS_TIPS = [
+    "On 25 December and 1 January most shops are closed and buses run a holiday timetable. Check the live times in the app.",
+    "Book restaurants well ahead for Christmas Eve and New Year’s Eve.",
+    "On New Year’s Eve the night buses usually run later than normal.",
+    "Lights go up in every district, from Fontvieille to Monte-Carlo. The harbour and Casino Square are the brightest.",
+    "Evenings are cool, around 8–12 °C. Bring a warm layer for the village and the fireworks."
+  ];
+  function xmasCard() {
+    if (!xmasSeason()) return "";
+    return '<a class="xmas-card" href="#/christmas"><span class="xm-star" aria-hidden="true">✦</span><span><strong>' + esc(t("Christmas in Monaco")) + "</strong><small>" +
+      esc(t("The Christmas village, the ice rink, the lights and New Year’s Eve, and the easy way between them.")) + "</small></span>" + ARROW + "</a>";
+  }
+  var xmasScreen = {
+    html: function () {
+      return '<section class="page whats-on xmas-page"><a class="back" href="#/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + esc(t("Home")) + "</a>" +
+        "<h1>" + esc(t("Christmas in Monaco")) + '</h1><p class="lede-dark">' + esc(t("The Christmas village, the ice rink, the lights and New Year’s Eve, and the easy way between them.")) + "</p>" +
+        (window.L && window.MMEMap ? '<div class="yt-map xm-map" id="xm-map" role="application" aria-label="' + esc(t("Map")) + '"></div>' : "") +
+        '<ol class="wo-list xm-list">' + XMAS.map(function (x, i) {
+          return '<li class="wo-ev" data-xm="' + i + '"><span class="ev-date">' + esc(t(x.when)) + '</span><strong><span class="yt-num xm-num">' + (i + 1) + "</span>" + esc(t(x.name)) + "</strong>" +
+            '<span class="wo-where">' + esc(x.where) + "</span><p>" + esc(t(x.what)) + (x.tip ? " " + esc(t(x.tip)) : "") + "</p>" +
+            '<div class="wo-acts">' + goBtn(t(x.name), x.ll) + (x.route ? '<a class="btn-small" href="#/go/' + x.route + '">' + esc(t("See the lift route")) + "</a>" : "") + "</div></li>";
+        }).join("") + "</ol>" +
+        "<h2>" + esc(t("Good to know at Christmas")) + '</h2><ul class="xm-tips">' + XMAS_TIPS.map(function (s) { return "<li>" + esc(t(s)) + "</li>"; }).join("") + "</ul>" +
+        '<a class="know-link" href="#/whats-on">' + esc(t("In January: the Rallye Monte-Carlo, the Circus Festival and Sainte-Dévote")) + ARROW + "</a>" +
+        '<p class="unchecked">' + esc(t("Monaco announces this year’s Christmas dates in November. Check before you travel.")) + "</p></section>";
+    },
+    mount: function (el) {
+      if (window.MMEStats) window.MMEStats.track("Christmas opened");
+      var mapEl = el.querySelector("#xm-map"), map = null, marks = [];
+      if (mapEl) {
+        map = window.MMEMap.makeMap(mapEl);
+        XMAS.forEach(function (x, i) {
+          marks[i] = L.marker(x.ll, { icon: L.divIcon({ className: "", html: '<span class="yt-mk xm-mk">' + (i + 1) + "</span>", iconSize: [26, 26], iconAnchor: [13, 13] }), title: t(x.name), keyboard: true })
+            .addTo(map).bindPopup("<strong>" + esc(t(x.name)) + "</strong><br>" + esc(x.where));
+        });
+        map.fitBounds(L.latLngBounds(XMAS.map(function (x) { return x.ll; })).pad(0.2), { maxZoom: 17 });
+        setTimeout(function () { map.invalidateSize(); }, 200);
+      }
+      el.addEventListener("click", function (e) {
+        var b = e.target.closest("[data-wo-go]");
+        if (b) {
+          var ll = b.dataset.woGo.split(",");
+          window.MMEPlanner.state.to = { label: b.dataset.label, lat: +ll[0], lng: +ll[1], kind: "place" };
+          window.MMEPlanner.state.from = null; window.MMEPlanner.state.arrival = null;
+          if (window.MMEStats) window.MMEStats.track("Christmas take me there");
+          location.hash = "#/plan"; return;
+        }
+        if (e.target.closest("a")) return;
+        var li = e.target.closest("[data-xm]");
+        if (li && map && marks[li.dataset.xm]) { map.setView(marks[li.dataset.xm].getLatLng(), 17); marks[li.dataset.xm].openPopup(); mapEl.scrollIntoView({ behavior: "smooth", block: "center" }); }
+      });
+    }
+  };
+
   window.MMEExtras = { knowCard: knowCard, knowLink: knowLink,
     Home: Home, homeCard: homeCard,
     eventBanner: eventBanner, eventsInfo: eventsInfo, whatsOnScreen: whatsOnScreen, routeEventNote: routeEventNote, EVENTS: EVENTS,
     cruise: cruise, shipPoint: shipPoint, cruiseCard: cruiseCard, cruiseScreen: cruiseScreen, mountHome: mountHome,
     offlineCard: offlineCard, mountOffline: mountOffline, tileUrls: tileUrls,
     Reports: Reports, reportBox: reportBox, routeReportNote: routeReportNote,
-    yachtsBox: yachtsBox, mountYachts: mountYachts, yachtsScreen: yachtsScreen
+    yachtsBox: yachtsBox, mountYachts: mountYachts, yachtsScreen: yachtsScreen,
+    xmasCard: xmasCard, xmasScreen: xmasScreen, xmasSeason: xmasSeason
   };
 })();

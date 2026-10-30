@@ -155,7 +155,7 @@
     return '<section class="hero">' +
       '<a class="preview" href="mailto:hello@monacomadeeasy.com?subject=' + encodeURIComponent("Monaco Made Easy feedback") + '">' + esc(t("Spotted something wrong? Tell us")) + "</a>" +
       "<h1>" + esc(t("Monaco, without the climb.")) + "</h1>" + (window.MMEWeather ? window.MMEWeather.strip() : "") +
-      (X ? X.eventBanner() + X.cruiseCard() : "") + (window.MMEWalks ? window.MMEWalks.guardCard() : "") +
+      (X ? X.xmasCard() + X.eventBanner() + X.cruiseCard() : "") + (window.MMEWalks ? window.MMEWalks.guardCard() : "") +
       '<a class="arrive-btn" href="#/arrive"><span><strong>' + esc(t("Just arrived?")) + "</strong><small>" + esc(t("The easiest way to where you’re staying, with your bags")) + '</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.6 5.4 10 4l8 8-8 8-1.4-1.4 6.6-6.6z"/></svg></a>' +
       '<p class="lede">' + esc(t("Around 80 free public lifts, 37 escalators and 8 moving walkways link Monaco, Beausoleil and Cap d’Ail. We show you how to use them, and we cover Roquebrune and Cap Martin too.")) + "</p>" + (X ? X.knowLink() + essQuick() + X.homeCard() : "") +
       window.MMEPlanner.boxHtml() +
@@ -193,7 +193,7 @@
     var items = [["toilets", "Toilets"], ["pharmacy", "Pharmacy"], ["atm", "Cash machine"], ["drinking_water", "Drinking water"]];
     return '<nav class="ess-quick" aria-label="' + esc(t("Nearest essentials")) + '">' + items.map(function (i) {
       return '<a href="#/map/' + i[0] + '"><span class="eq-ico" style="--c:' + window.MMEMap.CAT_COLOR[i[0]] + '">' + icon(i[0]) + "</span>" + esc(t(i[1])) + "</a>";
-    }).join("") + "</nav>" + '<div class="quick-links"><a class="sos-link" href="#/info"><span aria-hidden="true">☎</span> ' + esc(t("Emergency numbers")) + '</a><a class="sos-link" href="#/whats-on"><span aria-hidden="true">✦</span> ' + esc(t("What’s on")) + '</a><a class="sos-link" href="#/yachts"><span aria-hidden="true">⚓</span> ' + esc(t("Yachts in port")) + "</a></div>";
+    }).join("") + "</nav>" + '<div class="quick-links"><a class="sos-link" href="#/info"><span aria-hidden="true">☎</span> ' + esc(t("Emergency numbers")) + '</a><a class="sos-link" href="#/whats-on"><span aria-hidden="true">✦</span> ' + esc(t("What’s on")) + '</a><a class="sos-link" href="#/yachts"><span aria-hidden="true">⚓</span> ' + esc(t("Yachts in port")) + "</a>" + "</div>";
   }
 
   // Links to the visitor guide pages, in the visitor's language.
@@ -254,6 +254,7 @@
     else if (parts[0] === "info") { html = infoPage(); tab = "info"; }
     else if (parts[0] === "whats-on" && X) { screen = X.whatsOnScreen; tab = "info"; }
     else if (parts[0] === "yachts" && X) { screen = X.yachtsScreen; tab = "info"; }
+    else if (parts[0] === "christmas" && X) { screen = X.xmasScreen; tab = "info"; }
     else if (parts[0] === "guide") { screen = window.MMEGuide.screen; tab = "guide"; }
     else if (parts[0].indexOf("pro") === 0) { window.MMEPro.previewSwitch(); screen = window.MMEPro.screen; }
     else if (parts[0] === "cruise") { screen = X.cruiseScreen; tab = "transport"; }
