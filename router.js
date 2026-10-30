@@ -28,6 +28,14 @@
   var stepsOnly = new Uint8Array(N).fill(1);
   G.e.forEach(function (e) { if (e[3] !== 2) { stepsOnly[e[0]] = 0; stepsOnly[e[1]] = 0; } });
 
+  // Small pieces of path that don't join the main network (a private stairway, a courtyard) make dead-end starting points.
+  // Note which points belong to the main network, so we never start or finish on an island.
+  var par = new Int32Array(N); for (i = 0; i < N; i++) par[i] = i;
+  function root(x) { while (par[x] !== x) { par[x] = par[par[x]]; x = par[x]; } return x; }
+  G.e.forEach(function (e) { par[root(e[0])] = root(e[1]); });
+  var size = {}; for (i = 0; i < N; i++) { var rt = root(i); size[rt] = (size[rt] || 0) + 1; }
+  var island = new Uint8Array(N); for (i = 0; i < N; i++) island[i] = size[root(i)] < 200 ? 1 : 0;
+
   // Quick lookup grid for "nearest point on the network".
   var CELL = 0.0015, grid = {};
   for (i = 0; i < N; i++) {
@@ -44,7 +52,7 @@
     for (var ring = 1; ring <= 4 && best < 0; ring++) {
       for (var y = gy - ring; y <= gy + ring; y++) for (var x = gx - ring; x <= gx + ring; x++) {
         (grid[y + ":" + x] || []).forEach(function (n) {
-          if (liftAt[n]) return; // never start inside a lift
+          if (liftAt[n] || island[n]) return; // never start inside a lift, or on a bit of path that leads nowhere
           var d = metres(p.lat, p.lng, lat[n], lng[n]) + (stepsOnly[n] ? 30 : 0);
           if (d < bd) { bd = d; best = n; }
         });
