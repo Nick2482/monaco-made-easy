@@ -978,3 +978,163 @@ html.cjk .xmas-card strong { font-family: "PingFang SC", "Hiragino Mincho ProN",
 .xm-list .wo-acts { margin-top: 8px; }
 .xm-tips { margin: 8px 0 0; padding-left: 20px; display: grid; gap: 8px; color: var(--ink); }
 :root[data-theme="dark"] .xm-tips { color: var(--head); }
+
+/* ---------- v96: a calmer, classier home ----------
+   One photograph, one headline, one main action (the planner, with the only red button).
+   Everything else sits quietly underneath: a single list for the visit, and a row of white icons. */
+.hero { padding: 0 16px 28px; }
+.hero-head { padding-top: min(46vw, 300px); }
+.hero h1 { font-size: clamp(44px, 12.5vw, 62px); line-height: 1.02; letter-spacing: -0.015em; max-width: 9.5em; }
+.hero .lede { margin-top: 14px; font-size: 16.5px; line-height: 1.55; color: #d7e1ec; max-width: 34ch; }
+.hero .wx { margin-top: 22px; background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.14); -webkit-backdrop-filter: none; backdrop-filter: none; }
+
+/* The planner: no box of its own, so it reads as the page's main purpose. */
+.hero .where { margin-top: 30px; padding: 0; background: none; border: 0; border-radius: 0; }
+.hero .where-h { font-size: 28px; }
+.hero .pl-popular { font-weight: 400; color: #c9d6e5; }
+.hero .dest { background: transparent; color: #fff; border: 1px solid rgba(255, 255, 255, 0.38); font-weight: 400; padding: 7px 14px; }
+.hero .dest:hover { border-color: #fff; }
+.hero .dest.on { background: #fff; color: var(--navy); border-color: #fff; font-weight: 700; }
+.hero .pl-go { margin-top: 18px; }
+.hero .meet-btn { border: 0; padding: 12px 0 4px; background: none; }
+.hero .meet-btn svg { width: 22px; height: 22px; }
+.hero .meet-btn strong { font-size: 17px; }
+.hero .near-link { text-align: left; font-weight: 400; color: #d7e1ec; }
+
+/* The visit, in one list. */
+.stay-list { list-style: none; margin: 30px 0 0; padding: 0; border-radius: 16px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.14); overflow: hidden; }
+.stay-list li + li { border-top: 1px solid rgba(255, 255, 255, 0.1); }
+.sl-row { display: flex; align-items: center; gap: 14px; padding: 14px 14px 14px 16px; color: #fff; text-decoration: none; }
+.sl-row:hover { background: rgba(255, 255, 255, 0.05); }
+.sl-ico { flex: none; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); }
+.sl-ico svg { width: 20px; height: 20px; fill: #fff; }
+.sl-season .sl-ico { background: var(--red); }
+.sl-txt { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.sl-txt strong { display: block; font-size: 17px; line-height: 1.3; }
+.sl-txt small { display: block; margin-top: 2px; font-size: 14.5px; line-height: 1.4; color: #c9d6e5; }
+.sl-chev { flex: none; width: 20px; height: 20px; fill: var(--riva); }
+.hero .home-change { margin-top: 8px; font-weight: 400; }
+
+/* Everyday things: one row of white icons, no colours. */
+.ess-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px 6px; margin-top: 26px; }
+.ess-grid a { display: flex; flex-direction: column; align-items: center; gap: 7px; color: #fff; text-decoration: none; text-align: center; font-size: 13.5px; line-height: 1.25; overflow-wrap: anywhere; }
+.eg-ico { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.32); }
+.ess-grid a:hover .eg-ico { background: rgba(255, 255, 255, 0.08); border-color: #fff; }
+.eg-ico svg { width: 22px; height: 22px; fill: #fff; }
+
+/* Below the hero: no orange. */
+.share-card { background: var(--stone); border-color: var(--line); }
+.share-card .ic-ico { background: var(--navy); }
+:root[data-theme="dark"] .share-card { background: var(--card); }
+.meet-panel[hidden] { display: none; }
+.g-quick a, .ess-grid a { overflow-wrap: break-word; }
+
+/* =====================================================================================
+   v97 "Champagne": champagne white, Monaco red (the flag's own red, Pantone 186 / #CE1126)
+   and antique gold, like the gold of the Grimaldi crown. No dark panels in the light theme:
+   cards are ivory with fine gold lines; red is kept for the one main action on each screen.
+   ===================================================================================== */
+:root:not([data-theme="dark"]) {
+  --champ: #f7f2e8; --page: #f7f2e8; --card: #fffdf8; --stone: #f2eadb; --line: #e7dcc5; --hair: #e7dcc5;
+  --ink: #1d2533; --head: #1d2533; --navy: #1d2533; --navy-2: #2b3445; --edge: #1d2533; --grey: #5d5a52;
+  --red: #ce1126; --red-deep: #a90e20; --gold: #b8923f; --gold-text: #7c5f1f; --riva: #b8923f; --riva-pale: #f6eedc;
+  --fusil: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='14'%3E%3Crect width='10' height='14' fill='%23fffdf8'/%3E%3Cpath d='M5 0L10 7 5 14 0 7z' fill='%23ce1126'/%3E%3C/svg%3E");
+}
+:root { --gold-line: #b8923f; }
+:root:not([data-theme="dark"]) body { background: var(--champ); }
+:root:not([data-theme="dark"]) .mark { background: var(--red); }
+:root:not([data-theme="dark"]) .tabs a { color: #8a8478; }
+:root:not([data-theme="dark"]) .tabs a[aria-current="page"] { color: var(--ink); }
+
+/* Home: the photo fades into champagne, and the headline sits clean beneath it. */
+:root:not([data-theme="dark"]) .hero { color: var(--ink); box-shadow: inset 0 -1px 0 var(--gold-line);
+  background: linear-gradient(180deg, rgba(247,242,232,0) 0, rgba(247,242,232,0) 40vw, rgba(247,242,232,.86) 66vw, var(--champ) 84vw), url(img/harbour-hero.jpg) center top / 100% auto no-repeat, var(--champ); }
+@media (min-width: 600px) { :root:not([data-theme="dark"]) .hero { background: linear-gradient(180deg, rgba(247,242,232,0) 0, rgba(247,242,232,0) 240px, rgba(247,242,232,.86) 400px, var(--champ) 520px), url(img/harbour-hero.jpg) center top / 100% auto no-repeat, var(--champ); } }
+:root:not([data-theme="dark"]) .hero-head { padding-top: min(66vw, 420px); }
+:root:not([data-theme="dark"]) .hero h1 { color: var(--ink); text-shadow: none; }
+:root:not([data-theme="dark"]) .hero .lede { color: #4a4d55; }
+:root:not([data-theme="dark"]) .hero .wx { background: var(--card); border-color: var(--line); color: var(--ink); }
+:root:not([data-theme="dark"]) .wx-ico svg { fill: #8a8478; }
+:root:not([data-theme="dark"]) .wx-more, :root:not([data-theme="dark"]) .wx-credit { color: var(--grey); }
+:root:not([data-theme="dark"]) .wx-tip { border-top-color: var(--line); }
+:root:not([data-theme="dark"]) .hero .pl-fields { box-shadow: 0 0 0 1px var(--line), 0 6px 18px rgba(80, 60, 20, 0.08); }
+:root:not([data-theme="dark"]) .hero .pl-popular { color: var(--gold-text); }
+:root:not([data-theme="dark"]) .hero .dest { color: var(--ink); border-color: #dccca6; background: var(--card); }
+:root:not([data-theme="dark"]) .hero .dest:hover { border-color: var(--gold); }
+:root:not([data-theme="dark"]) .hero .dest.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+:root:not([data-theme="dark"]) .hero .meet-btn, :root:not([data-theme="dark"]) .hero .near-link { color: var(--ink); }
+:root:not([data-theme="dark"]) .meet-btn small, :root:not([data-theme="dark"]) .meet-panel label { color: var(--grey); }
+:root:not([data-theme="dark"]) .meet-panel input { border: 1px solid var(--line); }
+:root:not([data-theme="dark"]) .meet-status { color: var(--ink); }
+.pl-go { background: var(--red); color: #fff; box-shadow: 0 6px 16px rgba(206, 17, 38, 0.18); }
+.pl-go:hover { background: var(--red-deep); }
+:root:not([data-theme="dark"]) .stay-list { background: var(--card); border-color: var(--line); }
+:root:not([data-theme="dark"]) .stay-list li + li { border-top-color: var(--line); }
+:root:not([data-theme="dark"]) .sl-row { color: var(--ink); }
+:root:not([data-theme="dark"]) .sl-row:hover { background: #fbf6ea; }
+:root:not([data-theme="dark"]) .sl-txt small { color: var(--grey); }
+:root:not([data-theme="dark"]) .sl-ico { background: transparent; border: 1px solid var(--gold-line); }
+:root:not([data-theme="dark"]) .sl-ico svg { fill: var(--gold-text); }
+.sl-season .sl-ico { background: var(--red) !important; border-color: var(--red) !important; }
+.sl-season .sl-ico svg { fill: #fff !important; }
+.sl-chev { fill: var(--gold-line); }
+:root:not([data-theme="dark"]) .hero .home-change { color: var(--gold-text); }
+:root:not([data-theme="dark"]) .ess-grid a { color: var(--ink); }
+:root:not([data-theme="dark"]) .eg-ico { border-color: var(--gold-line); background: var(--card); }
+:root:not([data-theme="dark"]) .eg-ico svg { fill: var(--ink); }
+:root:not([data-theme="dark"]) .ess-grid a:hover .eg-ico { background: #fbf6ea; border-color: var(--gold-text); }
+/* Guide categories: one gold outline icon for all, instead of a colour each. */
+:root:not([data-theme="dark"]) .g-quick .eq-ico { background: transparent; border: 1px solid var(--gold-line); }
+:root:not([data-theme="dark"]) .g-quick .eq-ico svg { fill: var(--gold-text); }
+.pro-badge { background: var(--card); color: var(--gold-text); box-shadow: inset 0 0 0 1px var(--gold-line); }
+:root[data-theme="dark"] .pro-badge { background: transparent; color: #d9bd7c; box-shadow: inset 0 0 0 1px #b8923f; }
+
+/* Champagne: the panels that used to be navy become ivory cards with a fine gold line along the top. */
+:root:not([data-theme="dark"]) .tr-card, :root:not([data-theme="dark"]) .tr-card.tr-airport, :root:not([data-theme="dark"]) .pro-lock, :root:not([data-theme="dark"]) .pro-tip,
+:root:not([data-theme="dark"]) .offline-card, :root:not([data-theme="dark"]) .sv-rec, :root:not([data-theme="dark"]) .near-btn,
+:root:not([data-theme="dark"]) .guard-card, :root:not([data-theme="dark"]) .walk .guard-card, :root:not([data-theme="dark"]) .event-banner, :root:not([data-theme="dark"]) .voice-bar {
+  background: var(--card); color: var(--ink); border: 1px solid var(--line); box-shadow: inset 0 3px 0 var(--gold-line);
+}
+:root:not([data-theme="dark"]) .voice-bar { box-shadow: inset 0 3px 0 var(--gold-line), 0 10px 30px rgba(60, 45, 15, 0.18); }
+:root:not([data-theme="dark"]) .near-btn:hover { background: #fbf6ea; }
+:root:not([data-theme="dark"]) .near-btn svg { fill: var(--gold-text); }
+:root:not([data-theme="dark"]) .near-btn small { opacity: 1; color: var(--grey); }
+:root:not([data-theme="dark"]) .tr-card span, :root:not([data-theme="dark"]) .pro-lock p, :root:not([data-theme="dark"]) .pro-tip p,
+:root:not([data-theme="dark"]) .offline-card p, :root:not([data-theme="dark"]) .sv-rec-sub, :root:not([data-theme="dark"]) .guard-card small,
+:root:not([data-theme="dark"]) .event-banner p, :root:not([data-theme="dark"]) .voice-bar .vb-note { color: var(--grey); }
+:root:not([data-theme="dark"]) .ev-tag, :root:not([data-theme="dark"]) .gd-top, :root:not([data-theme="dark"]) .voice-bar .vb-count { color: var(--gold-text); }
+:root:not([data-theme="dark"]) .voice-bar .vb-warn { color: #8a5a00; }
+:root:not([data-theme="dark"]) .event-banner::before { display: none; }
+:root:not([data-theme="dark"]) .pro-lock .pl-head .pro-badge, :root:not([data-theme="dark"]) .pro-tip .pl-head .pro-badge { background: var(--card); color: var(--gold-text); }
+:root:not([data-theme="dark"]) .offline-card .off-ok { background: #eef3e6; color: #2f5a2a; }
+:root:not([data-theme="dark"]) .offline-card .off-status { color: var(--ink); }
+:root:not([data-theme="dark"]) .offline-card .form-err { color: var(--red); }
+:root:not([data-theme="dark"]) .offline-card .btn-line, :root:not([data-theme="dark"]) .pro-tip .pt-no, :root:not([data-theme="dark"]) .sv-rec .btn-line { color: var(--ink); border: 1.5px solid var(--ink) !important; background: transparent !important; }
+:root:not([data-theme="dark"]) .pro-tip .pt-x, :root:not([data-theme="dark"]) .voice-bar .vb-x { color: var(--ink); }
+:root:not([data-theme="dark"]) .voice-bar .vb-btns button { color: var(--ink); border-color: var(--line); }
+:root:not([data-theme="dark"]) .voice-bar .vb-btns .vb-next { color: #fff; }
+:root:not([data-theme="dark"]) .know-link { color: var(--ink); border-color: var(--line); background: var(--card); }
+:root:not([data-theme="dark"]) .know-link svg { fill: var(--gold-line); }
+/* Small icon tiles and the voice button: gold outline instead of navy. */
+:root:not([data-theme="dark"]) .install-card .ic-ico, :root:not([data-theme="dark"]) .share-card .ic-ico { background: transparent; border: 1px solid var(--gold-line); }
+:root:not([data-theme="dark"]) .install-card .ic-ico svg, :root:not([data-theme="dark"]) .share-card .ic-ico svg { fill: var(--gold-text); }
+:root:not([data-theme="dark"]) .install-card { background: var(--card); border-color: var(--line); }
+:root:not([data-theme="dark"]) .voice-btn { background: var(--card); color: var(--ink); border: 1px solid var(--gold-line); }
+:root:not([data-theme="dark"]) .voice-btn svg { fill: var(--gold-text); }
+/* Walks: photos with a neutral evening shade instead of a navy one, and Le Corbusier gets its own photo. */
+.walk-card { box-shadow: 0 10px 26px rgba(40, 30, 10, 0.16); }
+.walk-list li .walk-card { background: linear-gradient(180deg, rgba(18, 20, 26, 0.3), rgba(18, 20, 26, 0.9)), url(img/harbour-hero.jpg) center 35% / cover; }
+.walk-list li .walk-card.wk-rock { background: linear-gradient(180deg, rgba(18, 20, 26, 0.25), rgba(18, 20, 26, 0.88)), url(img/rock-museum.jpg) center 30% / cover; }
+.walk-list li .walk-card.wk-montecarlo { background: linear-gradient(180deg, rgba(18, 20, 26, 0.3), rgba(18, 20, 26, 0.88)), url(img/mc-garden-pond.jpg) center 45% / cover; }
+.walk-list li .walk-card.wk-seapath { background: linear-gradient(180deg, rgba(18, 20, 26, 0.3), rgba(18, 20, 26, 0.88)), url(img/seapath-coast.jpg) center 40% / cover; }
+.walk-list li .walk-card.wk-corbusier { background: linear-gradient(180deg, rgba(18, 20, 26, 0.3), rgba(18, 20, 26, 0.88)), url(img/corbusier-waves.jpg) center 50% / cover; }
+.wk-sub { color: #ece6d8; }
+.wk-stops { color: #e3c98c; }
+:root:not([data-theme="dark"]) .ar-opt input:checked + span { background: #fbf4e3; border-color: var(--gold-line); box-shadow: inset 4px 0 0 var(--gold-line); }
+:root:not([data-theme="dark"]) .unchecked { color: #5d4a1c; }
+:root:not([data-theme="dark"]) .lang-sheet button.on { box-shadow: inset 4px 0 0 var(--gold-line); }
+:root:not([data-theme="dark"]) .wo-ev { background: var(--card); border: 1px solid var(--line); box-shadow: inset 3px 0 0 var(--gold-line); }
+:root:not([data-theme="dark"]) .wo-ev .ev-date { color: var(--gold-text); }
+/* Dark mode keeps its night colours, with gold instead of light blue for the fine details. */
+:root[data-theme="dark"] { --riva: #c9a961; --gold: #c9a961; --gold-line: #a8863f; }
+:root[data-theme="dark"] .mark { background: var(--red); }

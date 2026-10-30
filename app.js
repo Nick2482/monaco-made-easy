@@ -33,6 +33,11 @@
     yacht: '<path d="M12 2a3 3 0 0 1 1 5.83V10h3v2h-3v7.9A7 7 0 0 0 18.9 15h-2.4l3-4 3 4h-1.6A9 9 0 0 1 3.1 15H1.5l3-4 3 4H5.1A7 7 0 0 0 11 19.9V12H8v-2h3V7.83A3 3 0 0 1 12 2zm0 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>',
     broker: '<path d="M11 2.5V13H4.5zM13 5.5l6.5 7.5H13zM2 15h20l-2.6 5.2a1.5 1.5 0 0 1-1.3.8H5.9a1.5 1.5 0 0 1-1.3-.8z"/>',
     club: '<path d="M5 2h2v20H5zM8 3l13 4.5L8 12z"/>',
+    phone: '<path d="M6.6 2.5 9.4 6a1.5 1.5 0 0 1-.1 2l-1.6 1.5a12 12 0 0 0 6.8 6.8l1.5-1.6a1.5 1.5 0 0 1 2-.1l3.5 2.8a1.5 1.5 0 0 1 .2 2.1l-1.4 1.7A3 3 0 0 1 17.5 22 15.5 15.5 0 0 1 2 6.5a3 3 0 0 1 .8-2.8l1.7-1.4a1.5 1.5 0 0 1 2.1.2z"/>',
+    calendar: '<path d="M7 2h2v2h6V2h2v2h2.5A1.5 1.5 0 0 1 21 5.5v14a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 19.5v-14A1.5 1.5 0 0 1 4.5 4H7zM5 9v10h14V9zm2 2h4v4H7z"/>',
+    star: '<path d="M12 2.5l2.6 6.4 6.9.5-5.3 4.4 1.7 6.7L12 16.8l-5.9 3.7 1.7-6.7-5.3-4.4 6.9-.5z"/>',
+    suitcase: '<path d="M9 2.5h6A1.5 1.5 0 0 1 16.5 4v2h3A1.5 1.5 0 0 1 21 7.5v11a1.5 1.5 0 0 1-1.5 1.5H19v1.5h-2V20H7v1.5H5V20h-.5A1.5 1.5 0 0 1 3 18.5v-11A1.5 1.5 0 0 1 4.5 6h3V4A1.5 1.5 0 0 1 9 2.5zm.5 2V6h5V4.5zM8 9v8h2V9zm6 0v8h2V9z"/>',
+    house: '<path d="M12 3 2 11.5h3V21h5.5v-6h3v6H19v-9.5h3z"/>',
     info: '<path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm-1.3 8v8h2.6v-8zM12 5.5a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2z"/>'
   };
   function icon(type, cls) {
@@ -153,12 +158,11 @@
     var chips = [["all", t("All routes")], ["stepfree", t("Step-free only")], ["beausoleil", t("Beausoleil")]];
     var pf = placeFilter ? D.places[placeFilter] : null;
     return '<section class="hero">' +
-      '<a class="preview" href="mailto:hello@monacomadeeasy.com?subject=' + encodeURIComponent("Monaco Made Easy feedback") + '">' + esc(t("Spotted something wrong? Tell us")) + "</a>" +
-      "<h1>" + esc(t("Monaco, without the climb.")) + "</h1>" + (window.MMEWeather ? window.MMEWeather.strip() : "") +
-      (X ? X.xmasCard() + X.eventBanner() + X.cruiseCard() : "") + (window.MMEWalks ? window.MMEWalks.guardCard() : "") +
-      '<a class="arrive-btn" href="#/arrive"><span><strong>' + esc(t("Just arrived?")) + "</strong><small>" + esc(t("The easiest way to where you’re staying, with your bags")) + '</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.6 5.4 10 4l8 8-8 8-1.4-1.4 6.6-6.6z"/></svg></a>' +
-      '<p class="lede">' + esc(t("Around 80 free public lifts, 37 escalators and 8 moving walkways link Monaco, Beausoleil and Cap d’Ail. We show you how to use them, and we cover Roquebrune and Cap Martin too.")) + "</p>" + (X ? X.knowLink() + essQuick() + X.homeCard() : "") +
-      window.MMEPlanner.boxHtml() +
+      '<div class="hero-head"><h1>' + esc(t("Monaco, without the climb.")) + "</h1>" +
+      '<p class="lede">' + esc(t("Around 80 free public lifts, 37 escalators and 8 moving walkways link Monaco, Beausoleil and Cap d’Ail. We show you how to use them, and we cover Roquebrune and Cap Martin too.")) + "</p></div>" +
+      (window.MMEWeather ? window.MMEWeather.strip() : "") +
+      (X ? X.eventBanner() + X.cruiseCard() : "") + (window.MMEWalks ? window.MMEWalks.guardCard() : "") +
+      window.MMEPlanner.boxHtml() + stayList() + essQuick() +
       "</section>" +
       (window.MMEInstall ? window.MMEInstall.card("home") + window.MMEInstall.rateCard() : "") +
       (window.MMEGuide ? guideBlock() : "") +
@@ -188,12 +192,30 @@
       }).join("") + "</nav></section>";
   }
 
-  // Quick links to the nearest toilets, pharmacy, cash machine and water.
+  // The visit, in one quiet list: arriving, where you're staying, the season, and what to know.
+  var CHEV = '<svg class="sl-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.6 5.4 10 4l8 8-8 8-1.4-1.4 6.6-6.6z"/></svg>';
+  function stayRow(href, ico, title, sub, cls) {
+    return '<li><a class="sl-row' + (cls ? " " + cls : "") + '" href="' + href + '"><span class="sl-ico">' + icon(ico) + '</span><span class="sl-txt"><strong>' + esc(title) + "</strong>" + (sub ? "<small>" + esc(sub) + "</small>" : "") + "</span>" + CHEV + "</a></li>";
+  }
+  function stayList() {
+    if (!X) return "";
+    var h = X.Home.get();
+    return '<ul class="stay-list">' +
+      stayRow("#/arrive", "suitcase", t("Just arrived?"), t("The easiest way to where you’re staying, with your bags")) +
+      (h ? stayRow("#/home-route", "house", t("Back to {name}", { name: t(h.label) }), t("The easiest way from where you are now")) :
+        stayRow("#/stay", "house", t("Where are you staying?"), t("Save it once, then one tap gets you back from anywhere."))) +
+      (X.xmasSeason() ? stayRow("#/christmas", "star", t("Christmas in Monaco"), t("The Christmas village, the ice rink, the lights and New Year’s Eve, and the easy way between them."), "sl-season") : "") +
+      stayRow("#/info", "info", t("Know before you go: phone roaming, dress rules and the Casino"), "") +
+      "</ul>" + (h ? '<a class="home-change" href="#/stay">' + esc(t("Change where I’m staying")) + "</a>" : "");
+  }
+
+  // Quick links to the nearest toilets, pharmacy, cash machine and water, and the other everyday things.
   function essQuick() {
-    var items = [["toilets", "Toilets"], ["pharmacy", "Pharmacy"], ["atm", "Cash machine"], ["drinking_water", "Drinking water"]];
-    return '<nav class="ess-quick" aria-label="' + esc(t("Nearest essentials")) + '">' + items.map(function (i) {
-      return '<a href="#/map/' + i[0] + '"><span class="eq-ico" style="--c:' + window.MMEMap.CAT_COLOR[i[0]] + '">' + icon(i[0]) + "</span>" + esc(t(i[1])) + "</a>";
-    }).join("") + "</nav>" + '<div class="quick-links"><a class="sos-link" href="#/info"><span aria-hidden="true">☎</span> ' + esc(t("Emergency numbers")) + '</a><a class="sos-link" href="#/whats-on"><span aria-hidden="true">✦</span> ' + esc(t("What’s on")) + '</a><a class="sos-link" href="#/yachts"><span aria-hidden="true">⚓</span> ' + esc(t("Yachts in port")) + "</a>" + "</div>";
+    var items = [["#/map/toilets", "toilets", "Toilets"], ["#/map/pharmacy", "pharmacy", "Pharmacy"], ["#/map/atm", "atm", "Cash machine"], ["#/map/drinking_water", "drinking_water", "Drinking water"],
+      ["#/info", "phone", "Emergency numbers"], ["#/whats-on", "calendar", "What’s on"], ["#/yachts", "yacht", "Yachts in port"], ["#/map/near", "lift", "Lifts near me"]];
+    return '<nav class="ess-grid" aria-label="' + esc(t("Nearest essentials")) + '">' + items.map(function (i) {
+      return '<a href="' + i[0] + '"><span class="eg-ico">' + icon(i[1]) + "</span><span>" + esc(t(i[2])) + "</span></a>";
+    }).join("") + "</nav>";
   }
 
   // Links to the visitor guide pages, in the visitor's language.
@@ -234,7 +256,7 @@
       return "<div><dt>" + esc(i[0]) + "</dt><dd>" + esc(i[1]) + "</dd></div>";
     }).join("") + "</dl>" + (X ? X.eventsInfo() : "") +
       guidesBlock("") + '<p class="unchecked">' + esc(t("This is a preview. Details are gathered from published sources and are being checked on the ground before launch.")) + "</p>" +
-      '<p class="legal-links"><a href="mailto:hello@monacomadeeasy.com?subject=Monaco%20Made%20Easy">' + esc(t("Report a problem with the app")) + '</a><a href="https://www.instagram.com/monacomadeeasy/" target="_blank" rel="noopener">Instagram</a><a href="https://x.com/Monacomadeeasy" target="_blank" rel="noopener">X</a><a href="privacy.html">' + esc(t("Privacy policy")) + '</a><a href="terms.html">' + esc(t("Terms of sale")) + "</a></p></section>";
+      '<p class="legal-links"><a href="mailto:hello@monacomadeeasy.com?subject=' + encodeURIComponent("Monaco Made Easy feedback") + '">' + esc(t("Spotted something wrong? Tell us")) + '</a><a href="https://www.instagram.com/monacomadeeasy/" target="_blank" rel="noopener">Instagram</a><a href="https://x.com/Monacomadeeasy" target="_blank" rel="noopener">X</a><a href="privacy.html">' + esc(t("Privacy policy")) + '</a><a href="terms.html">' + esc(t("Terms of sale")) + "</a></p></section>";
   }
 
   // ---------- Router ----------
