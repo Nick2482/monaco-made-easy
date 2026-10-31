@@ -174,6 +174,7 @@
         (cat === "eat" ? '<div class="ess-chips g-grps" role="group" aria-label="' + esc(t("Restaurants")) + '"><a class="chip' + (!grp ? " on" : "") + '" href="#/guide/eat"' + (!grp ? ' aria-current="true"' : "") + ">" + esc(t("All")) + "</a>" +
           GRPS.map(function (g) { return '<a class="chip' + (g[0] === grp ? " on" : "") + '" href="#/guide/eat/' + g[0] + '"' + (g[0] === grp ? ' aria-current="true"' : "") + ">" + esc(t(g[1])) + "</a>"; }).join("") + "</div>" : "") +
         "<h1>" + esc(t(VIRT[cat] || (grp ? GRPS.filter(function (g) { return g[0] === grp; })[0][1] : catName(cat)))) + (FREE[cat] ? "" : " " + (P ? P.badge() : "")) + "</h1>" +
+        (cat === "yacht" ? '<img class="pg-photo g-photo" src="img/yachts-quay.jpg" width="1200" height="675" loading="lazy" alt="' + esc(t("Yachts moored in Monaco")) + '">' : "") +
         (grp === "fine" ? '<p class="lede-dark">' + esc(t("Stars from the Michelin Guide 2026. Book well ahead, and expect a dress code.")) + "</p>" : "") +
         (cat === "broker" ? '<aside class="note note-ess"><p>' + esc(t("These are offices. Call or email ahead to arrange a visit.")) + "</p></aside>" : "") +
         ((cat === "yacht" || cat === "broker" || cat === "club") && window.MMEExtras ? window.MMEExtras.yachtsBox() : "") +

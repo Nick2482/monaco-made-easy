@@ -460,6 +460,7 @@
   var yachtsScreen = {
     html: function () {
       return '<section class="page yachts-page"><a class="back" href="#/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + esc(t("Home")) + "</a>" +
+        '<img class="pg-photo" src="img/yachts-port-hercule.jpg" width="1200" height="675" alt="' + esc(t("Yachts in Port Hercule, below the Rock of Monaco")) + '">' +
         yachtsBox() + '<p class="wo-note yt-wait" id="yt-wait">' + esc(t("Listening for yachts…")) + "</p></section>";
     },
     mount: function (el) {
