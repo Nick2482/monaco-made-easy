@@ -142,6 +142,7 @@
         '<div class="near"><div class="ess-chips" role="group" aria-label="' + esc(t("Show on the map")) + '">' + CATS.map(function (c) {
           return '<a class="chip' + (c[0] === cat ? " on" : "") + '" href="#/map/' + c[0] + '"' + (c[0] === cat ? ' aria-current="true"' : "") + ">" + esc(t(c[1])) + "</a>";
         }).join("") + "</div>" +
+        (cat === "lifts" ? '<img class="pg-photo map-photo" src="img/escalator-sea-view.jpg" width="1200" height="1004" loading="lazy" alt="' + esc(t("A public escalator in Beausoleil, heading down towards the sea")) + '">' : "") +
         '<h1 id="near-h">' + esc(cat === "lifts" ? t("Lifts and escalators") : t(CATS.filter(function (c) { return c[0] === cat; })[0][1])) + '</h1><p class="lede-dark" id="near-sub">' + esc(cat === "lifts" ? t("Tap “Lifts near me” to sort them by distance, or tap anywhere on the map to get there.") : t("Finding the nearest to you…")) + "</p>" +
         (note ? '<aside class="note note-ess"><p>' + esc(note) + "</p></aside>" : "") +
         '<p class="loc-error" id="loc-error" hidden></p><ul class="lifts" id="near-list"></ul>' +

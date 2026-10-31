@@ -1148,3 +1148,4 @@ html.cjk .xmas-card strong { font-family: "PingFang SC", "Hiragino Mincho ProN",
 :root[data-theme="dark"] .pg-photo, :root[data-theme="dark"] .way-photo, :root[data-theme="dark"] .tr-photo { filter: brightness(.9); }
 .yachts-page .pg-photo { margin-top: 10px; }
 .guide .g-photo { margin: 10px 0 12px; }
+.map-photo { aspect-ratio: 4 / 3; object-position: center 30%; margin: 4px 0 14px; }
