@@ -813,9 +813,10 @@ h1 .pro-badge { margin-left: 4px; font-size: 14px; }
 :root[data-theme="dark"] .g-item .g-pick { background: #2e3439; color: #d4c7b7; }
 .theme-btn { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--hair); background: var(--card); color: var(--head); cursor: pointer; padding: 0; flex: none; }
 .theme-btn svg { width: 20px; height: 20px; fill: currentColor; }
-.theme-btn .t-sun { display: none; }
-:root[data-theme="dark"] .theme-btn .t-sun { display: block; }
-:root[data-theme="dark"] .theme-btn .t-moon { display: none; }
+/* The button shows the look you're in now: a sun in the light (champagne) look, a moon in dark mode. Tap to switch. */
+.theme-btn .t-moon { display: none; }
+:root[data-theme="dark"] .theme-btn .t-moon { display: block; }
+:root[data-theme="dark"] .theme-btn .t-sun { display: none; }
 .bar .theme-btn { margin-left: auto; margin-right: 8px; }
 .brand-name { white-space: nowrap; }
 @media (max-width: 420px) { .brand-name { font-size: 19px; } .bar .theme-btn { width: 36px; height: 36px; margin-right: 6px; } .bar { gap: 8px; } }
