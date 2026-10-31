@@ -10,7 +10,7 @@
   // Stop positions come from OpenStreetMap.
   var WALKS = [
     { id: "rock", title: "The Rock without the climb", sub: "Monaco-Ville, the old town on the Rock, using the lifts from the harbour",
-      photos: ["img/rock-palace.jpg", "img/rock-fontvieille.jpg"],
+      photos: ["img/rock-palace-dusk.jpg", "img/rock-fontvieille.jpg"], portrait: true,
       stops: [
         { name: "Port Hercule", lat: D.places.port.lat, lng: D.places.port.lng, text: "Start by the harbour. The lifts in the Parking des Pêcheurs take you up the cliff, so there’s no long climb." },
         { name: "Oceanographic Museum", lat: 43.73103, lng: 7.42564, text: "Jacques Cousteau’s museum, built into the cliff edge. Its rooftop terrace has one of the best views in Monaco." },
@@ -103,7 +103,7 @@
       if (window.MMEPro && !window.MMEPro.isPro()) return '<section class="plan walk"><a class="back" href="#/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + esc(t("Home")) + "</a><h1>" + esc(t(w.title)) + '</h1><p class="lede-dark">' + esc(t(w.sub)) + "</p>" + window.MMEPro.lockCard("Walks") + "</section>";
       return '<section class="plan walk"><a class="back" href="#/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + esc(t("Home")) + "</a>" +
         "<h1>" + esc(t(w.title)) + '</h1><p class="lede-dark">' + esc(t(w.sub)) + "</p>" +
-        (w.photos ? '<div class="wk-photos wk-p' + w.photos.length + (w.coast ? " wk-portrait" : "") + '">' + w.photos.map(function (p) { return '<img src="' + p + '" alt="" loading="lazy">'; }).join("") + "</div>" : "") +
+        (w.photos ? '<div class="wk-photos wk-p' + w.photos.length + (w.coast || w.portrait ? " wk-portrait" : "") + '">' + w.photos.map(function (p) { return '<img src="' + p + '" alt="" loading="lazy">'; }).join("") + "</div>" : "") +
         (w.id === "rock" ? guardCard() : "") +
         '<div class="map plan-map" id="walk-map"></div><div id="walk-body"><p class="lede-dark" role="status">' + esc(t("Working out the easiest way…")) + "</p></div></section>";
     },
