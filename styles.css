@@ -1149,3 +1149,13 @@ html.cjk .xmas-card strong { font-family: "PingFang SC", "Hiragino Mincho ProN",
 .yachts-page .pg-photo { margin-top: 10px; }
 .guide .g-photo { margin: 10px 0 12px; }
 .map-photo { aspect-ratio: 4 / 3; object-position: center 30%; margin: 4px 0 14px; }
+/* MonaBike stations */
+.bikes h2 { margin-top: 24px; }
+.bk-map { margin-top: 12px; }
+.bk-mk { display: block; width: 18px; height: 18px; border-radius: 50%; background: var(--red); border: 2.5px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.35); }
+.bk-list { list-style: none; margin: 10px 0 0; padding: 0; border-top: 1px solid var(--line); }
+.bk-list li { display: flex; align-items: center; gap: 12px; padding: 10px 2px; border-bottom: 1px solid var(--line); cursor: pointer; }
+.bk-txt { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.bk-txt strong { display: block; color: var(--head); }
+.bk-txt small { display: block; color: var(--grey); font-size: 14.5px; }
+#bk-near { margin-top: 8px; }

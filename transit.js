@@ -410,12 +410,62 @@
         "<p>" + tb("**€1** a single ride, **€3** for 24 hours, **€8** for 7 days. Each ride is up to 30 minutes. Keep rides under 30 minutes: after that it costs €1 more up to an hour, then €2 for each extra half hour.") + "</p></li>" +
         '<li class="way"><div class="way-top"><strong>' + tb("Good to know") + "</strong></div>" +
         "<p>" + tb("Riders must be 14 or over. Use the cycle lanes and bus lanes, not the pavements. If a station is empty, wait a little: a van and trailer go round all day, moving bikes to where they’re needed.") + "</p></li></ol>" +
+        "<h2>" + tb("Stations") + '</h2><p class="wo-note" id="bk-note">' + tb("Tap “Show nearest” to sort the stations by distance from you.") + "</p>" +
+        '<button type="button" class="btn-small" id="bk-near">' + tb("Show nearest") + "</button>" +
+        (window.L && window.MMEMap ? '<div class="yt-map bk-map" id="bk-map" role="application" aria-label="' + tb("Map") + '"></div>' : "") +
+        '<ol class="bk-list" id="bk-list"></ol>' +
+        '<p class="wo-note">' + tb("Station positions from OpenStreetMap. A station can move or close, so check the MonaPass app for live bike numbers.") + "</p>" +
         '<div class="wo-acts"><a class="btn-small wo-ext" href="https://monabike.mc/en/fares/" target="_blank" rel="noopener">' + tb("Fares and sign-up at monabike.mc") + "</a></div>" +
         '<p class="unchecked">' + tb("Fares from monabike.mc in October 2026. Check before you ride.") + "</p></section>";
     },
-    mount: function () { if (window.MMEStats) window.MMEStats.track("Bikes opened"); }
+    mount: function (root) {
+      if (window.MMEStats) window.MMEStats.track("Bikes opened");
+      var esc = ui().esc, M = window.MMEMap, list = root.querySelector("#bk-list"), map = null, marks = [], pos = null;
+      function name(s) { return s[2] || t("MonaBike station"); }
+      function draw() {
+        var items = BIKE_STATIONS.map(function (s, i) { return { s: s, i: i, d: pos && M ? M.distance(pos, { lat: s[0], lng: s[1] }) : null }; });
+        if (pos) items.sort(function (a, b) { return a.d - b.d; });
+        list.innerHTML = items.slice(0, pos ? 8 : BIKE_STATIONS.length).map(function (it) {
+          return '<li data-bk="' + it.i + '"><span class="bk-txt"><strong>' + esc(name(it.s)) + "</strong>" + (it.d != null ? "<small>" + esc(M.niceDistance(it.d)) + "</small>" : "") + "</span>" +
+            '<button type="button" class="btn-small" data-bk-go="' + it.i + '">' + esc(t("Take me there")) + "</button></li>";
+        }).join("");
+      }
+      draw();
+      var mapEl = root.querySelector("#bk-map");
+      if (mapEl && M) {
+        map = M.makeMap(mapEl);
+        BIKE_STATIONS.forEach(function (s, i) {
+          marks[i] = L.marker([s[0], s[1]], { icon: L.divIcon({ className: "", html: '<span class="bk-mk"></span>', iconSize: [18, 18], iconAnchor: [9, 9] }), title: name(s), keyboard: true })
+            .addTo(map).bindPopup("<strong>" + esc(name(s)) + '</strong><br><button type="button" class="btn-small" data-bk-go="' + i + '">' + esc(t("Take me there")) + "</button>");
+        });
+        map.fitBounds(L.latLngBounds(BIKE_STATIONS.map(function (s) { return [s[0], s[1]]; })).pad(0.05));
+        setTimeout(function () { map.invalidateSize(); }, 200);
+      }
+      function go(i) {
+        var s = BIKE_STATIONS[i];
+        window.MMEPlanner.state.to = { label: t("MonaBike station") + (s[2] ? " " + s[2] : ""), lat: s[0], lng: s[1], kind: "place" };
+        window.MMEPlanner.state.from = null; window.MMEPlanner.state.arrival = null;
+        if (window.MMEStats) window.MMEStats.track("Bike take me there");
+        location.hash = "#/plan";
+      }
+      root.addEventListener("click", function (e) {
+        var b = e.target.closest("[data-bk-go]"); if (b) { go(+b.dataset.bkGo); return; }
+        if (e.target.closest("#bk-near") && M) {
+          var note = root.querySelector("#bk-note"); note.textContent = t("Finding where you are…");
+          M.startLocating(function (msg) { note.textContent = msg; });
+          var off = M.onLocation(function (h) { pos = h; off(); note.textContent = t("The closest stations to you."); draw(); });
+          return;
+        }
+        var li = e.target.closest("[data-bk]");
+        if (li && map) { var m = marks[+li.dataset.bk]; map.setView(m.getLatLng(), 17); m.openPopup(); mapEl.scrollIntoView({ behavior: "smooth", block: "center" }); }
+      });
+      // "Take me there" inside the map pop-ups (Leaflet puts them outside our list).
+      if (mapEl) mapEl.addEventListener("click", function (e) { var b = e.target.closest("[data-bk-go]"); if (b) { e.stopPropagation(); go(+b.dataset.bkGo); } });
+    }
   };
   var BIKE_PHOTO = "img/monabike-station.jpg";
+  var BIKE_STATIONS = [[43.727573,7.418892,"Roseraie"],[43.729157,7.414482,"Gabian"],[43.731305,7.421253,"Palais princier"],[43.733388,7.419872,"Rue Princesse Florestine",1],[43.733563,7.420858,"Rue Louis Notari",1],[43.732434,7.419773,"Avenue du Port",1],[43.732964,7.418034,"Lazare Sauvaigo"],[43.745399,7.432027,"Rose de Vents"],[43.747228,7.434682,"Larvotto"],[43.744227,7.431127,"Grimaldi Forum"],[43.743533,7.431118,"Grimaldi Forum"],[43.740086,7.42218,"Avenue du Berceau",1],[43.749028,7.435722,"Boulevard d'Italie"],[43.741896,7.427315,"Boulevard des Moulins"],[43.731127,7.416458,"Promenade Honoré II",1],[43.741086,7.430543,"Mareterra"],[43.737072,7.421655,"Rond-Point Sainte-Dévote",1],[43.739042,7.425672,"Monte Carlo"],[43.748143,7.434603,"Carmes"],[43.737297,7.42675,"Yacht Club"],[43.74193,7.428873,"Citronniers"],[43.742381,7.425905,"Marché"],[43.728539,7.419238,"Port de Fontvieille"],[43.73002,7.416231,"Fontvieille"],[43.725563,7.418863,"Héliport"],[43.731263,7.412903,"Parking des Salines Bas"],[43.735039,7.42211,"Route de la Piscine",1],[43.730682,7.412954,"Hôpital",1],[43.734402,7.416194,"Boulevard de Belgique",1],[43.748077,7.431414,"Avenue de l'Annonciade",1],[43.738109,7.417388,"Boulevard des Moneghetti",1],[43.747585,7.43078,"Avenue de l'Annonciade",1],[43.738526,7.42017,"Boulevard de Suisse",1],[43.731065,7.42544,"Musée Océanographique"]]; // MonaBike stations from OpenStreetMap (© OpenStreetMap contributors, ODbL), October 2026
+
 
   var taxiScreen = {
     html: function () {
