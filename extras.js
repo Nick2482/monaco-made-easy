@@ -116,6 +116,8 @@
       links: [["Opera", "https://www.opera.mc"], ["Ballet", "https://www.balletsdemontecarlo.com"]] },
     { name: "Monte-Carlo Philharmonic Orchestra", what: "Concerts at the Auditorium Rainier III, from September to July.", ll: [43.738352, 7.429406], links: [["See the programme", "https://www.opmc.mc"]] },
     { name: "Grimaldi Forum", what: "Big shows, concerts and exhibitions by the sea at Larvotto.", ll: [43.7439, 7.431], links: [["See the programme", "https://www.grimaldiforum.com"]] },
+    { name: "Monaco Open Air Cinema", photo: "img/open-air-cinema.jpg", what: "Summer only, from mid-June to mid-September: films under the stars on the Rock, with the sea behind the screen. Films are shown in their original language with French subtitles. Screenings start after dark.", ll: [43.731347, 7.427098],
+      links: [["See the programme", "https://www.cinemas2monaco.com/"]] },
     { name: "Théâtre Princesse Grace", what: "Plays, comedy and music, mostly in French.", ll: [43.737651, 7.426034], links: [["See the programme", "https://www.tpgmonaco.mc"]] },
     { name: "AS Monaco", what: "Football at the Stade Louis II in Fontvieille.", ll: [43.727506, 7.41551], links: [["Fixtures and tickets", "https://www.asmonaco.com"]] }
   ];
@@ -140,7 +142,7 @@
         (next.length ? "<h2>" + esc(t("Coming up")) + '</h2><ul class="wo-list">' + next.map(card).join("") + "</ul>" : "") +
         yachtsBox() +
         "<h2>" + esc(t("Theatre, concerts and sport")) + '</h2><p class="wo-note">' + esc(t("Each venue’s own programme, always up to date.")) + '</p><ul class="wo-list">' + VENUES.map(function (v) {
-          return '<li class="wo-ev"><strong>' + esc(v.name) + "</strong><p>" + esc(t(v.what)) + '</p><div class="wo-acts">' + v.links.map(function (l) { return extLink(l[0], l[1]); }).join("") + goBtn(v.name, v.ll) + "</div></li>";
+          return '<li class="wo-ev">' + (v.photo ? '<img class="way-photo" src="' + v.photo + '" width="1200" height="675" loading="lazy" alt="' + esc(t("The Monaco Open Air Cinema on the Rock, above the sea")) + '">' : "") + "<strong>" + esc(v.name) + "</strong><p>" + esc(t(v.what)) + '</p><div class="wo-acts">' + v.links.map(function (l) { return extLink(l[0], l[1]); }).join("") + goBtn(v.name, v.ll) + "</div></li>";
         }).join("") + "</ul>" +
         "<h2>" + esc(t("Every day")) + '</h2><ul class="wo-list">' + DAILY.map(function (d) {
           return '<li class="wo-ev"><strong>' + esc(t(d.name)) + '</strong><span class="wo-where">' + esc(d.where) + "</span><p>" + esc(t(d.what)) + '</p><div class="wo-acts">' + goBtn(t(d.name), d.ll) + "</div></li>";
