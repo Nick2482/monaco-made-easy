@@ -254,6 +254,7 @@
       return '<section class="page transport"><h1>' + tb("Getting around") + "</h1>" +
         '<a class="tr-card tr-airport tr-has-photo" href="#/airport"><img class="tr-photo" src="img/airport-t1.jpg" width="1200" height="675" loading="lazy" alt=""><strong>' + tb("From Nice airport") + "</strong><span>" + tb("Train, bus, taxi or helicopter, and how long each takes") + "</span></a>" +
         '<a class="tr-card tr-cruise" href="#/cruise"><strong>' + tb("On a cruise?") + "</strong><span>" + tb("Set your all-aboard time and we’ll tell you when to head back.") + "</span></a>" +
+        '<a class="tr-card tr-bike tr-has-photo" href="#/bikes"><img class="tr-photo" src="img/monabike-station.jpg" width="1200" height="675" loading="lazy" alt=""><strong>' + tb("MonaBike electric bikes") + "</strong><span>" + tb("350 electric bikes at stations all over Monaco, from €1 a ride. They take the hills for you.") + "</span></a>" +
         '<a class="tr-card tr-taxi" href="#/taxis"><strong>' + tb("Taxis") + "</strong><span>" + tb("Numbers, ranks, fixed fares, and the border rule for the French towns next door") + "</span></a>" +
         trainsCard() +
         '<section class="tr-sec"><h2 class="tr-sec-h">' + tb("Buses along the coast") + "</h2>" +
@@ -394,6 +395,28 @@
 
   // ---------- Taxis ----------
   var TAXI_TEL = "+37793150101";
+  // ---------- MonaBike: Monaco's electric bike share (fares from monabike.mc, October 2026) ----------
+  var bikeScreen = {
+    html: function () {
+      var back = '<a class="back" href="#/transport"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + tb("Getting around") + "</a>";
+      return '<section class="page bikes">' + back +
+        (BIKE_PHOTO ? '<img class="pg-photo" src="' + BIKE_PHOTO + '" width="1200" height="675" alt="' + tb("MonaBike electric bikes at a station in Monaco") + '">' : "") +
+        "<h1>" + tb("MonaBike electric bikes") + "</h1>" +
+        '<p class="lede-dark">' + tb("Monaco’s bike share: 350 electric bikes at around 50 stations, with at least one in every district. The motor helps up to 25 km/h, so the hills are easy.") + "</p>" +
+        '<ol class="ways">' +
+        '<li class="way"><div class="way-top"><strong>' + tb("How to ride") + "</strong></div>" +
+        "<p>" + tb("Download the **MonaPass** app, or sign up at monabike.mc, and choose a ticket. At a station, scan the QR code on a bike with a green light and lift it out. To finish, push it back into any station until the light turns green. You’ll get an email to confirm.") + "</p></li>" +
+        '<li class="way"><div class="way-top"><strong>' + tb("Prices") + "</strong></div>" +
+        "<p>" + tb("**€1** a single ride, **€3** for 24 hours, **€8** for 7 days. Each ride is up to 30 minutes. Keep rides under 30 minutes: after that it costs €1 more up to an hour, then €2 for each extra half hour.") + "</p></li>" +
+        '<li class="way"><div class="way-top"><strong>' + tb("Good to know") + "</strong></div>" +
+        "<p>" + tb("Riders must be 14 or over. Use the cycle lanes and bus lanes, not the pavements. If a station is empty, wait a little: a van and trailer go round all day, moving bikes to where they’re needed.") + "</p></li></ol>" +
+        '<div class="wo-acts"><a class="btn-small wo-ext" href="https://monabike.mc/en/fares/" target="_blank" rel="noopener">' + tb("Fares and sign-up at monabike.mc") + "</a></div>" +
+        '<p class="unchecked">' + tb("Fares from monabike.mc in October 2026. Check before you ride.") + "</p></section>";
+    },
+    mount: function () { if (window.MMEStats) window.MMEStats.track("Bikes opened"); }
+  };
+  var BIKE_PHOTO = "img/monabike-station.jpg";
+
   var taxiScreen = {
     html: function () {
       return '<section class="page taxis"><a class="back" href="#/transport"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + tb("Getting around") + "</a>" +
@@ -443,5 +466,5 @@
   }
   setTimeout(refreshBus, 300);
 
-  window.MMETransit = { refreshBus: refreshBus, inMonaco: inMonaco, taxiScreen: taxiScreen, busOption: busOption, trainOption: trainOption, departures: departures, monacoNow: monacoNow, hhmm: hhmm, badge: badge, stopName: function (i) { return B.stops[i][0]; }, stopPt: stopPt, transportScreen: transportScreen, lineScreen: lineScreen, airportScreen: airportScreen, ready: !!B };
+  window.MMETransit = { bikeScreen: bikeScreen, refreshBus: refreshBus, inMonaco: inMonaco, taxiScreen: taxiScreen, busOption: busOption, trainOption: trainOption, departures: departures, monacoNow: monacoNow, hhmm: hhmm, badge: badge, stopName: function (i) { return B.stops[i][0]; }, stopPt: stopPt, transportScreen: transportScreen, lineScreen: lineScreen, airportScreen: airportScreen, ready: !!B };
 })();
