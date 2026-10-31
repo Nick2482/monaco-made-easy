@@ -467,6 +467,9 @@
   var BIKE_STATIONS = [[43.727573,7.418892,"Roseraie"],[43.729157,7.414482,"Gabian"],[43.731305,7.421253,"Palais princier"],[43.733388,7.419872,"Rue Princesse Florestine",1],[43.733563,7.420858,"Rue Louis Notari",1],[43.732434,7.419773,"Avenue du Port",1],[43.732964,7.418034,"Lazare Sauvaigo"],[43.745399,7.432027,"Rose de Vents"],[43.747228,7.434682,"Larvotto"],[43.744227,7.431127,"Grimaldi Forum"],[43.743533,7.431118,"Grimaldi Forum"],[43.740086,7.42218,"Avenue du Berceau",1],[43.749028,7.435722,"Boulevard d'Italie"],[43.741896,7.427315,"Boulevard des Moulins"],[43.731127,7.416458,"Promenade Honoré II",1],[43.741086,7.430543,"Mareterra"],[43.737072,7.421655,"Rond-Point Sainte-Dévote",1],[43.739042,7.425672,"Monte Carlo"],[43.748143,7.434603,"Carmes"],[43.737297,7.42675,"Yacht Club"],[43.74193,7.428873,"Citronniers"],[43.742381,7.425905,"Marché"],[43.728539,7.419238,"Port de Fontvieille"],[43.73002,7.416231,"Fontvieille"],[43.725563,7.418863,"Héliport"],[43.731263,7.412903,"Parking des Salines Bas"],[43.735039,7.42211,"Route de la Piscine",1],[43.730682,7.412954,"Hôpital",1],[43.734402,7.416194,"Boulevard de Belgique",1],[43.748077,7.431414,"Avenue de l'Annonciade",1],[43.738109,7.417388,"Boulevard des Moneghetti",1],[43.747585,7.43078,"Avenue de l'Annonciade",1],[43.738526,7.42017,"Boulevard de Suisse",1],[43.731065,7.42544,"Musée Océanographique"]]; // MonaBike stations from OpenStreetMap (© OpenStreetMap contributors, ODbL), October 2026
 
 
+  // Taxi ranks with a known position (OpenStreetMap, October 2026), for "Take me there".
+  var RANKS = [["Casino Square taxi rank", 43.738676, 7.427912], ["Monaco Monte-Carlo station taxi rank", 43.73808, 7.420031], ["Place des Moulins taxi rank", 43.745283, 7.429359], ["Larvotto taxi rank", 43.74832, 7.435236], ["Beausoleil taxi rank", 43.74165, 7.42545]];
+  function rankGo(i) { return ' <button type="button" class="btn-small rank-go" data-rank="' + i + '">' + tb("Take me there") + "</button>"; }
   var taxiScreen = {
     html: function () {
       return '<section class="page taxis"><a class="back" href="#/transport"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + tb("Getting around") + "</a>" +
@@ -476,17 +479,25 @@
         '<aside class="note note-rule"><strong>' + tb("The border rule") + "</strong><p>" + tb("Monaco taxis can only pick you up in Monaco. French taxis, Uber and Bolt can drop you off in Monaco but can’t collect you there. So:") + "</p>" +
         '<ul class="rule-list"><li>' + tb("**In Monaco:** use a Monaco taxi, from a rank or by phone or app.") + "</li><li>" + tb("**In Beausoleil, Cap d’Ail or Roquebrune (France):** book a French taxi, or use Uber or Bolt, though cars can be scarce. A Monaco taxi can take you to these towns, but not collect you from them.") + "</li><li>" + tb("**From Nice airport to Monaco:** take a French taxi from the airport rank, which has a flat fare of about €95. **Going back to the airport** from Monaco, use a Monaco taxi.") + "</li></ul></aside>" +
         '<h2 class="area-h">' + tb("Taxi ranks in Monaco") + '</h2><ul class="info-list">' +
-        "<li>" + tb("**Casino Square** (Avenue de Monte-Carlo), 24 hours") + "</li><li>" + tb("**Monaco Monte-Carlo station**, 24 hours") + "</li><li><b>Place des Moulins</b></li><li><b>Avenue de la Costa</b></li><li><b>Fontvieille</b></li><li>" + tb("**Larvotto**, by the Méridien Beach Plaza") + "</li></ul>" +
+        "<li>" + tb("**Casino Square** (Avenue de Monte-Carlo), 24 hours") + rankGo(0) + "</li><li>" + tb("**Monaco Monte-Carlo station**, 24 hours") + rankGo(1) + "</li><li><b>Place des Moulins</b>" + rankGo(2) + "</li><li><b>Avenue de la Costa</b></li><li><b>Fontvieille</b></li><li>" + tb("**Larvotto**, by the Méridien Beach Plaza") + rankGo(3) + "</li></ul>" +
         '<h2 class="area-h">' + tb("Taxis in Beausoleil (France)") + '</h2>' +
         '<img class="way-photo" src="img/taxi-beausoleil.jpg" width="1200" height="674" loading="lazy" alt="' + tb("The taxi rank sign in Beausoleil, with its phone number") + '">' +
         '<ul class="info-list">' +
-        "<li>" + tb("**Beausoleil taxi rank**, Place Simone Veil") + ' · <a href="tel:+33493783923">04 93 78 39 23</a></li></ul>' +
+        "<li>" + tb("**Beausoleil taxi rank**, Place Simone Veil (3 Boulevard du Général Leclerc)") + ' · <a href="tel:+33493783923">04 93 78 39 23</a>' + rankGo(4) + "</li></ul>" +
         '<h2 class="area-h">' + tb("What it costs") + '</h2><ul class="info-list">' +
         "<li>" + tb("Monaco taxis use **fixed fares**, not a meter.") + "</li><li>" + tb("Within Monaco: about **€18** if you hail one, about **€28** if you book ahead.") + "</li><li>" + tb("To the towns next door, such as Beausoleil or Cap d’Ail: about **€25**.") + "</li><li>" + tb("To Nice airport: about **€95 to €100**.") + "</li><li>" + tb("Waiting or slow traffic: about €1.33 a minute after the first 3 minutes.") + "</li><li>" + tb("Some taxis take cash only, so carry some euros.") + "</li></ul>" +
         '<p class="unchecked">' + tb("Fares were published in 2025 and 2026. Confirm the price with the driver before you set off.") + "</p></section>";
     },
     mount: function (root) {
       var M = window.MMEMap;
+      root.addEventListener("click", function (e) {
+        var b = e.target.closest("[data-rank]"); if (!b) return;
+        var r = RANKS[+b.dataset.rank];
+        window.MMEPlanner.state.to = { label: t(r[0]), lat: r[1], lng: r[2], kind: "place" };
+        window.MMEPlanner.state.from = null; window.MMEPlanner.state.arrival = null;
+        if (window.MMEStats) window.MMEStats.track("Taxi rank take me there");
+        location.hash = "#/plan";
+      });
       root.querySelector("#taxi-where").addEventListener("click", function () {
         var box = root.querySelector("#taxi-here");
         box.innerHTML = '<p class="lede-dark">' + tb("Finding where you are…") + "</p>";

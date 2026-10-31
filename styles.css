@@ -1159,3 +1159,4 @@ html.cjk .xmas-card strong { font-family: "PingFang SC", "Hiragino Mincho ProN",
 .bk-txt strong { display: block; color: var(--head); }
 .bk-txt small { display: block; color: var(--grey); font-size: 14.5px; }
 #bk-near { margin-top: 8px; }
+.info-list .rank-go { margin-left: 6px; vertical-align: middle; }
