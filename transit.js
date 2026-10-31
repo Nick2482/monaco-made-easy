@@ -252,7 +252,7 @@
     html: function () {
       var esc = ui().esc, now = monacoNow();
       return '<section class="page transport"><h1>' + tb("Getting around") + "</h1>" +
-        '<a class="tr-card tr-airport" href="#/airport"><strong>' + tb("From Nice airport") + "</strong><span>" + tb("Train, bus, taxi or helicopter, and how long each takes") + "</span></a>" +
+        '<a class="tr-card tr-airport tr-has-photo" href="#/airport"><img class="tr-photo" src="img/airport-t1.jpg" width="1200" height="675" loading="lazy" alt=""><strong>' + tb("From Nice airport") + "</strong><span>" + tb("Train, bus, taxi or helicopter, and how long each takes") + "</span></a>" +
         '<a class="tr-card tr-cruise" href="#/cruise"><strong>' + tb("On a cruise?") + "</strong><span>" + tb("Set your all-aboard time and we’ll tell you when to head back.") + "</span></a>" +
         '<a class="tr-card tr-taxi" href="#/taxis"><strong>' + tb("Taxis") + "</strong><span>" + tb("Numbers, ranks, fixed fares, and the border rule for the French towns next door") + "</span></a>" +
         trainsCard() +
@@ -356,10 +356,12 @@
       var now = monacoNow();
       var next = ZOU80_FROM_AIRPORT.map(function (t) { var p = t.split(":"); return +p[0] * 60 + +p[1]; }).filter(function (m) { return m >= now.min; }).slice(0, 3);
       return '<section class="page airport"><a class="back" href="#/transport"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + tb("Getting around") + "</a>" +
+        '<img class="pg-photo" src="img/airport-t1.jpg" width="1200" height="675" alt="' + tb("Terminal 1 at Nice Côte d’Azur Airport") + '">' +
         "<h1>" + tb("From Nice airport to Monaco") + "</h1>" +
         '<p class="lede-dark">' + tb("Four ways in. Prices and times are from published timetables in autumn 2026, so check before you travel.") + "</p>" +
         '<ol class="ways">' +
         '<li class="way"><div class="way-top"><strong>' + tb("Train") + '</strong><span class="way-tag">' + tb("Cheapest") + "</span></div>" +
+        '<img class="way-photo" src="img/airport-tram.jpg" width="1200" height="672" loading="lazy" alt="' + tb("The tram at Nice airport") + '">' +
         "<p>" + tb("Walk about 7 minutes from Terminal 1 to **Nice Saint-Augustin** station (from Terminal 2, take the free tram one stop). Trains to Monaco Monte-Carlo usually run every 15 minutes through the day and take about 35 minutes. A regional ticket costs a few euros. Evening and Sunday services can be thinner, so check the SNCF Connect app for live times.") + "</p>" +
         (TR ? trFromAirport(monacoNow()) : "") +
         '<p class="way-tip">' + tb("At Monaco, the app picks the best station exit for where you’re staying. Tap “Just arrived?” on the home screen.") + "</p></li>" +

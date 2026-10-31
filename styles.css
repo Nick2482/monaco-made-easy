@@ -1139,3 +1139,10 @@ html.cjk .xmas-card strong { font-family: "PingFang SC", "Hiragino Mincho ProN",
 /* Dark mode keeps its night colours, with gold instead of light blue for the fine details. */
 :root[data-theme="dark"] { --riva: #c9a961; --gold: #c9a961; --gold-line: #a8863f; }
 :root[data-theme="dark"] .mark { background: var(--red); }
+
+/* Photos (Nick's own): a wide photo at the top of a page, inside a card, or on a Transport card. */
+.pg-photo { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 16px; margin: 6px 0 18px; background: var(--stone); }
+.way-photo { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 12px; margin: 10px 0 12px; background: var(--stone); }
+.tr-card.tr-has-photo { padding-top: 0; overflow: hidden; }
+.tr-photo { display: block; width: calc(100% + 36px); max-width: none; height: 132px; object-fit: cover; margin: 0 -18px 14px; }
+:root[data-theme="dark"] .pg-photo, :root[data-theme="dark"] .way-photo, :root[data-theme="dark"] .tr-photo { filter: brightness(.9); }
