@@ -569,7 +569,7 @@
         "<h1>" + esc(t("Christmas in Monaco")) + '</h1><p class="lede-dark">' + esc(t("The Christmas village, the ice rink, the lights and New Year’s Eve, and the easy way between them.")) + "</p>" +
         (window.L && window.MMEMap ? '<div class="yt-map xm-map" id="xm-map" role="application" aria-label="' + esc(t("Map")) + '"></div>' : "") +
         '<ol class="wo-list xm-list">' + XMAS.map(function (x, i) {
-          return '<li class="wo-ev" data-xm="' + i + '">' + (x.photo ? '<img class="way-photo" src="' + x.photo + '" width="1200" height="675" loading="lazy" alt="' + esc(t("Monaco Cathedral, on the Rock")) + '">' : "") + '<span class="ev-date">' + esc(t(x.when)) + '</span><strong><span class="yt-num xm-num">' + (i + 1) + "</span>" + esc(t(x.name)) + "</strong>" +
+          return '<li class="wo-ev" data-xm="' + i + '">' + (x.photo ? '<img class="way-photo photo-full" src="' + x.photo + '" width="1200" height="800" loading="lazy" alt="' + esc(t("Monaco Cathedral, on the Rock")) + '">' : "") + '<span class="ev-date">' + esc(t(x.when)) + '</span><strong><span class="yt-num xm-num">' + (i + 1) + "</span>" + esc(t(x.name)) + "</strong>" +
             '<span class="wo-where">' + esc(x.where) + "</span><p>" + esc(t(x.what)) + (x.tip ? " " + esc(t(x.tip)) : "") + "</p>" +
             '<div class="wo-acts">' + goBtn(t(x.name), x.ll) + (x.route ? '<a class="btn-small" href="#/go/' + x.route + '">' + esc(t("See the lift route")) + "</a>" : "") + "</div></li>";
         }).join("") + "</ol>" +
