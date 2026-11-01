@@ -372,6 +372,7 @@
         '<li class="way"><div class="way-top"><strong>' + tb("Taxi") + '</strong><span class="way-tag">' + tb("Easiest with bags") + "</span></div>" +
         "<p>" + tb("From the taxi rank at either terminal. A flat fare of about €95 to Monaco for up to four people with luggage, around 30 to 45 minutes depending on traffic. Uber can drop you in Monaco, but can’t collect you there.") + "</p></li>" +
         '<li class="way"><div class="way-top"><strong>' + tb("Helicopter") + '</strong><span class="way-tag">' + tb("Fastest") + "</span></div>" +
+        '<img class="way-photo" src="img/heliport.jpg" width="1200" height="675" loading="lazy" alt="' + tb("A helicopter at Monaco Heliport, with the coast behind") + '">' +
         "<p>" + tb("About 7 minutes to Monaco Heliport in Fontvieille, usually with a car to your hotel included. Book ahead with an operator. Shared seats start at around €200.") + "</p></li></ol>" +
         '<p class="unchecked">' + tb("ZOU! times are from the timetable valid from 2 June 2026. Check zou.maregionsud.fr or SNCF Connect on the day.") + "</p></section>";
     },
