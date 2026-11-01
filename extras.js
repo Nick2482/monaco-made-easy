@@ -544,7 +544,7 @@
     { name: "Christmas tree and Casino lights", where: "Place du Casino", ll: [43.7397, 7.4277], when: "December to early January",
       what: "A giant Christmas tree in front of the Casino, with light shows on the Casino front in the evenings in the second half of December.",
       tip: "From the Christmas village, the public lifts by the Auditorium take you straight up. No climb.", route: "port-casino" },
-    { name: "Christmas Eve Mass", where: "Monaco Cathedral, Monaco-Ville", ll: [43.7303, 7.4230], when: "24 December",
+    { name: "Christmas Eve Mass", where: "Monaco Cathedral, Monaco-Ville", ll: [43.7303, 7.4230], when: "24 December", photo: "img/cathedral.jpg",
       what: "Usually a vigil at 23:30 followed by Midnight Mass, in the Cathedral on the Rock where Princess Grace is buried. It fills up, so arrive early.",
       tip: "Lifts from the harbour take you up to the Rock.", route: "port-palace" },
     { name: "New Year’s Eve", where: "Port Hercule", ll: [43.7343, 7.4214], when: "31 December",
@@ -569,7 +569,7 @@
         "<h1>" + esc(t("Christmas in Monaco")) + '</h1><p class="lede-dark">' + esc(t("The Christmas village, the ice rink, the lights and New Year’s Eve, and the easy way between them.")) + "</p>" +
         (window.L && window.MMEMap ? '<div class="yt-map xm-map" id="xm-map" role="application" aria-label="' + esc(t("Map")) + '"></div>' : "") +
         '<ol class="wo-list xm-list">' + XMAS.map(function (x, i) {
-          return '<li class="wo-ev" data-xm="' + i + '"><span class="ev-date">' + esc(t(x.when)) + '</span><strong><span class="yt-num xm-num">' + (i + 1) + "</span>" + esc(t(x.name)) + "</strong>" +
+          return '<li class="wo-ev" data-xm="' + i + '">' + (x.photo ? '<img class="way-photo" src="' + x.photo + '" width="1200" height="675" loading="lazy" alt="' + esc(t("Monaco Cathedral, on the Rock")) + '">' : "") + '<span class="ev-date">' + esc(t(x.when)) + '</span><strong><span class="yt-num xm-num">' + (i + 1) + "</span>" + esc(t(x.name)) + "</strong>" +
             '<span class="wo-where">' + esc(x.where) + "</span><p>" + esc(t(x.what)) + (x.tip ? " " + esc(t(x.tip)) : "") + "</p>" +
             '<div class="wo-acts">' + goBtn(t(x.name), x.ll) + (x.route ? '<a class="btn-small" href="#/go/' + x.route + '">' + esc(t("See the lift route")) + "</a>" : "") + "</div></li>";
         }).join("") + "</ol>" +

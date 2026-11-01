@@ -10,7 +10,7 @@
   // Stop positions come from OpenStreetMap.
   var WALKS = [
     { id: "rock", title: "The Rock without the climb", sub: "Monaco-Ville, the old town on the Rock, using the lifts from the harbour",
-      photos: ["img/rock-palace-dusk.jpg", "img/rock-fontvieille.jpg"], portrait: true,
+      photos: ["img/rock-palace-dusk.jpg", "img/cathedral.jpg"], portrait: true,
       stops: [
         { name: "Port Hercule", lat: D.places.port.lat, lng: D.places.port.lng, text: "Start by the harbour. The lifts in the Parking des Pêcheurs take you up the cliff, so there’s no long climb." },
         { name: "Oceanographic Museum", lat: 43.73103, lng: 7.42564, text: "Jacques Cousteau’s museum, built into the cliff edge. Its rooftop terrace has one of the best views in Monaco." },
