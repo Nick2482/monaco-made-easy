@@ -1162,3 +1162,8 @@ html.cjk .xmas-card strong { font-family: "PingFang SC", "Hiragino Mincho ProN",
 .info-list .rank-go { margin-left: 6px; vertical-align: middle; }
 .way-photo.photo-full { aspect-ratio: 3 / 2; }
 .wk-photos img[src$="cathedral.jpg"] { object-position: center 70%; }
+/* Arrival choices: make the chosen one unmistakable in the champagne look. */
+:root:not([data-theme="dark"]) .ar-opt input:checked + span { background: #fdf0f1; border-color: var(--red); box-shadow: inset 5px 0 0 var(--red); }
+.ar-opt span { position: relative; }
+.ar-opt input:checked + span::after { content: "✓"; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); width: 26px; height: 26px; border-radius: 50%; background: var(--red); color: #fff; font-weight: 700; font-size: 15px; display: grid; place-items: center; }
+.ar-opt input:checked + span { padding-right: 52px; }
