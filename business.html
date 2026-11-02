@@ -7,7 +7,6 @@
   <meta name="description" content="Restaurants, cafés, bars and shops in Monaco, Beausoleil, Cap d'Ail and Roquebrune-Cap-Martin: add your business to the free Monaco Made Easy guide.">
   <link rel="stylesheet" href="styles.css">
   <style>
-    body { background: #fff; }
     .bz { max-width: 600px; margin: 0 auto; padding: 24px 16px 56px; color: var(--ink); }
     .bz h1 { font-size: 32px; line-height: 1.15; }
     .bz .lede { color: var(--grey); margin-top: 8px; font-size: 17px; }
@@ -33,9 +32,33 @@
     .small { margin-top: 18px; font-size: 15px; color: var(--grey); }
     [data-l] { display: none; }
     html[lang="fr"] [data-l="fr"], html[lang="en-GB"] [data-l="en"] { display: revert; }
+    /* Champagne, Monaco red and gold, to match the app */
+    body { background: #f7f2e8; }
+    .site-hero { display: block; width: 100%; height: clamp(200px, 52vw, 340px); object-fit: cover; object-position: center 35%; }
+    .pill-row button, .lang button { background: #fffdf8; border-color: #dccca6; color: #1d2533; }
+    .pill-row button[aria-pressed="true"], .lang button[aria-pressed="true"] { background: #1d2533; border-color: #1d2533; color: #fff; }
+    ol.steps li { background: #fffdf8; border: 1px solid #e7dcc5; }
+    ol.steps strong { color: #1d2533; }
+    .go { background: #fffdf8; color: #1d2533; border: 1.5px solid #1d2533; }
+    .go.red { background: #ce1126; color: #fff; border-color: #ce1126; }
+    .note { background: #fffdf8; }
+    .pro-box { background: #fffdf8; color: #1d2533; border: 1px solid #e7dcc5; box-shadow: inset 0 3px 0 #b8923f; }
+    .pro-box h2 { color: #1d2533; }
+    .pro-box .feats li { color: #1d2533; }
+    .pro-small { color: #5d5a52; }
+    label { color: #1d2533; }
+    input, select, textarea { background: #fffdf8; border-color: #e7dcc5; }
+    input:focus, select:focus, textarea:focus { outline: 3px solid #e3c98c; border-color: #b8923f; }
   </style>
 </head>
 <body>
+  <header class="bar">
+    <a class="brand" href="./#/" aria-label="Monaco Made Easy, home">
+      <span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4l6 7h-4v9h-4v-9H6z"/></svg></span>
+      <span class="brand-name">Monaco Made Easy</span>
+    </a>
+  </header>
+  <img class="site-hero" src="img/harbour-wide.jpg" alt="Port Hercule and the Rock of Monaco">
 <main class="bz">
   <h1><span data-l="en">Add your business to Monaco Made Easy</span><span data-l="fr">Ajoutez votre établissement à Monaco Made Easy</span></h1>
   <p class="lede"><span data-l="en">Free. Visitors find you with the easiest, step-free way to your door.</span><span data-l="fr">Gratuit. Les visiteurs vous trouvent, avec le chemin le plus facile et sans marches jusqu’à votre porte.</span></p>
