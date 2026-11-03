@@ -28,6 +28,25 @@
         { name: "Grimaldi Forum", lat: 43.74383, lng: 7.43192, text: "Monaco’s congress and exhibition centre, with a big exhibition every summer." },
         { name: "Larvotto Beach", lat: D.places.larvotto.lat, lng: D.places.larvotto.lng, text: "Monaco’s public beach, with a promenade, cafés and restaurants." }
       ] },
+    { id: "gp", title: "The Grand Prix lap", sub: "Walk the Formula 1 circuit, from the starting grid all the way round to the finish line",
+      photos: ["img/gp-1992.jpg"], photoCredit: "The Swimming Pool section at the 1992 Monaco Grand Prix. Photo: Nick Hutton",
+      stops: [
+        { name: "Start line", lat: 43.7350, lng: 7.4212, text: "The start and finish straight on Boulevard Albert 1er. On race day the grid lines up here, and the Prince watches from the royal box beside the finish line. In race weeks barriers go up and parts of this walk are closed, so check What’s on first." },
+        { name: "Sainte-Dévote", lat: 43.7369, lng: 7.4217, text: "The first corner, a tight right-hander beside the little church of Monaco’s patron saint. With the whole field arriving at once, it’s where many first-lap accidents happen." },
+        { name: "Beau Rivage", lat: 43.7374, lng: 7.4240, text: "The long climb up Avenue d’Ostende, taken flat out by the cars. On foot it’s a steady uphill walk. If you’d rather skip it, the public lifts by the Auditorium Rainier III on the harbour take you up to the Casino terraces." },
+        { name: "Massenet", lat: 43.7385, lng: 7.4279, text: "A long, fast left-hander at the top of the hill, sweeping round towards Casino Square." },
+        { name: "Casino Square", lat: 43.7394, lng: 7.4274, text: "The most glamorous corner in motor racing, between the Casino, the Hôtel de Paris and the Café de Paris. The cars crest a bump here and dive right, downhill." },
+        { name: "Mirabeau", lat: 43.7403, lng: 7.4277, text: "A sharp right-hander at the bottom of the run down from the Casino, with the barriers just inches from the cars." },
+        { name: "The Grand Hotel hairpin", lat: 43.7411, lng: 7.4287, text: "The slowest corner in Formula 1, taken at around 50 km/h, wrapped round the Fairmont hotel. One of the most photographed spots on the calendar: stand on the outside of the bend for the classic view." },
+        { name: "Portier", lat: 43.7406, lng: 7.4304, text: "The right-hander that brings the cars down to the sea, just before the tunnel. Ayrton Senna crashed out here in 1988 while leading the race." },
+        { name: "The tunnel", lat: 43.7383, lng: 7.4291, text: "The only covered section of any Formula 1 track. The drivers come out of the sunlight flat out, at close to 290 km/h, into the dark. You can walk it on the pavement beside the traffic: it’s noisy, so keep children close. It takes about 4 minutes, and you come out into daylight at the harbour, just as the drivers do." },
+        { name: "Nouvelle Chicane", lat: 43.7378, lng: 7.4280, text: "The chicane at the tunnel exit, where the drivers brake hard from top speed. It’s one of the few real overtaking places in Monaco." },
+        { name: "Tabac", lat: 43.7369, lng: 7.4237, text: "A fast left-hander along the harbour, named after the kiosk that once stood on the corner. The yachts are moored just feet away." },
+        { name: "Swimming Pool", lat: 43.7350, lng: 7.4223, text: "A quick pair of chicanes around the Rainier III swimming pool, one of the most demanding sections of the lap. In winter the pool becomes an ice rink." },
+        { name: "La Rascasse", lat: 43.73238, lng: 7.42298, text: "A tight right-hander round the famous Rascasse bar, one of the best places to watch the race." },
+        { name: "Anthony Noghès", lat: 43.73286, lng: 7.42217, text: "The last corner, named after Antony Noghès, who organised the first Monaco Grand Prix in 1929." },
+        { name: "Finish line", lat: 43.7350, lng: 7.4212, text: "You’re back where you started: one lap of the Monaco Grand Prix, about 3.3 km. In 1992 Nigel Mansell had the race won until a puncture sent him into the pits. Ayrton Senna swept into the lead, and Mansell, in a much faster car, hunted him down. For the last laps Senna made his car as wide as the narrow streets would allow and held on to win by two tenths of a second, one of the greatest finishes in Formula 1 history. Both men were exhausted: Senna could barely lift the trophy, and Mansell was close to collapse. Chequered flag!" }
+      ] },
     { id: "seapath", title: "The sea path from Cap d’Ail", sub: "Our favourite walk: along the water from Mala beach to Monaco’s heliport", coast: true,
       photos: ["img/seapath-arch.jpg", "img/seapath-coast.jpg"],
       stops: [
@@ -103,7 +122,7 @@
       if (window.MMEPro && !window.MMEPro.isPro()) return '<section class="plan walk"><a class="back" href="#/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + esc(t("Home")) + "</a><h1>" + esc(t(w.title)) + '</h1><p class="lede-dark">' + esc(t(w.sub)) + "</p>" + window.MMEPro.lockCard("Walks") + "</section>";
       return '<section class="plan walk"><a class="back" href="#/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + esc(t("Home")) + "</a>" +
         "<h1>" + esc(t(w.title)) + '</h1><p class="lede-dark">' + esc(t(w.sub)) + "</p>" +
-        (w.photos ? '<div class="wk-photos wk-p' + w.photos.length + (w.coast || w.portrait ? " wk-portrait" : "") + '">' + w.photos.map(function (p) { return '<img src="' + p + '" alt="" loading="lazy">'; }).join("") + "</div>" : "") +
+        (w.photos ? '<div class="wk-photos wk-p' + w.photos.length + (w.coast || w.portrait ? " wk-portrait" : "") + '">' + w.photos.map(function (p) { return '<img src="' + p + '" alt="" loading="lazy">'; }).join("") + "</div>" : "") + (w.photoCredit ? '<p class="wk-credit">' + esc(t(w.photoCredit)) + "</p>" : "") +
         (w.id === "rock" ? guardCard() : "") +
         '<div class="map plan-map" id="walk-map"></div><div id="walk-body"><p class="lede-dark" role="status">' + esc(t("Working out the easiest way…")) + "</p></div></section>";
     },
