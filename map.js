@@ -53,9 +53,13 @@
   }
   function walkText(w) { return t("{d} away, about {n} min walk", { d: niceDistance(w.metres), n: w.minutes }); }
   // Nearest first by real walking time: straight-line distance picks the candidates, the route decides the order.
-  // La Turbie and Èze are beyond our walking map: those places get Google Maps directions instead of our route.
+  // La Turbie and Èze are on our walking map, but from Monaco they're a bus or taxi ride, not a walk.
+  // So their places get Google Maps directions (with buses and trains), unless you're already within 2.5 km.
   var FAR = { "La Turbie": 1, "Èze": 1 };
-  function isFar(e) { return !!(e && FAR[e.a]); }
+  function isFar(e) {
+    if (!e || !FAR[e.a]) return false;
+    return !(here && distance(here, e) < 2500);
+  }
   function goHtml(e, label, cls, text) {
     var esc = window.MMEUI.esc;
     if (isFar(e)) return '<a class="' + cls + '" href="https://www.google.com/maps/dir/?api=1&destination=' + e.lat + "," + e.lng + '" target="_blank" rel="noopener">' + esc(t("Directions")) + "</a>";
@@ -82,9 +86,22 @@
     // Its tiles live on our own website and are kept on the phone for offline use.
     if (ownMapOk()) {
       var dark = document.documentElement.getAttribute("data-theme") === "dark";
-      L.maplibreGL({ style: window.mmeMapStyle(location.origin, dark), interactive: false, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(map);
-      map.setMinZoom(11);
-      map.setMaxBounds([[43.66, 7.30], [43.82, 7.58]]);
+      // A wider drawn margin (padding) so panning and pinching don't show empty edges before the map catches up.
+      var gl = L.maplibreGL({ style: window.mmeMapStyle(location.origin, dark), interactive: false, padding: 0.35, updateInterval: 16, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(map);
+      map.getContainer().classList.add("own-map");
+      // Our map covers Èze to Roquebrune-Cap-Martin: keep the view on it, and don't zoom out so far that it's mostly empty.
+      map.setMinZoom(window.innerWidth > 700 ? 12 : 13);
+      map.setMaxBounds([[43.708, 7.345], [43.780, 7.500]]);
+      map.options.maxBoundsViscosity = 0.8;
+      // After a zoom, a resize, or coming back to the app, redraw so no part of the map is left blank.
+      var redraw = function () { var g = gl.getMaplibreMap && gl.getMaplibreMap(); if (g) { try { g.resize(); g.triggerRepaint(); } catch (e) {} } };
+      map.on("zoomend moveend resize", function () { setTimeout(redraw, 0); });
+      var onVis = function () {
+        if (!document.body.contains(map.getContainer())) { document.removeEventListener("visibilitychange", onVis); window.removeEventListener("pageshow", onVis); return; }
+        if (!document.hidden) { map.invalidateSize(); setTimeout(redraw, 50); }
+      };
+      document.addEventListener("visibilitychange", onVis);
+      window.addEventListener("pageshow", onVis);
     } else {
       // Fallback for phones without WebGL: the CARTO map. Two layers, so zooming in close never shows blank squares.
       var TILE = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=" + CARTO_KEY;

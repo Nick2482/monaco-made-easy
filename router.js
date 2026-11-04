@@ -72,9 +72,9 @@
   // ---------- Heights: free terrain tiles (AWS Terrain Tiles, Terrarium format) ----------
   // Each pixel stores height above sea level. Loaded once, then kept offline by the service worker.
   var height = null;
-  // Zoom-14 tiles that cover the walking network (Cap d'Ail to Roquebrune-Cap-Martin).
+  // Zoom-14 tiles that cover the walking network (Èze and La Turbie to Roquebrune-Cap-Martin).
   var TZ = 14, TILES = [[8528, 5974], [8528, 5975], [8529, 5973], [8529, 5974], [8529, 5975], [8530, 5971], [8530, 5972], [8530, 5973], [8530, 5974],
-    [8531, 5971], [8531, 5972], [8532, 5971], [8532, 5972], [8532, 5973], [8533, 5971], [8533, 5972]];
+    [8531, 5971], [8531, 5972], [8532, 5971], [8532, 5972], [8532, 5973], [8533, 5971], [8533, 5972], [8526, 5972], [8526, 5973], [8526, 5974], [8526, 5975], [8527, 5972], [8527, 5973], [8527, 5974], [8527, 5975], [8528, 5972], [8528, 5973], [8529, 5972]];
   var TILE_URL = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/";
   function loadTile(x, y) {
     return new Promise(function (resolve) {

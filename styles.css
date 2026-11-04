@@ -1221,3 +1221,6 @@ a.pop-go, .leaflet-popup-content a.pop-go { display: inline-block; color: #fff; 
 .ab-h { margin: 28px 0 10px; }
 .near .lifts > li.area-sec > span { font-family: var(--serif); font-size: 25px; line-height: 1.15; color: var(--head); font-weight: 400; }
 .near .lifts > li.area-sec > small { font-size: 14px; }
+/* Our own map: the space around it while it redraws is the colour of the land, not grey. */
+.leaflet-container.own-map { background: #f4efe3; }
+:root[data-theme="dark"] .leaflet-container.own-map { background: #1c232c; }

@@ -282,7 +282,7 @@
               '<div><span class="step-type">' + esc(t(STEP_LABEL[k] || "Arrive")) + "</span><p>" + esc(st.text) + "</p></div></li>";
           }).join("") + "</ol>";
           if (!r.stepFree) h += '<aside class="note"><strong>' + esc(t("Steps on this route")) + "</strong><p>" + esc(t("This is the easiest way we can find, but it still has some steps. A taxi may be easier with heavy bags.")) + "</p></aside>";
-          if (outside) h += '<aside class="note"><strong>' + esc(t("Beyond our map")) + "</strong><p>" + esc(t("Part of this journey is outside the area we cover (Monaco, Beausoleil, Cap d’Ail and Roquebrune-Cap-Martin). Use Google Maps for that part.")) + "</p></aside>";
+          if (outside) h += '<aside class="note"><strong>' + esc(t("Beyond our map")) + "</strong><p>" + esc(t("Part of this journey is outside the area we cover (from Èze and La Turbie to Roquebrune-Cap-Martin). Use Google Maps for that part.")) + "</p></aside>";
           var T = window.MMETransit, bus = T && T.ready ? T.busOption(from, to) : null;
           if (bus && (bus.minutes + 2 < r.minutes || (r.climbed > 30 && bus.minutes < r.minutes + 8) || (!r.stepFree && bus.minutes < r.minutes + 8))) {
             var now = T.monacoNow();
