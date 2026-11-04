@@ -159,7 +159,8 @@
     var pf = placeFilter ? D.places[placeFilter] : null;
     return '<section class="hero">' +
       '<div class="hero-head"><h1>' + esc(t("Monaco, without the climb.")) + "</h1>" +
-      '<p class="lede">' + esc(t("Around 80 free public lifts, 37 escalators and 8 moving walkways link Monaco, Beausoleil and Cap d’Ail. We show you how to use them, and we cover Roquebrune and Cap Martin too.")) + "</p></div>" +
+      '<p class="lede">' + esc(t("Around 80 free public lifts, 37 escalators and 8 moving walkways, and the easy way to use them. Plus the whole coast around Monaco, from Èze to Cap Martin, with La Turbie on the hill above.")) + "</p>" +
+      (X && X.coverageFig ? X.coverageFig() : "") + "</div>" +
       (window.MMEWeather ? window.MMEWeather.strip() : "") +
       (X ? X.eventBanner() + X.cruiseCard() : "") + (window.MMEWalks ? window.MMEWalks.guardCard() : "") +
       window.MMEPlanner.boxHtml() + stayList() + essQuick() +

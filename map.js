@@ -53,9 +53,17 @@
   }
   function walkText(w) { return t("{d} away, about {n} min walk", { d: niceDistance(w.metres), n: w.minutes }); }
   // Nearest first by real walking time: straight-line distance picks the candidates, the route decides the order.
+  // La Turbie and Èze are beyond our walking map: those places get Google Maps directions instead of our route.
+  var FAR = { "La Turbie": 1, "Èze": 1 };
+  function isFar(e) { return !!(e && FAR[e.a]); }
+  function goHtml(e, label, cls, text) {
+    var esc = window.MMEUI.esc;
+    if (isFar(e)) return '<a class="' + cls + '" href="https://www.google.com/maps/dir/?api=1&destination=' + e.lat + "," + e.lng + '" target="_blank" rel="noopener">' + esc(t("Directions")) + "</a>";
+    return '<button type="button" class="' + cls + '" data-goto="' + e.lat + "," + e.lng + '" data-label="' + esc(label) + '">' + esc(t(text || "Take me there")) + "</button>";
+  }
   function byWalk(items, pos, get) {
     items.sort(function (a, b) { return a.d - b.d; });
-    items.slice(0, 40).forEach(function (it) { it.w = walkTo(pos, get(it)); });
+    items.slice(0, 40).forEach(function (it) { if (!isFar(get(it))) it.w = walkTo(pos, get(it)); });
     items.sort(function (a, b) { return (a.w ? a.w.minutes : 1e9) - (b.w ? b.w.minutes : 1e9) || a.d - b.d; });
   }
 
@@ -139,7 +147,7 @@
   function essPopup(e) {
     var esc = window.MMEUI.esc, det = essDetails(e);
     return '<div class="lift-pop"><strong>' + esc(essTitle(e)) + "</strong>" + (det ? "<br>" + esc(det) : "") +
-      '<br><button type="button" class="pop-go" data-goto="' + e.lat + "," + e.lng + '" data-label="' + CAT_ONE[e.k] + '">' + esc(t("Take me there")) + "</button></div>";
+      '<br>' + goHtml(e, CAT_ONE[e.k], "pop-go") + "</div>";
   }
   function catNote(cat) {
     if (cat === "pharmacy") return t("At night, on Sundays and on holidays, one pharmacy stays open. In Monaco its name and address are posted on the door of every pharmacy. In Beausoleil, Cap d’Ail and the rest of France, call 3237 to find it.");
@@ -198,8 +206,8 @@
           var e = it.e, det = essDetails(e);
           return '<li><span class="step-ico" style="--c:' + CAT_COLOR[e.k] + '">' + ui.icon(e.k) + "</span><div><strong>" + ui.esc(essTitle(e)) + "</strong>" +
             (det ? "<span>" + ui.esc(det) + "</span>" : "") + "<small>" + ui.esc(it.w ? walkText(it.w) : e.a) + "</small></div>" +
-            '<button type="button" class="map-mini" data-goto="' + e.lat + "," + e.lng + '" data-label="' + CAT_ONE[e.k] + '">' + ui.esc(t("Take me there")) + "</button></li>";
-        }).join("") + '<li class="more-note">' + ui.esc(t(pos ? "The 15 closest of {n}. All of them are on the map." : "{n} in Monaco, Beausoleil, Cap d’Ail and Roquebrune-Cap-Martin. All of them are on the map.", { n: all.length })) + "</li>";
+            goHtml(e, CAT_ONE[e.k], "map-mini") + "</li>";
+        }).join("") + '<li class="more-note">' + ui.esc(t(pos ? "The 15 closest of {n}. All of them are on the map." : "{n} in Monaco and nearby, from Èze to Roquebrune-Cap-Martin. All of them are on the map.", { n: all.length })) + "</li>";
       }
 
       function drawList(pos) {
@@ -276,5 +284,5 @@
   };
 
   function currentCat() { var c = (location.hash.split("/")[2] || "").split("?")[0]; return CAT_ONE[c] ? c : "lifts"; }
-  window.MMEMap = { ownMapOk: ownMapOk, CAT_ONE: CAT_ONE, CAT_COLOR: CAT_COLOR, CARTO_KEY: CARTO_KEY, liftName: liftName, here: function () { return here; }, screen: screen, makeMap: makeMap, liftIcon: liftIcon, meIcon: meIcon, startLocating: startLocating, onLocation: onLocation, distance: distance, niceDistance: niceDistance, walkTo: walkTo };
+  window.MMEMap = { ownMapOk: ownMapOk, CAT_ONE: CAT_ONE, CAT_COLOR: CAT_COLOR, CARTO_KEY: CARTO_KEY, liftName: liftName, here: function () { return here; }, screen: screen, makeMap: makeMap, liftIcon: liftIcon, meIcon: meIcon, startLocating: startLocating, onLocation: onLocation, distance: distance, niceDistance: niceDistance, walkTo: walkTo, isFar: isFar, goHtml: goHtml };
 })();

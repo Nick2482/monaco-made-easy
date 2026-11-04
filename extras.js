@@ -624,7 +624,7 @@
   var ABOVE = [
     { name: "Trophée d’Auguste, La Turbie", ll: [43.74479, 7.40176], area: "La Turbie",
       what: "A huge Roman monument from 6 BC, high above Monaco, with one of the finest views on the Riviera from its gardens. Open every day except Monday. Under-18s go free.",
-      how: "ZOU! bus 605 from Place d’Armes, a few times a day on some days of the week, or a taxi (about 15 minutes)." },
+      how: "ZOU! buses from Place d’Armes: the 603 every day, the 604 on weekdays and the 605 at weekends. Or a taxi (about 15 minutes)." },
     { name: "La Turbie village", ll: [43.7451, 7.4005], area: "La Turbie",
       what: "A quiet medieval village of stone lanes and arches below the Trophée, with cafés on the main square.",
       how: "The same bus or taxi as the Trophée, which is a few minutes’ walk away." },
@@ -642,7 +642,7 @@
       how: "By taxi, on the Grande Corniche above Roquebrune-Cap-Martin." },
     { name: "Èze village", ll: [43.7282, 7.3615], area: "Èze",
       what: "A perched medieval village 430 m above the sea, with the Jardin exotique d’Èze at the very top, art galleries, and the Fragonard and Galimard perfume houses.",
-      how: "ZOU! bus 602 from Monaco (Office de Tourisme) to Èze Village, or a taxi (about 20 minutes)." },
+      how: "ZOU! bus 602 from Monaco (Office de Tourisme) every day, or the 605 from Place d’Armes at weekends. Or a taxi (about 20 minutes)." },
     { name: "Chemin de Nietzsche", ll: [43.72314, 7.35901], area: "Èze",
       what: "The steep footpath from the sea up to Èze village, named after the philosopher who walked it. About 1 to 1½ hours up, with many steps: wear good shoes and take water.",
       how: "It starts opposite Èze-sur-Mer station. Walk up, then take the bus back down." },
@@ -655,6 +655,7 @@
       return '<section class="page whats-on above-page"><a class="back" href="#/transport"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + esc(t("Getting around")) + "</a>" +
         "<h1>" + esc(t("Above Monaco")) + '</h1><p class="lede-dark">' + esc(t("La Turbie, Èze and the viewpoints on the hills behind Monaco: the best views of the Principality, a short trip away.")) + "</p>" +
         (window.L && window.MMEMap ? '<div class="yt-map xm-map" id="ab-map" role="application" aria-label="' + esc(t("Map")) + '"></div>' : "") +
+        (window.MMEZouBus ? window.MMEZouBus.html() : "") +
         '<ol class="wo-list xm-list">' + ABOVE.map(function (x, i) {
           return '<li class="wo-ev" data-xm="' + i + '"><span class="ev-date">' + esc(t(x.area)) + '</span><strong><span class="yt-num xm-num">' + (i + 1) + "</span>" + esc(t(x.name)) + "</strong>" +
             "<p>" + esc(t(x.what)) + '</p><p class="ab-how"><b>' + esc(t("Getting there:")) + "</b> " + esc(t(x.how)) + "</p>" +
@@ -665,6 +666,7 @@
     },
     mount: function (el) {
       if (window.MMEStats) window.MMEStats.track("Above Monaco opened");
+      if (window.MMEZouBus) window.MMEZouBus.mount(el);
       var mapEl = el.querySelector("#ab-map"), map = null, marks = [];
       if (mapEl) {
         map = window.MMEMap.makeMap(mapEl);
@@ -677,13 +679,42 @@
       }
       el.addEventListener("click", function (e) {
         if (e.target.closest("a")) { if (window.MMEStats && e.target.closest(".wo-ext")) window.MMEStats.track("Above Monaco directions"); return; }
+        var go = e.target.closest("[data-goto]");
+        if (go) {
+          var ll = go.dataset.goto.split(",");
+          window.MMEPlanner.state.to = { label: go.dataset.label, lat: +ll[0], lng: +ll[1], kind: "place" };
+          window.MMEPlanner.state.from = null; window.MMEPlanner.state.arrival = null;
+          location.hash = "#/plan"; return;
+        }
         var li = e.target.closest("[data-xm]");
         if (li && map && marks[li.dataset.xm]) { map.setView(marks[li.dataset.xm].getLatLng(), 16); marks[li.dataset.xm].openPopup(); mapEl.scrollIntoView({ behavior: "smooth", block: "center" }); }
       });
     }
   };
 
-  window.MMEExtras = { knowCard: knowCard, knowLink: knowLink,
+
+  // ---------------------------------------------------------------------------
+  // 9. The coast we cover, drawn for the home page (coverage.js has the shapes). Tapping it opens Above Monaco.
+  // ---------------------------------------------------------------------------
+  function coverageFig() {
+    var C = window.MMECoverage;
+    if (!C) return "";
+    var P = C.pts;
+    // [point, label, x offset, y offset, anchor, class]
+    var L = [["eze", "Èze", 18, 12, "start", ""], ["turbie", "La Turbie", 0, -24, "middle", ""], ["capdail", "Cap d’Ail", -10, 50, "middle", ""],
+      ["beausoleil", "Beausoleil", 18, -22, "start", ""], ["rcm", "Roquebrune", -18, 12, "end", ""], ["capmartin", "Cap Martin", 4, -26, "end", ""]];
+    var dots = L.map(function (l) { var p = P[l[0]]; return '<circle class="cv-dot" cx="' + p[0] + '" cy="' + p[1] + '" r="9"/>'; }).join("") +
+      '<circle class="cv-dot cv-mc" cx="' + P.monaco[0] + '" cy="' + P.monaco[1] + '" r="12"/>';
+    var labels = L.map(function (l) { var p = P[l[0]]; return '<text x="' + (p[0] + l[2]) + '" y="' + (p[1] + l[3]) + '" text-anchor="' + l[4] + '">' + esc(t(l[1])) + "</text>"; }).join("") +
+      '<text class="cv-mcl" x="' + (P.monaco[0] + 58) + '" y="' + (P.monaco[1] + 84) + '">' + esc(t("Monaco")) + "</text>" +
+      '<text class="cv-sea" x="' + (C.w - 40) + '" y="' + (C.h - 34) + '" text-anchor="end">' + esc(t("Mediterranean Sea")) + "</text>";
+    return '<a class="cv" href="#/above" aria-label="' + esc(t("Our map covers the coast from Èze to Cap Martin, with La Turbie on the hill above. See La Turbie and Èze.")) + '">' +
+      '<svg viewBox="0 0 ' + C.w + " " + C.h + '" role="img" aria-hidden="true" focusable="false"><rect class="cv-sea-bg" width="' + C.w + '" height="' + C.h + '"/>' +
+      '<path class="cv-land" d="' + C.land + '"/><path class="cv-mon" d="' + C.monaco + '"/>' + dots + '<g class="cv-lbl">' + labels + "</g></svg>" +
+      '<span class="cv-cap">' + esc(t("From Èze to Cap Martin, and up to La Turbie.")) + " <u>" + esc(t("See what’s above Monaco")) + "</u></span></a>";
+  }
+
+  window.MMEExtras = { knowCard: knowCard, knowLink: knowLink, coverageFig: coverageFig,
     Home: Home, homeCard: homeCard,
     eventBanner: eventBanner, eventsInfo: eventsInfo, whatsOnScreen: whatsOnScreen, routeEventNote: routeEventNote, EVENTS: EVENTS,
     cruise: cruise, shipPoint: shipPoint, cruiseCard: cruiseCard, cruiseScreen: cruiseScreen, mountHome: mountHome,

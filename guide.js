@@ -15,7 +15,7 @@
   var FREE = {};
   var SUB = { museum: "Museum", gallery: "Art gallery", theatre: "Theatre", garden: "Garden", venue: "Exhibitions and events", chandlery: "Chandlery", harbour: "Harbour office", pub: "Pub", nightclub: "Nightclub",
     motor: "Motor club", yacht: "Yacht club", rowing: "Rowing club", tennis: "Tennis club", sailing: "Sailing club", hiking: "Hiking club", convenience: "Mini-market", pastry: "Pâtisserie", cocktail: "Cocktail bar", wine: "Wine bar", beachbar: "Beach bar",
-    market: "Market", butcher: "Butcher and fine food", zoo: "Zoo", church: "Church", castle: "Castle", village: "Old village", tree: "Landmark", walk: "Coastal path", boats: "Boat sales and service", cigars: "Cigar shop", presse: "Newsagent and tabac", bartabac: "Bar-tabac" };
+    market: "Market", butcher: "Butcher and fine food", zoo: "Zoo", church: "Church", castle: "Castle", village: "Old village", tree: "Landmark", walk: "Coastal path", boats: "Boat sales and service", perfume: "Perfume house", cigars: "Cigar shop", presse: "Newsagent and tabac", bartabac: "Bar-tabac" };
   var CUISINE = { italian: "Italian", pizza: "Pizza", burger: "Burgers", mediterranean: "Mediterranean", french: "French", japanese: "Japanese", sushi: "Sushi",
     regional: "Local dishes", local: "Local dishes", seafood: "Seafood", fish: "Seafood", international: "International", pasta: "Pasta", steak_house: "Steakhouse", grill: "Grill",
     lebanese: "Lebanese", thai: "Thai", indian: "Indian", mexican: "Mexican", tacos: "Tacos", asian: "Asian", chinese: "Chinese", peruvian: "Peruvian", ice_cream: "Ice cream",
@@ -119,7 +119,7 @@
       (webUrl ? '<a href="' + esc(webUrl) + '" target="_blank" rel="noopener">' + esc(webHost(webUrl)) + "</a>" : "") +
       '<button type="button" class="g-fav' + (isFav(e) ? " on" : "") + '" data-fav="' + esc(favKey(e)) + '" aria-pressed="' + isFav(e) + '">' + (isFav(e) ? "♥ " + esc(t("Saved")) : "♡ " + esc(t("Save"))) + "</button>" +
       '<button type="button" class="g-gm" data-gq="' + esc([e.n, e.addr, e.a].filter(Boolean).join(", ")) + '" data-ll="' + e.lat + "," + e.lng + '">' + esc(t("Reviews on Google")) + "</button></span></div>" +
-      '<button type="button" class="map-mini" data-goto="' + e.lat + "," + e.lng + '" data-label="' + esc(e.n) + '">' + esc(t("Take me there")) + "</button></li>";
+      window.MMEMap.goHtml(e, e.n, "map-mini") + "</li>";
   }
 
   var VIRT = { find: "Search everything", saved: "My places" };
@@ -135,7 +135,7 @@
   function hay(e) {
     return [t(e.n), e.n, subtitle(e), t(catName(e.k)), catName(e.k), e.addr || "", e.d ? t(e.d) : "",
       (e.grp || []).map(function (g) { var x = GRPS.filter(function (y) { return y[0] === g; })[0]; return x ? t(x[1]) + " " + x[1] : ""; }).join(" "),
-      (e.cu || "").replace(/[;_]/g, " "), e.sub || ""].join(" ").toLowerCase();
+      (e.cu || "").replace(/[;_]/g, " "), e.sub || "", e.a || "", e.a ? t(e.a) : ""].join(" ").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[’']/g, "'");
   }
 
   // Google's own page for a place (rating, reviews, photos) in a sheet over the app, so the visitor never leaves it.
@@ -194,7 +194,7 @@
       var icon = function (e) { return L.divIcon({ className: "", html: '<span class="mk mk-ess' + (all.length > 30 ? " mk-g" : "") + '" style="background:' + COLOR[e.k] + '">' + ui().icon(e.k) + "</span>", iconSize: all.length > 30 ? [22, 22] : [30, 30], iconAnchor: all.length > 30 ? [11, 11] : [15, 15], popupAnchor: [0, -12] }); };
       all.forEach(function (e, i) {
         var mk = L.marker([e.lat, e.lng], { icon: icon(e), title: t(e.n), keyboard: true, zIndexOffset: 500 }).addTo(map);
-        if (!locked) mk.bindPopup('<div class="lift-pop"><strong>' + ui().esc(t(e.n)) + "</strong><br>" + ui().esc(subtitle(e)) + '<br><button type="button" class="pop-go" data-goto="' + e.lat + "," + e.lng + '" data-label="' + ui().esc(e.n) + '">' + ui().esc(t("Take me there")) + "</button></div>");
+        if (!locked) mk.bindPopup('<div class="lift-pop"><strong>' + ui().esc(t(e.n)) + "</strong><br>" + ui().esc(subtitle(e)) + "<br>" + window.MMEMap.goHtml(e, e.n, "pop-go") + "</div>");
         else mk.on("click", function () { location.hash = "#/pro"; });
       });
       if (all.length) { var b = L.latLngBounds(all.map(function (e) { return [e.lat, e.lng]; })); map.fitBounds(b.pad(0.1), { maxZoom: 17 }); }
@@ -215,7 +215,7 @@
           // Real walking times by the easiest route (lifts, escalators, the hills) for the nearer places;
           // the straight-line distance only decides which ones are worth working out.
           items.sort(function (a, b) { return a.d - b.d; });
-          items.slice(0, 60).forEach(function (it) { it.w = M.walkTo(pos, it.e); });
+          items.slice(0, 60).forEach(function (it) { if (!M.isFar(it.e)) it.w = M.walkTo(pos, it.e); });
           items.sort(function (a, b) { return (a.w ? a.w.minutes : 1e9) - (b.w ? b.w.minutes : 1e9) || a.d - b.d; });
         }
         else items.sort(function (a, b) { return (b.e.mich || 0) - (a.e.mich || 0) || (b.e.star || 0) - (a.e.star || 0) || (b.e.d ? 1 : 0) - (a.e.d ? 1 : 0); });
@@ -231,7 +231,7 @@
       }
       draw();
       var s = root.querySelector("#g-search");
-      if (s) s.addEventListener("input", function () { q = s.value.trim().toLowerCase(); draw(); });
+      if (s) s.addEventListener("input", function () { q = s.value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[’']/g, "'"); draw(); });
       var ob = root.querySelector("#g-open");
       if (ob) ob.addEventListener("click", function () { onlyOpen = !onlyOpen; ob.classList.toggle("on", onlyOpen); ob.setAttribute("aria-pressed", String(onlyOpen)); draw(); if (window.MMEStats && onlyOpen) window.MMEStats.track("Open now filter"); });
       var me = null, stop = null;

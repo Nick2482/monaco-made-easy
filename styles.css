@@ -1172,3 +1172,42 @@ html.cjk .xmas-card strong { font-family: "PingFang SC", "Hiragino Mincho ProN",
 .wk-credit { margin: -8px 0 16px; font-size: 13.5px; color: var(--grey); font-style: italic; }
 .wk-photos.wk-p1 img[src$="gp-1992.jpg"] { height: auto; aspect-ratio: 16 / 10; }
 .ab-how { margin-top: 6px; font-size: 16px; color: var(--grey); } .ab-how b { color: var(--head); }
+a.pop-go, .leaflet-popup-content a.pop-go { display: inline-block; color: #fff; text-decoration: none; }
+/* ZOU! bus times on the Above Monaco page */
+.zb { margin: 24px 0 8px; }
+.zb h2 { margin: 0 0 4px; }
+.zb-lede { margin: 0 0 12px; color: var(--grey); }
+.zb-stop { margin: 14px 0 8px; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; font-size: 15px; }
+.zb-rows { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.zb-rows li { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.zb-badge { background: #E47F0B; color: #fff; font-weight: 800; border-radius: 8px; padding: 4px 8px; min-width: 44px; text-align: center; font-variant-numeric: tabular-nums; }
+.zb-to strong { display: block; line-height: 1.3; }
+.zb-st { display: block; font-size: 14px; color: var(--grey); margin-top: 2px; }
+.zb-live { color: #18794e; font-weight: 700; }
+.zb-live i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: currentColor; margin-right: 6px; vertical-align: 1px; animation: zb-pulse 2s ease-in-out infinite; }
+@keyframes zb-pulse { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .zb-live i { animation: none; } }
+.zb-time { text-align: right; }
+.zb-time b { display: block; font-size: 20px; font-variant-numeric: tabular-nums; }
+.zb-time small { color: var(--grey); }
+.zb-none { margin: 12px 0; }
+.zb-foot { font-size: 13px; color: var(--grey); margin: 10px 0 0; }
+:root[data-theme="dark"] .zb-live { color: #5fd49a; }
+/* Home: the coast we cover */
+.cv { display: block; margin: 18px 0 4px; text-decoration: none; color: inherit; }
+.cv svg { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--line); background: #e4ebeb; }
+.cv-sea-bg { fill: #e4ebeb; }
+.cv-land { fill: var(--card); stroke: var(--gold); stroke-width: 2.2; stroke-linejoin: round; }
+.cv-mon { fill: rgba(206, 17, 38, 0.14); stroke: var(--red); stroke-width: 2.6; stroke-linejoin: round; }
+.cv-dot { fill: var(--gold); stroke: var(--card); stroke-width: 3.5; }
+.cv-dot.cv-mc { fill: var(--red); }
+.cv-lbl text { font-family: var(--sans); font-weight: 700; font-size: 34px; fill: var(--ink); paint-order: stroke; stroke: var(--card); stroke-width: 7px; stroke-linejoin: round; }
+.cv-lbl .cv-mcl { font-family: var(--serif); font-weight: 400; font-size: 52px; fill: var(--red); stroke: #e4ebeb; }
+.cv-lbl .cv-sea { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 34px; fill: #7f8f92; stroke: none; letter-spacing: 1px; }
+.cv-cap { display: block; margin-top: 10px; font-size: 15.5px; color: var(--grey); }
+.cv-cap u { color: var(--red); font-weight: 700; text-underline-offset: 3px; }
+.cv:focus-visible svg { outline: 3px solid var(--gold); outline-offset: 3px; }
+:root[data-theme="dark"] .cv svg, :root[data-theme="dark"] .cv-sea-bg { fill: #14263d; background: #14263d; }
+:root[data-theme="dark"] .cv-lbl .cv-mcl { stroke: #14263d; }
+:root[data-theme="dark"] .cv-cap u { color: #ff8a96; }
+:root[data-theme="dark"] .cv-lbl .cv-mcl { fill: #ff6b7a; }
