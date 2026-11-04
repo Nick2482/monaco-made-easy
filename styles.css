@@ -1211,3 +1211,13 @@ a.pop-go, .leaflet-popup-content a.pop-go { display: inline-block; color: #fff; 
 :root[data-theme="dark"] .cv-lbl .cv-mcl { stroke: #14263d; }
 :root[data-theme="dark"] .cv-cap u { color: #ff8a96; }
 :root[data-theme="dark"] .cv-lbl .cv-mcl { fill: #ff6b7a; }
+/* Lists split by town */
+.area-chips { margin-top: -4px; }
+.lifts > li.area-sec, .g-list > li.area-sec { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 16px 0 6px; margin: 8px 0 0; border: 0; border-bottom: 1.5px solid var(--gold); font-family: var(--serif); font-size: 23px; color: var(--head); grid-template-columns: none; }
+.lifts > li.area-sec:first-child { margin-top: 0; }
+.area-sec small { font-family: var(--sans); font-size: 14px; color: var(--grey); font-variant-numeric: tabular-nums; }
+.lifts > li.area-more, .g-list > li.area-more { display: block; padding: 8px 0 14px; border: 0; grid-template-columns: none; }
+.area-more .link-btn { font-weight: 700; color: var(--red); }
+.ab-h { margin: 28px 0 10px; }
+.near .lifts > li.area-sec > span { font-family: var(--serif); font-size: 25px; line-height: 1.15; color: var(--head); font-weight: 400; }
+.near .lifts > li.area-sec > small { font-size: 14px; }

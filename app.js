@@ -37,6 +37,7 @@
     calendar: '<path d="M7 2h2v2h6V2h2v2h2.5A1.5 1.5 0 0 1 21 5.5v14a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 19.5v-14A1.5 1.5 0 0 1 4.5 4H7zM5 9v10h14V9zm2 2h4v4H7z"/>',
     star: '<path d="M12 2.5l2.6 6.4 6.9.5-5.3 4.4 1.7 6.7L12 16.8l-5.9 3.7 1.7-6.7-5.3-4.4 6.9-.5z"/>',
     suitcase: '<path d="M9 2.5h6A1.5 1.5 0 0 1 16.5 4v2h3A1.5 1.5 0 0 1 21 7.5v11a1.5 1.5 0 0 1-1.5 1.5H19v1.5h-2V20H7v1.5H5V20h-.5A1.5 1.5 0 0 1 3 18.5v-11A1.5 1.5 0 0 1 4.5 6h3V4A1.5 1.5 0 0 1 9 2.5zm.5 2V6h5V4.5zM8 9v8h2V9zm6 0v8h2V9z"/>',
+    hotel: '<path d="M2 5h2v8h7V8h8.5A2.5 2.5 0 0 1 22 10.5V20h-2v-3H4v3H2zm5.5 3.5a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/>',
     house: '<path d="M12 3 2 11.5h3V21h5.5v-6h3v6H19v-9.5h3z"/>',
     info: '<path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm-1.3 8v8h2.6v-8zM12 5.5a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2z"/>'
   };
@@ -185,8 +186,8 @@
   // The guide: eat, drink, see.
   function guideBlock() {
     var P = window.MMEPro, G = window.MMEGuide;
-    return '<section class="block guide-block"><div class="block-head"><h2>' + esc(t("Eat, drink and see")) + "</h2>" + (P ? P.badge() : "") + '</div><p class="block-lede">' +
-      esc(t("Restaurants, bars, museums and more, each with the step-free way there.")) + '</p>' +
+    return '<section class="block guide-block"><div class="block-head"><h2>' + esc(t("Stay, eat, drink and see")) + "</h2>" + (P ? P.badge() : "") + '</div><p class="block-lede">' +
+      esc(t("Hotels, restaurants, bars, museums and more, each with the way there.")) + '</p>' +
       '<a class="g-searchlink" href="#/guide/find"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3a7 7 0 0 1 5.6 11.2l5.1 5.1-1.4 1.4-5.1-5.1A7 7 0 1 1 10 3zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10z"/></svg><span>' + esc(t("Search the guide")) + '</span></a>' +
       '<nav class="g-quick"><a href="#/guide/saved"><span class="eq-ico" style="--c:#ce1126"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.5-9.2C1 8.3 3.2 5 6.6 5c2 0 3.4 1.1 4.4 2.5C12 6.1 13.4 5 15.4 5 18.8 5 21 8.3 19.5 11.8 17.5 16.4 12 21 12 21z"/></svg></span>' + esc(t("My places")) + "</a>" + G.CATS.map(function (c) {
         return '<a href="#/guide/' + c[0] + '"><span class="eq-ico" style="--c:' + G.COLOR[c[0]] + '">' + icon(c[0]) + "</span>" + esc(t(c[1])) + "</a>";

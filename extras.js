@@ -656,6 +656,7 @@
         "<h1>" + esc(t("Above Monaco")) + '</h1><p class="lede-dark">' + esc(t("La Turbie, Èze and the viewpoints on the hills behind Monaco: the best views of the Principality, a short trip away.")) + "</p>" +
         (window.L && window.MMEMap ? '<div class="yt-map xm-map" id="ab-map" role="application" aria-label="' + esc(t("Map")) + '"></div>' : "") +
         (window.MMEZouBus ? window.MMEZouBus.html() : "") +
+        '<h2 class="ab-h">' + esc(t("Places to visit")) + "</h2>" +
         '<ol class="wo-list xm-list">' + ABOVE.map(function (x, i) {
           return '<li class="wo-ev" data-xm="' + i + '"><span class="ev-date">' + esc(t(x.area)) + '</span><strong><span class="yt-num xm-num">' + (i + 1) + "</span>" + esc(t(x.name)) + "</strong>" +
             "<p>" + esc(t(x.what)) + '</p><p class="ab-how"><b>' + esc(t("Getting there:")) + "</b> " + esc(t(x.how)) + "</p>" +

@@ -130,6 +130,19 @@
   var CAT_ONE = { toilets: "Toilets", pharmacy: "Pharmacy", atm: "Cash machine", drinking_water: "Drinking water", defibrillator: "Defibrillator" };
   var CAT_COLOR = { toilets: "#6b4fa0", pharmacy: "#18a058", atm: "#b7791f", drinking_water: "#2b8cc4", defibrillator: "#0f6b45" };
   function essList() { return window.MMEEssentials || []; }
+  // Towns we cover, west to east along the coast and up the hill. Lists can be narrowed to one, or split by town.
+  var AREAS = ["Monaco", "Beausoleil", "Cap d'Ail", "Roquebrune-Cap-Martin", "La Turbie", "Èze"];
+  function getArea() { try { var a = localStorage.getItem("mme-area"); return AREAS.indexOf(a) >= 0 ? a : ""; } catch (e) { return ""; } }
+  function setArea(a) { try { if (a) localStorage.setItem("mme-area", a); else localStorage.removeItem("mme-area"); } catch (e) {} }
+  function areaChips(sel, counts) {
+    var esc = window.MMEUI.esc;
+    return '<div class="ess-chips area-chips" role="group" aria-label="' + esc(t("Town")) + '">' +
+      [""].concat(AREAS).filter(function (a) { return !a || !counts || counts[a]; }).map(function (a) {
+        return '<button type="button" class="chip' + (a === sel ? " on" : "") + '" data-area="' + esc(a) + '" aria-pressed="' + (a === sel) + '">' + esc(a ? t(a) : t("Everywhere")) + "</button>";
+      }).join("") + "</div>";
+  }
+  function areaCounts(items) { var c = {}; items.forEach(function (e) { c[e.a] = (c[e.a] || 0) + 1; }); return c; }
+  function areaHead(a, n) { return '<li class="g-sec area-sec"><span>' + window.MMEUI.esc(t(a)) + "</span><small>" + n + "</small></li>"; }
   function essTitle(e) { return e.n || t(CAT_ONE[e.k]); }
   function essDetails(e) {
     var d = [];
@@ -174,6 +187,7 @@
         (cat === "toilets" ? '<img class="pg-photo" src="img/toilets-monaco.jpg" width="1200" height="768" loading="lazy" alt="' + esc(t("Public toilets in Monaco, set into the cliff under a white colonnade")) + '">' : "") +
         '<h1 id="near-h">' + esc(cat === "lifts" ? t("Lifts and escalators") : t(CATS.filter(function (c) { return c[0] === cat; })[0][1])) + '</h1><p class="lede-dark" id="near-sub">' + esc(cat === "lifts" ? t("Tap “Lifts near me” to sort them by distance, or tap anywhere on the map to get there.") : t("Finding the nearest to you…")) + "</p>" +
         (note ? '<aside class="note note-ess"><p>' + esc(note) + "</p></aside>" : "") +
+        (cat !== "lifts" ? areaChips(getArea(), areaCounts(essList().filter(function (e) { return e.k === cat; }))) : "") +
         '<p class="loc-error" id="loc-error" hidden></p><ul class="lifts" id="near-list"></ul>' +
         '<p class="unchecked">' + esc(cat === "lifts" ? t("Lift positions come from OpenStreetMap and are being checked on the ground.") : t("Locations come from OpenStreetMap and are being checked on the ground.")) + "</p></div></section>";
     },
@@ -191,23 +205,45 @@
       var me = null, centred = false;
       var list = root.querySelector("#near-list");
       var cat = currentCat();
+      var area = getArea(), essLayer = L.layerGroup().addTo(map);
+      function essMarkers(fit) {
+        essLayer.clearLayers();
+        var sel = essList().filter(function (e) { return e.k === cat && (!area || e.a === area); });
+        sel.forEach(function (e) {
+          L.marker([e.lat, e.lng], { icon: essIcon(e), title: essTitle(e), keyboard: true, zIndexOffset: 500 }).addTo(essLayer).bindPopup(essPopup(e));
+        });
+        if (fit && sel.length) map.fitBounds(L.latLngBounds(sel.map(function (e) { return [e.lat, e.lng]; })).pad(0.15), { maxZoom: 17 });
+      }
       if (cat !== "lifts") {
-        essList().filter(function (e) { return e.k === cat; }).forEach(function (e) {
-          L.marker([e.lat, e.lng], { icon: essIcon(e), title: essTitle(e), keyboard: true, zIndexOffset: 500 }).addTo(map).bindPopup(essPopup(e));
+        essMarkers(!!area);
+        root.addEventListener("click", function (ev) {
+          var c = ev.target.closest("[data-area]"); if (!c) return;
+          area = c.dataset.area; setArea(area);
+          root.querySelectorAll("[data-area]").forEach(function (x) { var on = x === c; x.classList.toggle("on", on); x.setAttribute("aria-pressed", String(on)); });
+          essMarkers(true); drawEss(lastPos);
+          if (window.MMEStats) window.MMEStats.track("Area filter", { area: area || "all", cat: cat });
         });
       }
 
       function drawEss(pos) {
-        var all = essList().filter(function (e) { return e.k === cat; });
+        var all = essList().filter(function (e) { return e.k === cat && (!area || e.a === area); });
         var items = all.map(function (e) { return { e: e, d: pos ? distance(pos, e) : null }; });
-        if (pos) byWalk(items, pos, function (it) { return it.e; });
-        items = items.slice(0, 15);
-        list.innerHTML = items.map(function (it) {
+        function row(it) {
           var e = it.e, det = essDetails(e);
           return '<li><span class="step-ico" style="--c:' + CAT_COLOR[e.k] + '">' + ui.icon(e.k) + "</span><div><strong>" + ui.esc(essTitle(e)) + "</strong>" +
-            (det ? "<span>" + ui.esc(det) + "</span>" : "") + "<small>" + ui.esc(it.w ? walkText(it.w) : e.a) + "</small></div>" +
+            (det ? "<span>" + ui.esc(det) + "</span>" : "") + "<small>" + ui.esc(it.w ? walkText(it.w) : t(e.a)) + "</small></div>" +
             goHtml(e, CAT_ONE[e.k], "map-mini") + "</li>";
-        }).join("") + '<li class="more-note">' + ui.esc(t(pos ? "The 15 closest of {n}. All of them are on the map." : "{n} in Monaco and nearby, from Èze to Roquebrune-Cap-Martin. All of them are on the map.", { n: all.length })) + "</li>";
+        }
+        if (pos) {
+          byWalk(items, pos, function (it) { return it.e; });
+          list.innerHTML = items.slice(0, 15).map(row).join("") + '<li class="more-note">' + ui.esc(t("The 15 closest of {n}. All of them are on the map.", { n: all.length })) + "</li>";
+          return;
+        }
+        // No location: every one, under the name of its town.
+        list.innerHTML = AREAS.map(function (a) {
+          var here = items.filter(function (it) { return it.e.a === a; });
+          return here.length ? areaHead(a, here.length) + here.map(row).join("") : "";
+        }).join("") + (!items.length ? '<li class="more-note">' + ui.esc(t("None here yet.")) + "</li>" : "");
       }
 
       function drawList(pos) {
@@ -284,5 +320,5 @@
   };
 
   function currentCat() { var c = (location.hash.split("/")[2] || "").split("?")[0]; return CAT_ONE[c] ? c : "lifts"; }
-  window.MMEMap = { ownMapOk: ownMapOk, CAT_ONE: CAT_ONE, CAT_COLOR: CAT_COLOR, CARTO_KEY: CARTO_KEY, liftName: liftName, here: function () { return here; }, screen: screen, makeMap: makeMap, liftIcon: liftIcon, meIcon: meIcon, startLocating: startLocating, onLocation: onLocation, distance: distance, niceDistance: niceDistance, walkTo: walkTo, isFar: isFar, goHtml: goHtml };
+  window.MMEMap = { ownMapOk: ownMapOk, CAT_ONE: CAT_ONE, CAT_COLOR: CAT_COLOR, CARTO_KEY: CARTO_KEY, liftName: liftName, here: function () { return here; }, screen: screen, makeMap: makeMap, liftIcon: liftIcon, meIcon: meIcon, startLocating: startLocating, onLocation: onLocation, distance: distance, niceDistance: niceDistance, walkTo: walkTo, isFar: isFar, goHtml: goHtml, AREAS: AREAS, getArea: getArea, setArea: setArea, areaChips: areaChips, areaCounts: areaCounts, areaHead: areaHead };
 })();

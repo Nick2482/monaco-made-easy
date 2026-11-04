@@ -7,11 +7,11 @@
   function places() { return window.MMEGuidePlaces || []; }
   function lang() { var l = window.MMEI18N.lang(); return l === "en" ? "en-GB" : l === "zh" ? "zh-CN" : l; }
 
-  var CATS = [["eat", "Restaurants"], ["cafe", "Cafés"], ["bakery", "Bakeries"], ["bar", "Bars"], ["shop", "Supermarkets and markets"], ["tabac", "Cigars and tabacs"], ["culture", "Museums and galleries"], ["yacht", "Yachting"], ["broker", "Yacht brokers"], ["club", "Clubs"], ["info", "Tourist information"]];
+  var CATS = [["hotel", "Hotels"], ["eat", "Restaurants"], ["cafe", "Cafés"], ["bakery", "Bakeries"], ["bar", "Bars"], ["shop", "Supermarkets and markets"], ["tabac", "Cigars and tabacs"], ["culture", "Museums and galleries"], ["yacht", "Yachting"], ["broker", "Yacht brokers"], ["club", "Clubs"], ["info", "Tourist information"]];
   // Sections inside Restaurants.
   var GRPS = [["fine", "Michelin and fine dining"], ["french", "French and brasseries"], ["italian", "Italian and pizza"], ["seafood", "Seafood and Mediterranean"],
     ["asian", "Asian"], ["local", "Monégasque and Niçois"], ["world", "World food"], ["beach", "Beach and sea view"], ["quick", "Burgers and quick bites"]];
-  var COLOR = { bakery: "#a0661a", shop: "#2f7a3d", tabac: "#6b4a2e", eat: "#9c3d54", cafe: "#7a5230", bar: "#8a2f6b", culture: "#0e7c86", yacht: "#1f4e8c", broker: "#2b6a8f", club: "#7a4f1d", info: "#4a5d70" };
+  var COLOR = { hotel: "#1f3a5f", bakery: "#a0661a", shop: "#2f7a3d", tabac: "#6b4a2e", eat: "#9c3d54", cafe: "#7a5230", bar: "#8a2f6b", culture: "#0e7c86", yacht: "#1f4e8c", broker: "#2b6a8f", club: "#7a4f1d", info: "#4a5d70" };
   var FREE = {};
   var SUB = { museum: "Museum", gallery: "Art gallery", theatre: "Theatre", garden: "Garden", venue: "Exhibitions and events", chandlery: "Chandlery", harbour: "Harbour office", pub: "Pub", nightclub: "Nightclub",
     motor: "Motor club", yacht: "Yacht club", rowing: "Rowing club", tennis: "Tennis club", sailing: "Sailing club", hiking: "Hiking club", convenience: "Mini-market", pastry: "Pâtisserie", cocktail: "Cocktail bar", wine: "Wine bar", beachbar: "Beach bar",
@@ -80,6 +80,7 @@
       if (c.length) bits.push(c.join(", "));
     }
     if (!bits.length && e.grp) { var g0 = GRPS.filter(function (g) { return g[0] === e.grp[e.grp[0] === "fine" && e.grp[1] ? 1 : 0]; })[0]; if (g0 && g0[0] !== "fine") bits.push(t(g0[1])); }
+    if (e.hs) bits.push(t("{n}-star hotel", { n: e.hs }));
     if (e.sub && SUB[e.sub]) bits.push(t(SUB[e.sub]));
     else if (e.k === "shop") bits.push(t("Supermarket"));
     else if (e.k === "tabac" && e.n !== "Tabac") bits.push(t("Tabac"));
@@ -173,6 +174,7 @@
         }).join("") + "</div>" +
         (cat === "eat" ? '<div class="ess-chips g-grps" role="group" aria-label="' + esc(t("Restaurants")) + '"><a class="chip' + (!grp ? " on" : "") + '" href="#/guide/eat"' + (!grp ? ' aria-current="true"' : "") + ">" + esc(t("All")) + "</a>" +
           GRPS.map(function (g) { return '<a class="chip' + (g[0] === grp ? " on" : "") + '" href="#/guide/eat/' + g[0] + '"' + (g[0] === grp ? ' aria-current="true"' : "") + ">" + esc(t(g[1])) + "</a>"; }).join("") + "</div>" : "") +
+        (window.MMEMap.areaChips && cat !== "saved" && !locked ? window.MMEMap.areaChips(window.MMEMap.getArea(), window.MMEMap.areaCounts(all)) : "") +
         "<h1>" + esc(t(VIRT[cat] || (grp ? GRPS.filter(function (g) { return g[0] === grp; })[0][1] : catName(cat)))) + (FREE[cat] ? "" : " " + (P ? P.badge() : "")) + "</h1>" +
         (cat === "yacht" ? '<img class="pg-photo g-photo" src="img/yachts-quay.jpg" width="1200" height="675" loading="lazy" alt="' + esc(t("Yachts moored in Monaco")) + '">' : "") +
         (grp === "fine" ? '<p class="lede-dark">' + esc(t("Stars from the Michelin Guide 2026. Book well ahead, and expect a dress code.")) + "</p>" : "") +
@@ -180,7 +182,7 @@
         ((cat === "yacht" || cat === "broker" || cat === "club") && window.MMEExtras ? window.MMEExtras.yachtsBox() : "") +
         '<p class="lede-dark" id="g-sub">' + esc(cat === "saved" ? t("Places you’ve saved on this phone.") : cat === "find" ? t("Every place in the guide: restaurants, cafés, bars, shops, tabacs, museums and more.") : t("{n} in Monaco and nearby, each with the step-free way there.", { n: all.length })) + "</p>" +
         ((all.length > 12 || cat === "find") && !locked ? '<input class="g-search" id="g-search" type="search" placeholder="' + esc(t(cat === "find" ? "Try “sushi”, “tabac” or a name" : "Search by name or food")) + '" aria-label="' + esc(t("Search by name or food")) + '"' + (cat === "find" ? " autofocus" : "") + ">" : "") +
-        (!locked && cat !== "saved" || (cat === "saved" && all.length) ? '<div class="g-tools"><button type="button" class="chip g-open-btn" id="g-open" aria-pressed="false">🕘 ' + esc(t("Open now")) + "</button></div>" : "") +
+        (cat !== "hotel" && (!locked && cat !== "saved" || (cat === "saved" && all.length)) ? '<div class="g-tools"><button type="button" class="chip g-open-btn" id="g-open" aria-pressed="false">🕘 ' + esc(t("Open now")) + "</button></div>" : "") +
         '<p class="loc-error" id="g-err" hidden></p><ul class="lifts g-list" id="g-list"></ul>' +
         (locked && P ? P.lockCard("See every place, with opening hours and the step-free way there") : "") +
         '<p class="unchecked">' + esc(t("Places come from OpenStreetMap and local listings. Opening times change, so check before you go.")) + "</p>" +
@@ -192,12 +194,25 @@
       if (window.MMEExtras) window.MMEExtras.mountYachts(root);
       var map = M.makeMap(root.querySelector("#g-map"));
       var icon = function (e) { return L.divIcon({ className: "", html: '<span class="mk mk-ess' + (all.length > 30 ? " mk-g" : "") + '" style="background:' + COLOR[e.k] + '">' + ui().icon(e.k) + "</span>", iconSize: all.length > 30 ? [22, 22] : [30, 30], iconAnchor: all.length > 30 ? [11, 11] : [15, 15], popupAnchor: [0, -12] }); };
-      all.forEach(function (e, i) {
-        var mk = L.marker([e.lat, e.lng], { icon: icon(e), title: t(e.n), keyboard: true, zIndexOffset: 500 }).addTo(map);
-        if (!locked) mk.bindPopup('<div class="lift-pop"><strong>' + ui().esc(t(e.n)) + "</strong><br>" + ui().esc(subtitle(e)) + "<br>" + window.MMEMap.goHtml(e, e.n, "pop-go") + "</div>");
-        else mk.on("click", function () { location.hash = "#/pro"; });
-      });
-      if (all.length) { var b = L.latLngBounds(all.map(function (e) { return [e.lat, e.lng]; })); map.fitBounds(b.pad(0.1), { maxZoom: 17 }); }
+      var area = cat === "saved" || locked ? "" : M.getArea(), layer = L.layerGroup().addTo(map);
+      function inArea(e) { return !area || e.a === area; }
+      function markers() {
+        layer.clearLayers();
+        var sel = all.filter(inArea);
+        sel.forEach(function (e) {
+          var mk = L.marker([e.lat, e.lng], { icon: icon(e), title: t(e.n), keyboard: true, zIndexOffset: 500 }).addTo(layer);
+          if (!locked) mk.bindPopup('<div class="lift-pop"><strong>' + ui().esc(t(e.n)) + "</strong><br>" + ui().esc(subtitle(e)) + "<br>" + window.MMEMap.goHtml(e, e.n, "pop-go") + "</div>");
+          else mk.on("click", function () { location.hash = "#/pro"; });
+        });
+        if (sel.length) { var b = L.latLngBounds(sel.map(function (e) { return [e.lat, e.lng]; })); map.fitBounds(b.pad(0.1), { maxZoom: 17 }); }
+      }
+      markers();
+      function pickArea(a) {
+        area = a; M.setArea(a);
+        root.querySelectorAll("[data-area]").forEach(function (x) { var on = x.dataset.area === a; x.classList.toggle("on", on); x.setAttribute("aria-pressed", String(on)); });
+        markers(); draw();
+        if (window.MMEStats) window.MMEStats.track("Area filter", { area: a || "all", cat: cat });
+      }
       var list = root.querySelector("#g-list"), pos = null, q = "", onlyOpen = false;
       function draw() {
         var esc = ui().esc;
@@ -205,6 +220,7 @@
         if (cat === "find" && !q) { list.innerHTML = '<li class="more-note">' + esc(t("Type above to search all {n} places.", { n: all.length })) + "</li>"; return; }
         var words = q.split(/\s+/).filter(Boolean);
         var items = all.filter(function (e) {
+          if (!inArea(e)) return false;
           if (cat === "saved" && !isFav(e)) return false;
           if (!words.length) return true;
           var h = hay(e);
@@ -218,10 +234,20 @@
           items.slice(0, 60).forEach(function (it) { if (!M.isFar(it.e)) it.w = M.walkTo(pos, it.e); });
           items.sort(function (a, b) { return (a.w ? a.w.minutes : 1e9) - (b.w ? b.w.minutes : 1e9) || a.d - b.d; });
         }
-        else items.sort(function (a, b) { return (b.e.mich || 0) - (a.e.mich || 0) || (b.e.star || 0) - (a.e.star || 0) || (b.e.d ? 1 : 0) - (a.e.d ? 1 : 0); });
+        else items.sort(function (a, b) { return (b.e.mich || 0) - (a.e.mich || 0) || (b.e.star || 0) - (a.e.star || 0) || (b.e.hs || 0) - (a.e.hs || 0) || (b.e.d ? 1 : 0) - (a.e.d ? 1 : 0); });
         // Open now: places we know are open first, then the ones whose hours we don't know (never hidden).
         if (onlyOpen) { var kn = items.filter(function (it) { return it.o === true; }), un = items.filter(function (it) { return it.o !== true; }); items = kn.concat(un); }
-        var shown = locked ? items.slice(0, 3) : items.slice(0, q || cat === "saved" ? 60 : onlyOpen ? 40 : 25);
+        // No location, no search: split by town, the best few of each, with a way to see the rest.
+        if (!locked && !pos && !q && !onlyOpen && !area && cat !== "saved" && cat !== "find") {
+          list.innerHTML = M.AREAS.map(function (a) {
+            var here = items.filter(function (it) { return it.e.a === a; });
+            if (!here.length) return "";
+            return M.areaHead(a, here.length) + here.slice(0, 5).map(function (it) { return itemHtml(it.e, it.d, it.w); }).join("") +
+              (here.length > 5 ? '<li class="area-more"><button type="button" class="link-btn" data-area="' + esc(a) + '">' + esc(t("See all {n} in {town}", { n: here.length, town: t(a) })) + "</button></li>" : "");
+          }).join("") + (!items.length ? '<li class="more-note">' + esc(t("Nothing matches that search.")) + "</li>" : "");
+          return;
+        }
+        var shown = locked ? items.slice(0, 3) : items.slice(0, q || cat === "saved" || area ? 60 : onlyOpen ? 40 : 25);
         var firstUnknown = onlyOpen ? shown.findIndex(function (it) { return it.o !== true; }) : -1;
         list.innerHTML = (onlyOpen && firstUnknown !== 0 ? '<li class="g-sec">' + esc(t("Open now")) + "</li>" : "") + shown.map(function (it, i) {
             return (i === firstUnknown ? '<li class="g-sec">' + esc(t("Hours not known")) + '<small>' + esc(t("We don’t have opening hours for these yet. Call ahead or check the door.")) + "</small></li>" : "") + itemHtml(it.e, it.d, it.w);
@@ -250,6 +276,8 @@
       root.querySelector("#g-find").addEventListener("click", locate);
       locate();
       root.addEventListener("click", function (e) {
+        var ar = e.target.closest("[data-area]");
+        if (ar) { pickArea(ar.dataset.area); if (ar.classList.contains("link-btn")) root.querySelector(".area-chips").scrollIntoView({ behavior: "smooth", block: "center" }); return; }
         var fv = e.target.closest("[data-fav]");
         if (fv) { var added = toggleFav(fv.dataset.fav); if (window.MMEStats) window.MMEStats.track(added ? "Place saved" : "Place unsaved"); draw(); return; }
         var gm = e.target.closest("[data-gq]");
