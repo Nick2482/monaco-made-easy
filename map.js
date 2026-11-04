@@ -59,23 +59,34 @@
     items.sort(function (a, b) { return (a.w ? a.w.minutes : 1e9) - (b.w ? b.w.minutes : 1e9) || a.d - b.d; });
   }
 
+  var webgl = null;
+  function ownMapOk() {
+    if (!window.maplibregl || !L.maplibreGL || !window.mmeMapStyle || !window.mmeOwnMapSupported) return false;
+    if (webgl === null) { try { var c = document.createElement("canvas"); webgl = !!(c.getContext("webgl2") || c.getContext("webgl")); } catch (e) { webgl = false; } }
+    return webgl;
+  }
   var CARTO_KEY = "cb1_4i7l_1_06eb2a6dadbe6d5079442b67";
   // A Monaco map with a calm, light style so the red lift markers stand out.
   function makeMap(el, opts) {
     var map = L.map(el, { zoomControl: false, attributionControl: true, tap: true }).setView([43.7375, 7.4235], opts && opts.zoom || 15);
     map.attributionControl.setPrefix('<a href="https://leafletjs.com">Leaflet</a>');
-    // With no signal, zoom into the saved map tiles rather than showing blank squares.
-    // CARTO basemap key: public by design (it's in every tile request). Restrict it to the app's address in the CARTO dashboard.
-    // Two layers, so zooming in close never shows blank squares:
-    // underneath, the street-level tiles (the ones saved for offline use) stretched to fit;
-    // on top, the sharper close-up tiles when there's signal to load them.
-    var TILE = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=" + CARTO_KEY;
-    L.tileLayer(TILE, { minZoom: 18, maxZoom: 21, maxNativeZoom: 17, subdomains: "abcd" }).addTo(map);
-    L.tileLayer(TILE, {
-      maxZoom: 21, subdomains: "abcd", maxNativeZoom: navigator.onLine === false ? 17 : 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-    }).addTo(map);
-    map.setMaxZoom(21);
+    // Our own map of Monaco (from OpenStreetMap, styled in the app's colours), drawn on the phone so it's sharp at any zoom.
+    // Its tiles live on our own website and are kept on the phone for offline use.
+    if (ownMapOk()) {
+      var dark = document.documentElement.getAttribute("data-theme") === "dark";
+      L.maplibreGL({ style: window.mmeMapStyle(location.origin, dark), interactive: false, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(map);
+      map.setMinZoom(11);
+      map.setMaxBounds([[43.66, 7.30], [43.82, 7.58]]);
+    } else {
+      // Fallback for phones without WebGL: the CARTO map. Two layers, so zooming in close never shows blank squares.
+      var TILE = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=" + CARTO_KEY;
+      L.tileLayer(TILE, { minZoom: 18, maxZoom: 21, maxNativeZoom: 17, subdomains: "abcd" }).addTo(map);
+      L.tileLayer(TILE, {
+        maxZoom: 21, subdomains: "abcd", maxNativeZoom: navigator.onLine === false ? 17 : 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+      }).addTo(map);
+    }
+    map.setMaxZoom(20);
     L.control.zoom({ position: "bottomright" }).addTo(map);
     return map;
   }
@@ -264,5 +275,5 @@
   };
 
   function currentCat() { var c = (location.hash.split("/")[2] || "").split("?")[0]; return CAT_ONE[c] ? c : "lifts"; }
-  window.MMEMap = { CAT_ONE: CAT_ONE, CAT_COLOR: CAT_COLOR, CARTO_KEY: CARTO_KEY, liftName: liftName, here: function () { return here; }, screen: screen, makeMap: makeMap, liftIcon: liftIcon, meIcon: meIcon, startLocating: startLocating, onLocation: onLocation, distance: distance, niceDistance: niceDistance, walkTo: walkTo };
+  window.MMEMap = { ownMapOk: ownMapOk, CAT_ONE: CAT_ONE, CAT_COLOR: CAT_COLOR, CARTO_KEY: CARTO_KEY, liftName: liftName, here: function () { return here; }, screen: screen, makeMap: makeMap, liftIcon: liftIcon, meIcon: meIcon, startLocating: startLocating, onLocation: onLocation, distance: distance, niceDistance: niceDistance, walkTo: walkTo };
 })();

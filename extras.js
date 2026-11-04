@@ -275,7 +275,21 @@
   // ---------------------------------------------------------------------------
   var TILES = "mme-map-tiles";
   var BOX = { s: 43.712, n: 43.776, w: 7.385, e: 7.495 }; // Cap d'Ail to Roquebrune-Cap-Martin
+  // Our own map: one file with every tile of Monaco and the towns next door (about 1.4 MB), and the fonts for its labels.
+  var GLYPHS = ["Noto-Sans-Regular", "Noto-Sans-Medium"];
   function tileUrls() {
+    if (window.MMEMap && window.MMEMap.ownMapOk && window.MMEMap.ownMapOk()) {
+      var out = [location.origin + "/tiles/monaco-map.bin"];
+      GLYPHS.forEach(function (f) { ["0-255", "256-511", "8192-8447"].forEach(function (r) { out.push(location.origin + "/fonts/glyphs/" + f + "/" + r + ".pbf"); }); });
+      return out.concat(heightTiles());
+    }
+    return cartoTileUrls();
+  }
+  function heightTiles() {
+    return [[8528, 5974], [8528, 5975], [8529, 5973], [8529, 5974], [8529, 5975], [8530, 5971], [8530, 5972], [8530, 5973], [8530, 5974],
+      [8531, 5971], [8531, 5972], [8532, 5971], [8532, 5972], [8532, 5973], [8533, 5971], [8533, 5972]].map(function (xy) { return "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/14/" + xy[0] + "/" + xy[1] + ".png"; });
+  }
+  function cartoTileUrls() {
     var r = (window.devicePixelRatio || 1) > 1 ? "@2x" : "", out = [];
     function tx(lng, z) { return Math.floor((lng + 180) / 360 * Math.pow(2, z)); }
     function ty(lat, z) { var s = Math.sin(lat * Math.PI / 180); return Math.floor((0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * Math.pow(2, z)); }
@@ -284,11 +298,9 @@
         out.push("https://" + "abcd"[Math.abs(x + y) % 4] + ".basemaps.cartocdn.com/rastertiles/voyager/" + z + "/" + x + "/" + y + r + ".png?key=" + window.MMEMap.CARTO_KEY);
       }
     }
-    [[8528, 5974], [8528, 5975], [8529, 5973], [8529, 5974], [8529, 5975], [8530, 5971], [8530, 5972], [8530, 5973], [8530, 5974],
-      [8531, 5971], [8531, 5972], [8532, 5971], [8532, 5972], [8532, 5973], [8533, 5971], [8533, 5972]].forEach(function (xy) { out.push("https://s3.amazonaws.com/elevation-tiles-prod/terrarium/14/" + xy[0] + "/" + xy[1] + ".png"); });
-    return out;
+    return out.concat(heightTiles());
   }
-  function offlineSize() { return Math.max(1, Math.round(tileUrls().length * ((window.devicePixelRatio || 1) > 1 ? 0.045 : 0.018))); }
+  function offlineSize() { if (window.MMEMap && window.MMEMap.ownMapOk && window.MMEMap.ownMapOk()) return 2; return Math.max(1, Math.round(tileUrls().length * ((window.devicePixelRatio || 1) > 1 ? 0.045 : 0.018))); }
   function saveOffline(progress) {
     if (!("caches" in window)) return Promise.reject(new Error("no-cache"));
     var urls = tileUrls(), done = 0, failed = 0;
