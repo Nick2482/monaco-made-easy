@@ -1,6 +1,6 @@
 // Keeps the app working with no signal: everything is saved on the phone the first time it opens.
 // Change VERSION whenever the app is updated so phones pick up the new files.
-var VERSION = "mme-preview-139";
+var VERSION = "mme-preview-140";
 var TILES = "mme-map-tiles";
 var FILES = [
   "./", "index.html", "styles.css", "i18n.js", "i18n-strings.js", "app.js", "data.js", "graph.js", "lifts-osm.js", "router.js", "bus.js", "border.js", "trains.js", "transit.js", "map.js", "survey.js", "planner.js", "extras.js", "essentials.js", "zou.js", "zoubus.js", "coverage.js", "walks.js", "pro.js", "install.js", "weather.js", "guide-titles.js", "guide-data.js", "guide.js", "manifest.webmanifest",
@@ -48,7 +48,14 @@ self.addEventListener("fetch", function (e) {
   if (url.origin === location.origin && (url.pathname.indexOf("/tiles/") === 0 || url.pathname.indexOf("/fonts/glyphs/") === 0)) {
     e.respondWith(caches.open(TILES).then(function (c) {
       return c.match(e.request).then(function (hit) {
-        return hit || fetch(e.request).then(function (res) { if (res.ok) c.put(e.request, res.clone()); return res; });
+        return hit || fetch(e.request).then(function (res) {
+          if (res.ok) {
+            c.put(e.request, res.clone());
+            // A new version of the map file replaces the old one, so phones don't keep an out-of-date map.
+            if (url.pathname === "/tiles/monaco-map.bin") c.keys().then(function (ks) { ks.forEach(function (k) { var u = new URL(k.url); if (u.pathname === "/tiles/monaco-map.bin" && u.search !== url.search) c.delete(k); }); });
+          }
+          return res;
+        });
       });
     }));
     return;

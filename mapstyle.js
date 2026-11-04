@@ -41,8 +41,8 @@ function mmeMapStyle(base, dark) {
       { id: "major", type: "line", source: "mme", "source-layer": "roads", filter: ["all", notTunnel, ["==", ["get", "kind"], "major"]],
         layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": C.major, "line-width": w([12, 0.8, 15, 4.5, 18, 24]) } },
       { id: "rail", type: "line", source: "mme", "source-layer": "rail", filter: notTunnel, paint: { "line-color": C.rail, "line-width": w([13, 1, 18, 3]) } },
-      { id: "road-label", type: "symbol", source: "mme", "source-layer": "roads", minzoom: 15, filter: ["has", "name"],
-        layout: { "symbol-placement": "line", "text-field": ["get", "name"], "text-font": ["Noto-Sans-Regular"], "text-size": w([15, 10.5, 18, 14]), "text-letter-spacing": 0.02 },
+      { id: "road-label", type: "symbol", source: "mme", "source-layer": "roads", minzoom: 14, filter: ["has", "name"],
+        layout: { "symbol-placement": "line", "text-field": ["get", "name"], "text-font": ["Noto-Sans-Regular"], "text-size": w([14, 10, 15, 10.5, 18, 14]), "text-letter-spacing": 0.02, "text-max-angle": 60, "text-padding": 1, "symbol-spacing": 220 },
         paint: { "text-color": C.roadLabel, "text-halo-color": C.halo, "text-halo-width": 1.6 } },
       { id: "place-label", type: "symbol", source: "mme", "source-layer": "places",
         layout: { "text-field": ["get", "name"], "text-font": ["Noto-Sans-Medium"], "text-size": ["match", ["get", "kind"], "town", 15, "village", 14, 13], "text-transform": "uppercase", "text-letter-spacing": 0.08, "text-max-width": 8 },
@@ -52,9 +52,11 @@ function mmeMapStyle(base, dark) {
 }
 // The whole map of Monaco is one compressed file (about 1.4 MB). It's downloaded once, kept on the phone,
 // and the tiles are read from it as the map needs them.
+// Bump MME_MAP_V whenever monaco-map.bin is rebuilt, so phones fetch the new map instead of keeping the old one.
+var MME_MAP_V = "140";
 var mmeMapFile = null;
 function mmeLoadMapFile() {
-  if (!mmeMapFile) mmeMapFile = fetch("/tiles/monaco-map.bin").then(function (r) {
+  if (!mmeMapFile) mmeMapFile = fetch("/tiles/monaco-map.bin?v=" + MME_MAP_V).then(function (r) {
     if (!r.ok) throw new Error("map " + r.status);
     return new Response(r.body.pipeThrough(new DecompressionStream("gzip"))).arrayBuffer();
   }).then(function (buf) {

@@ -279,7 +279,7 @@
   var GLYPHS = ["Noto-Sans-Regular", "Noto-Sans-Medium"];
   function tileUrls() {
     if (window.MMEMap && window.MMEMap.ownMapOk && window.MMEMap.ownMapOk()) {
-      var out = [location.origin + "/tiles/monaco-map.bin"];
+      var out = [location.origin + "/tiles/monaco-map.bin?v=" + (window.MME_MAP_V || "1")];
       GLYPHS.forEach(function (f) { ["0-255", "256-511", "8192-8447"].forEach(function (r) { out.push(location.origin + "/fonts/glyphs/" + f + "/" + r + ".pbf"); }); });
       return out.concat(heightTiles());
     }
