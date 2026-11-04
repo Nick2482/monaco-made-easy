@@ -66,10 +66,16 @@
     map.attributionControl.setPrefix('<a href="https://leafletjs.com">Leaflet</a>');
     // With no signal, zoom into the saved map tiles rather than showing blank squares.
     // CARTO basemap key: public by design (it's in every tile request). Restrict it to the app's address in the CARTO dashboard.
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=" + CARTO_KEY, {
-      maxZoom: 20, subdomains: "abcd", maxNativeZoom: navigator.onLine === false ? 17 : 20,
+    // Two layers, so zooming in close never shows blank squares:
+    // underneath, the street-level tiles (the ones saved for offline use) stretched to fit;
+    // on top, the sharper close-up tiles when there's signal to load them.
+    var TILE = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=" + CARTO_KEY;
+    L.tileLayer(TILE, { minZoom: 18, maxZoom: 21, maxNativeZoom: 17, subdomains: "abcd" }).addTo(map);
+    L.tileLayer(TILE, {
+      maxZoom: 21, subdomains: "abcd", maxNativeZoom: navigator.onLine === false ? 17 : 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
     }).addTo(map);
+    map.setMaxZoom(21);
     L.control.zoom({ position: "bottomright" }).addTo(map);
     return map;
   }
