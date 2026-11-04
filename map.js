@@ -86,7 +86,8 @@
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
       }).addTo(map);
     }
-    map.setMaxZoom(20);
+    // The fallback map gets soft when stretched far beyond its own detail, so it stops a little sooner.
+    map.setMaxZoom(ownMapOk() ? 20 : 19);
     L.control.zoom({ position: "bottomright" }).addTo(map);
     return map;
   }
