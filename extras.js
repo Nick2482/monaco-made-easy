@@ -274,7 +274,7 @@
   // 4. Save the map for use without mobile data
   // ---------------------------------------------------------------------------
   var TILES = "mme-map-tiles";
-  var BOX = { s: 43.712, n: 43.776, w: 7.385, e: 7.495 }; // Cap d'Ail to Roquebrune-Cap-Martin
+  var BOX = { s: 43.708, n: 43.776, w: 7.345, e: 7.495 }; // Èze to Roquebrune-Cap-Martin
   // Our own map: one file with every tile of Monaco and the towns next door (about 1.4 MB), and the fonts for its labels.
   var GLYPHS = ["Noto-Sans-Regular", "Noto-Sans-Medium"];
   function tileUrls() {
@@ -617,6 +617,72 @@
     }
   };
 
+  // ---------------------------------------------------------------------------
+  // 8. Above Monaco: La Turbie, Èze and the viewpoints on the hills behind the Principality.
+  // Positions from OpenStreetMap. The lifts don't reach up here, so each place says how to get there.
+  // ---------------------------------------------------------------------------
+  var ABOVE = [
+    { name: "Trophée d’Auguste, La Turbie", ll: [43.74479, 7.40176], area: "La Turbie",
+      what: "A huge Roman monument from 6 BC, high above Monaco, with one of the finest views on the Riviera from its gardens. Open every day except Monday. Under-18s go free.",
+      how: "ZOU! bus 605 from Place d’Armes, a few times a day on some days of the week, or a taxi (about 15 minutes)." },
+    { name: "La Turbie village", ll: [43.7451, 7.4005], area: "La Turbie",
+      what: "A quiet medieval village of stone lanes and arches below the Trophée, with cafés on the main square.",
+      how: "The same bus or taxi as the Trophée, which is a few minutes’ walk away." },
+    { name: "Tête de Chien viewpoint", ll: [43.73026, 7.40278], area: "Cap-d’Ail",
+      what: "The rocky headland 550 m above the sea with the classic postcard view straight down onto Monaco, the harbour and the Rock. The old fort beside it is closed to visitors.",
+      how: "By taxi or car, up the Route de la Tête de Chien. Best in the morning, with the sun behind you." },
+    { name: "Mont des Mules viewpoint", ll: [43.74627, 7.42201], area: "Beausoleil",
+      what: "A viewing table on the hill above Beausoleil, looking out over Monte-Carlo and the coast towards Italy.",
+      how: "There’s a bus stop called Mont des Mules on the road below. It’s a steep walk up from Beausoleil." },
+    { name: "Roman quarry of Mont de Justice", ll: [43.74774, 7.41097], area: "La Turbie",
+      what: "The quarry where the stone for the Trophée d’Auguste was cut 2,000 years ago, with paths and information panels.",
+      how: "A short walk from La Turbie village." },
+    { name: "The Maybourne Riviera", ll: [43.75655, 7.44386], area: "Roquebrune-Cap-Martin",
+      what: "A luxury hotel on the cliff edge high above Monaco, with sweeping views from its terraces and restaurants. Book ahead to visit.",
+      how: "By taxi, on the Grande Corniche above Roquebrune-Cap-Martin." },
+    { name: "Èze village", ll: [43.7282, 7.3615], area: "Èze",
+      what: "A perched medieval village 430 m above the sea, with the Jardin exotique d’Èze at the very top, art galleries, and the Fragonard and Galimard perfume houses.",
+      how: "ZOU! bus 602 from Monaco (Office de Tourisme) to Èze Village, or a taxi (about 20 minutes)." },
+    { name: "Chemin de Nietzsche", ll: [43.72314, 7.35901], area: "Èze",
+      what: "The steep footpath from the sea up to Èze village, named after the philosopher who walked it. About 1 to 1½ hours up, with many steps: wear good shoes and take water.",
+      how: "It starts opposite Èze-sur-Mer station. Walk up, then take the bus back down." },
+    { name: "Èze-sur-Mer beach", ll: [43.7222, 7.35688], area: "Èze",
+      what: "A long pebble beach by the station at the foot of Èze, with beach restaurants in summer.",
+      how: "Two stops from Monaco by train (about 10 minutes), or coastal bus 600." }
+  ];
+  var aboveScreen = {
+    html: function () {
+      return '<section class="page whats-on above-page"><a class="back" href="#/transport"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + esc(t("Getting around")) + "</a>" +
+        "<h1>" + esc(t("Above Monaco")) + '</h1><p class="lede-dark">' + esc(t("La Turbie, Èze and the viewpoints on the hills behind Monaco: the best views of the Principality, a short trip away.")) + "</p>" +
+        (window.L && window.MMEMap ? '<div class="yt-map xm-map" id="ab-map" role="application" aria-label="' + esc(t("Map")) + '"></div>' : "") +
+        '<ol class="wo-list xm-list">' + ABOVE.map(function (x, i) {
+          return '<li class="wo-ev" data-xm="' + i + '"><span class="ev-date">' + esc(t(x.area)) + '</span><strong><span class="yt-num xm-num">' + (i + 1) + "</span>" + esc(t(x.name)) + "</strong>" +
+            "<p>" + esc(t(x.what)) + '</p><p class="ab-how"><b>' + esc(t("Getting there:")) + "</b> " + esc(t(x.how)) + "</p>" +
+            '<div class="wo-acts"><a class="btn-small wo-ext" href="https://www.google.com/maps/dir/?api=1&destination=' + x.ll[0] + "," + x.ll[1] + '" target="_blank" rel="noopener">' + esc(t("Directions")) + "</a></div></li>";
+        }).join("") + "</ol>" +
+        '<aside class="note note-rule"><strong>' + esc(t("Taxis up the hill")) + "</strong><p>" + esc(t("A Monaco taxi can take you up to La Turbie or Èze, but it can’t collect you there for the trip back. Book a French taxi for the return, or take the bus.")) + "</p></aside>" +
+        '<p class="unchecked">' + esc(t("Bus times change with the seasons. Check zou.maregionsud.fr before you go.")) + "</p></section>";
+    },
+    mount: function (el) {
+      if (window.MMEStats) window.MMEStats.track("Above Monaco opened");
+      var mapEl = el.querySelector("#ab-map"), map = null, marks = [];
+      if (mapEl) {
+        map = window.MMEMap.makeMap(mapEl);
+        ABOVE.forEach(function (x, i) {
+          marks[i] = L.marker(x.ll, { icon: L.divIcon({ className: "", html: '<span class="yt-mk xm-mk">' + (i + 1) + "</span>", iconSize: [26, 26], iconAnchor: [13, 13] }), title: t(x.name), keyboard: true })
+            .addTo(map).bindPopup("<strong>" + esc(t(x.name)) + "</strong><br>" + esc(t(x.area)));
+        });
+        map.fitBounds(L.latLngBounds(ABOVE.map(function (x) { return x.ll; })).pad(0.12));
+        setTimeout(function () { map.invalidateSize(); }, 200);
+      }
+      el.addEventListener("click", function (e) {
+        if (e.target.closest("a")) { if (window.MMEStats && e.target.closest(".wo-ext")) window.MMEStats.track("Above Monaco directions"); return; }
+        var li = e.target.closest("[data-xm]");
+        if (li && map && marks[li.dataset.xm]) { map.setView(marks[li.dataset.xm].getLatLng(), 16); marks[li.dataset.xm].openPopup(); mapEl.scrollIntoView({ behavior: "smooth", block: "center" }); }
+      });
+    }
+  };
+
   window.MMEExtras = { knowCard: knowCard, knowLink: knowLink,
     Home: Home, homeCard: homeCard,
     eventBanner: eventBanner, eventsInfo: eventsInfo, whatsOnScreen: whatsOnScreen, routeEventNote: routeEventNote, EVENTS: EVENTS,
@@ -624,6 +690,6 @@
     offlineCard: offlineCard, mountOffline: mountOffline, tileUrls: tileUrls,
     Reports: Reports, reportBox: reportBox, routeReportNote: routeReportNote,
     yachtsBox: yachtsBox, mountYachts: mountYachts, yachtsScreen: yachtsScreen,
-    xmasCard: xmasCard, xmasScreen: xmasScreen, xmasSeason: xmasSeason
+    xmasCard: xmasCard, xmasScreen: xmasScreen, aboveScreen: aboveScreen, xmasSeason: xmasSeason
   };
 })();

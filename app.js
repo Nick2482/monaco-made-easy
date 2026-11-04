@@ -277,6 +277,7 @@
     else if (parts[0] === "whats-on" && X) { screen = X.whatsOnScreen; tab = "info"; }
     else if (parts[0] === "yachts" && X) { screen = X.yachtsScreen; tab = "info"; }
     else if (parts[0] === "christmas" && X) { screen = X.xmasScreen; tab = "info"; }
+    else if (parts[0] === "above" && X) { screen = X.aboveScreen; tab = "transport"; }
     else if (parts[0] === "guide") { screen = window.MMEGuide.screen; tab = "guide"; }
     else if (parts[0].indexOf("pro") === 0) { window.MMEPro.previewSwitch(); screen = window.MMEPro.screen; }
     else if (parts[0] === "cruise") { screen = X.cruiseScreen; tab = "transport"; }

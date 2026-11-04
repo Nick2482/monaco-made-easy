@@ -1171,3 +1171,4 @@ html.cjk .xmas-card strong { font-family: "PingFang SC", "Hiragino Mincho ProN",
 .walk-list li .walk-card.wk-gp { background: linear-gradient(180deg, rgba(18, 20, 26, 0.3), rgba(18, 20, 26, 0.88)), url(img/gp-1992.jpg) center 55% / cover; }
 .wk-credit { margin: -8px 0 16px; font-size: 13.5px; color: var(--grey); font-style: italic; }
 .wk-photos.wk-p1 img[src$="gp-1992.jpg"] { height: auto; aspect-ratio: 16 / 10; }
+.ab-how { margin-top: 6px; font-size: 16px; color: var(--grey); } .ab-how b { color: var(--head); }

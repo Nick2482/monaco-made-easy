@@ -254,6 +254,7 @@
       return '<section class="page transport"><h1>' + tb("Getting around") + "</h1>" +
         '<a class="tr-card tr-airport tr-has-photo" href="#/airport"><img class="tr-photo" src="img/airport-t1.jpg" width="1200" height="675" loading="lazy" alt=""><strong>' + tb("From Nice airport") + "</strong><span>" + tb("Train, bus, taxi or helicopter, and how long each takes") + "</span></a>" +
         '<a class="tr-card tr-cruise" href="#/cruise"><strong>' + tb("On a cruise?") + "</strong><span>" + tb("Set your all-aboard time and we’ll tell you when to head back.") + "</span></a>" +
+        '<a class="tr-card tr-above" href="#/above"><strong>' + tb("Above Monaco") + "</strong><span>" + tb("La Turbie, Èze and the best viewpoints over Monaco, and how to get up there") + "</span></a>" +
         '<a class="tr-card tr-bike tr-has-photo" href="#/bikes"><img class="tr-photo" src="img/monabike-station.jpg" width="1200" height="675" loading="lazy" alt=""><strong>' + tb("MonaBike electric bikes") + "</strong><span>" + tb("350 electric bikes at stations all over Monaco, from €1 a ride. They take the hills for you.") + "</span></a>" +
         '<a class="tr-card tr-taxi" href="#/taxis"><strong>' + tb("Taxis") + "</strong><span>" + tb("Numbers, ranks, fixed fares, and the border rule for the French towns next door") + "</span></a>" +
         trainsCard() +
