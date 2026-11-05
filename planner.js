@@ -299,21 +299,21 @@
           var tr = T && T.trainOption && r.minutes >= 25 ? T.trainOption(from, to) : null;
           if (tr && tr.minutes + 5 < r.minutes) {
             var Bt = function (x) { return "<b>" + esc(x) + "</b>"; };
-            opts += '<div class="bus-opt tr-opt"><div class="bus-opt-top"><span class="bus-badge" style="background:#0b2545;color:#fff">' + esc(t("Train")) + "</span><span>" + esc(t("Or take the train: about {n} min in total", { n: tr.minutes })) + "</span></div>" +
+            opts += '<div class="bus-opt tr-opt"><div class="bus-opt-top"><span class="bus-badge" style="background:#0b2545;color:#fff">' + esc(t("Train")) + "</span><span>" + esc(t("Train: {r} min to {stop}", { r: tr.ride, stop: t(tr.to) })) + "</span></div>" +
               "<p>" + esc(t("Walk {a} min to {stop}.", { a: Math.max(1, tr.walkTo), stop: "\u0001" })).replace("\u0001", Bt(t(tr.from))) + " " +
               esc(t("Train at {time} ({wait}), {r} min to {stop}, then walk {w} min.", { time: "\u0002", wait: tr.wait <= 0 ? t("now") : t("in {n} min", { n: tr.wait }), r: tr.ride, stop: "\u0003", w: Math.max(1, tr.walkFrom) })).replace("\u0002", Bt(T.hhmm(tr.dep))).replace("\u0003", Bt(t(tr.to))) + "</p>" +
-              "<small>" + esc(t("Planned SNCF timetable. Check the SNCF Connect app for delays.")) + "</small></div>";
+              "<small>" + esc(t("About {n} min door to door, including the walks and the wait for the train.", { n: tr.minutes })) + " " + esc(t("Planned SNCF timetable. Check the SNCF Connect app for delays.")) + "</small></div>";
             [tr.fromPt, tr.toPt].forEach(function (p) { L.circleMarker([p.lat, p.lng], { radius: 9, color: "#fff", weight: 3, fillColor: "#0b2545", fillOpacity: 1 }).addTo(layer); });
           }
           var cb = T && T.coastOption && r.minutes >= 20 ? T.coastOption(from, to) : null;
           if (cb && (cb.generic || cb.minutes + 5 < r.minutes)) {
             var Bc = function (x) { return "<b>" + esc(x) + "</b>"; };
             opts += '<div class="bus-opt cb-opt"><div class="bus-opt-top"><span class="bus-badge" style="background:#E47F0B;color:#fff">' + esc(cb.r) + "</span><span>" +
-              esc(cb.generic ? t("Or take the coastal bus {r} towards Nice", { r: cb.r }) : t("Or take the coastal bus: about {n} min in total", { n: cb.minutes })) + "</span></div><p>" +
+              esc(cb.generic ? t("Or take the coastal bus {r} towards Nice", { r: cb.r }) : t("Bus {r}: {ride} min to {stop}", { r: cb.r, ride: cb.ride, stop: cb.to })) + "</span></div><p>" +
               esc(t("Walk {a} min to {stop}.", { a: Math.max(1, cb.walkTo), stop: "\u0001" })).replace("\u0001", Bc(cb.from)) + " " +
               (cb.generic ? esc(t("Buses run about every 15 minutes in the day (every 20 at weekends). Get off at {stop}, then walk {w} min.", { stop: "\u0003", w: Math.max(1, cb.walkFrom) })).replace("\u0003", Bc(cb.to))
                 : esc(t("Bus {r} towards {dest} at {time} ({wait}), {ride} min to {stop}, then walk {w} min.", { r: cb.r, dest: cb.dest, time: "\u0002", wait: cb.wait <= 0 ? t("now") : t("in {n} min", { n: cb.wait }), ride: cb.ride, stop: "\u0003", w: Math.max(1, cb.walkFrom) })).replace("\u0002", Bc(T.hhmm(cb.dep))).replace("\u0003", Bc(cb.to))) + "</p>" +
-              "<small>" + esc(cb.generic ? t("Live times are in the ZOU! app. Pay by tapping your card on board.") : t("ZOU! timetable. Live times are in the ZOU! app. Pay by tapping your card on board.")) + "</small></div>";
+              "<small>" + esc(cb.generic ? t("Live times are in the ZOU! app. Pay by tapping your card on board.") : t("About {n} min door to door, including the walks and the wait for the bus.", { n: cb.minutes }) + " " + t("ZOU! timetable. Live times are in the ZOU! app. Pay by tapping your card on board.")) + "</small></div>";
             [cb.fromPt, cb.toPt].forEach(function (p) { L.circleMarker([p.lat, p.lng], { radius: 9, color: "#fff", weight: 3, fillColor: "#E47F0B", fillOpacity: 1 }).addTo(layer); });
           }
           // Long journeys: lead with the train, bus and taxi, and put the walk last.
