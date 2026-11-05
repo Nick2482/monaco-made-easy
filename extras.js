@@ -354,26 +354,48 @@
   var SB = "https://oimcxmlewxjtcvrbpzop.supabase.co/rest/v1/mme_lift_reports";
   var SB_KEY = "sb_publishable_D1uaOD08d5u6aepRYDXetw_MrLZ2k9r";
   var WINDOW_H = 48; // reports count for two days
-  var latest = {};   // lift id -> { problem, at (ms) }
-
+  var NEEDED = 2;    // a lift shows as not working once two different phones say so (or you reported it yourself)
+  var byLift = {};   // lift id -> list of { problem, at (ms), device }
+  // A random id for this phone, so one person tapping several times counts once. It identifies nothing about you.
+  function device() {
+    var d = load("mme-device");
+    if (!d) { d = ""; for (var i = 0; i < 16; i++) d += "0123456789abcdef".charAt(Math.floor(Math.random() * 16)); save("mme-device", d); }
+    return d;
+  }
   function mine() { return (load("mme-my-reports") || []).filter(function (r) { return Date.now() - r.at < WINDOW_H * 3600000; }); }
   function apply(list) {
-    list.forEach(function (r) { if (!latest[r.lift_id] || latest[r.lift_id].at < r.at) latest[r.lift_id] = { problem: r.problem, at: r.at }; });
+    list.forEach(function (r) {
+      var l = byLift[r.lift_id] || (byLift[r.lift_id] = []);
+      if (!l.some(function (x) { return x.device === r.device && Math.abs(x.at - r.at) < 120000 && x.problem === r.problem; })) l.push(r);
+    });
+  }
+  // Not working = since the last "working again" report, at least two different phones (or this phone) reported a problem.
+  function statusOf(id) {
+    var l = (byLift[id] || []).slice().sort(function (a, b) { return a.at - b.at; });
+    var lastOk = 0;
+    l.forEach(function (r) { if (r.problem === "working") lastOk = r.at; });
+    var bad = l.filter(function (r) { return r.problem !== "working" && r.at > lastOk; });
+    if (!bad.length) return null;
+    var me = device(), devs = {};
+    bad.forEach(function (r) { devs[r.device || "?"] = 1; });
+    if (Object.keys(devs).length < NEEDED && !devs[me]) return null;
+    var last = bad[bad.length - 1];
+    return { problem: last.problem, at: last.at };
   }
   function refresh() {
-    latest = {};
-    apply(mine());
+    byLift = {};
+    apply(mine().map(function (r) { return { lift_id: r.lift_id, problem: r.problem, at: r.at, device: device() }; }));
     var since = new Date(Date.now() - WINDOW_H * 3600000).toISOString();
-    return fetch(SB + "?select=lift_id,problem,created_at&order=created_at.asc&created_at=gte." + encodeURIComponent(since), { headers: { apikey: SB_KEY } })
+    return fetch(SB + "?select=lift_id,problem,created_at,device&order=created_at.asc&created_at=gte." + encodeURIComponent(since), { headers: { apikey: SB_KEY } })
       .then(function (r) { return r.ok ? r.json() : []; })
       .then(function (rows) {
-        apply((rows || []).map(function (r) { return { lift_id: r.lift_id, problem: r.problem, at: Date.parse(r.created_at) }; }));
+        apply((rows || []).map(function (r) { return { lift_id: r.lift_id, problem: r.problem, at: Date.parse(r.created_at), device: r.device }; }));
         window.dispatchEvent(new Event("mme-reports"));
       }).catch(function () {});
   }
   function send(r) {
-    return fetch(SB, { method: "POST", headers: { apikey: SB_KEY, "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify({ lift_id: r.lift_id, problem: r.problem }) })
-      .then(function (res) { if (!res.ok) throw new Error(res.status); });
+    return fetch(SB, { method: "POST", headers: { apikey: SB_KEY, "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify({ lift_id: r.lift_id, problem: r.problem, device: device() }) })
+      .then(function (res) { if (!res.ok && res.status >= 500) throw new Error(res.status); }); // a 4xx means the database turned it down (too many taps): don't retry
   }
   function flush() { // reports made with no signal go up when the phone is back online
     var q = load("mme-report-queue") || [];
@@ -382,9 +404,14 @@
     q.forEach(function (r) { send(r).catch(function () { var qq = load("mme-report-queue") || []; qq.push(r); save("mme-report-queue", qq); }); });
   }
   var Reports = {
-    status: function (id) { var s = latest[id]; return s && s.problem !== "working" ? s : null; },
+    status: function (id) { return statusOf(id); },
+    // Slow down tapping: one report per lift every 10 minutes, and no more than 3 a minute, from this phone.
+    tooSoon: function (id) {
+      var m = mine(), now = Date.now();
+      return m.some(function (r) { return r.lift_id === id && now - r.at < 600000; }) || m.filter(function (r) { return now - r.at < 60000; }).length >= 3;
+    },
     report: function (id, problem) {
-      var r = { lift_id: id, problem: problem, at: Date.now() };
+      var r = { lift_id: id, problem: problem, at: Date.now(), device: device() };
       if (window.MMEStats) window.MMEStats.track("Lift reported", { problem: problem });
       var m = mine(); m.push(r); save("mme-my-reports", m);
       apply([r]);
@@ -418,8 +445,9 @@
     if (!b) return;
     var box = b.closest("[data-rep]"), msg = box.querySelector(".rep-thanks");
     box.querySelector(".rep-opts").hidden = true;
+    if (Reports.tooSoon(box.dataset.rep)) { msg.textContent = t("Thanks, we already have your report for this lift."); return; }
     Reports.report(box.dataset.rep, b.dataset.repSend).then(function (sent) {
-      msg.textContent = sent ? t("Thanks. Other visitors will see this for the next two days.") : t("Saved on this phone. We’ll share it when you have signal.");
+      msg.textContent = sent ? t("Thanks. When another visitor reports it too, everyone will see it for the next two days.") : t("Saved on this phone. We’ll share it when you have signal.");
     });
   });
   // A note for the plan screen when we've steered round a reported lift.
