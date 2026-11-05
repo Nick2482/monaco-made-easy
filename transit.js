@@ -219,7 +219,9 @@
     if (!CB) return null;
     now = now || monacoNow();
     var near = function (pt) {
-      return CB.stops.map(function (s, i) { return { i: i, d: metres(pt, { lat: s[1], lng: s[2] }) }; }).filter(function (x) { return x.d <= 1300; });
+      var all = CB.stops.map(function (s, i) { return { i: i, d: metres(pt, { lat: s[1], lng: s[2] }) }; });
+      var close = all.filter(function (x) { return x.d <= 1300; });
+      return close.length ? close : all.filter(function (x) { return x.d <= 2200; });   // a longer walk still beats no bus at all
     };
     var A = near(from), Z = near(to);
     if (!A.length || !Z.length) return null;
@@ -256,9 +258,9 @@
         best.after = times.filter(function (m) { return m > best.dep; })[0] || null;
       }
     }
-    if (!best && to.lng < from.lng - 0.01) {   // towards Nice: no reliable times in the open data
+    if (!best && Math.abs(to.lng - from.lng) > 0.01) {   // no timed bus soon (or towards Nice, where the open data is thin): show the line and stops
       var a0 = A.sort(function (x, y) { return x.d - y.d; })[0], z0 = Z.sort(function (x, y) { return x.d - y.d; })[0];
-      best = { generic: true, r: "600", dest: "Nice", a: a0.i, z: z0.i, walkTo: dA[a0.i], walkFrom: dZ[z0.i] };
+      best = { generic: true, r: "600", dest: to.lng < from.lng ? "Nice" : "Menton", a: a0.i, z: z0.i, walkTo: dA[a0.i], walkFrom: dZ[z0.i] };
     }
     if (best) { var sa = CB.stops[best.a], sz = CB.stops[best.z]; best.from = sa[0]; best.to = sz[0]; best.fromPt = { lat: sa[1], lng: sa[2] }; best.toPt = { lat: sz[1], lng: sz[2] }; }
     return best;

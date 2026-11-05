@@ -69,7 +69,17 @@
   var EXTRA = {
     capdail: { name: "Port de Cap d’Ail", short: "Cap d’Ail", area: "Cap d’Ail (France)", lat: 43.72602, lng: 7.41344 },
     roquebrune: { name: "Roquebrune old village", short: "Roquebrune", area: "Roquebrune-Cap-Martin (France)", lat: 43.765206, lng: 7.459182 },
-    capmartin: { name: "Parc du Cap-Martin", short: "Cap Martin", area: "Roquebrune-Cap-Martin (France)", lat: 43.755111, lng: 7.474712 }
+    capmartin: { name: "Parc du Cap-Martin", short: "Cap Martin", area: "Roquebrune-Cap-Martin (France)", lat: 43.755111, lng: 7.474712 },
+    menton: { name: "Menton town centre", short: "Menton", area: "Menton (France)", lat: 43.77432, lng: 7.49952 },
+    mentonold: { name: "Menton old town", short: "Menton old town", area: "Menton (France)", lat: 43.77640, lng: 7.50750 },
+    mentonst: { name: "Menton station", short: "Menton station", area: "Menton (France)", lat: 43.774703, lng: 7.4931157 },
+    garavan: { name: "Menton-Garavan", short: "Garavan", area: "Menton (France)", lat: 43.78400, lng: 7.51400 },
+    ezevil: { name: "Èze village", short: "Èze", area: "Èze (France)", lat: 43.72820, lng: 7.36150 },
+    ezemer: { name: "Èze-sur-Mer", short: "Èze-sur-Mer", area: "Èze (France)", lat: 43.72254, lng: 7.35674 },
+    turbie: { name: "La Turbie", short: "La Turbie", area: "La Turbie (France)", lat: 43.74522, lng: 7.39976 },
+    agnes: { name: "Sainte-Agnès village", short: "Sainte-Agnès", area: "Sainte-Agnès (France)", lat: 43.80041, lng: 7.46150 },
+    gorbio: { name: "Gorbio village", short: "Gorbio", area: "Gorbio (France)", lat: 43.78664, lng: 7.44388 },
+    castellar: { name: "Castellar village", short: "Castellar", area: "Castellar (France)", lat: 43.80413, lng: 7.49701 }
   };
   function place(id) { return D.places[id] || EXTRA[id]; }
   var POPULAR = ["casino", "palace", "port", "larvotto", "museum", "beausoleil", "fontvieille", "station", "exotic", "capdail", "roquebrune", "capmartin"];
@@ -296,6 +306,18 @@
             var a = T.stopPt(bus.from), z = T.stopPt(bus.to);
             [a, z].forEach(function (p) { L.circleMarker([p.lat, p.lng], { radius: 9, color: "#fff", weight: 3, fillColor: window.MMEBus.routes[bus.p.r].c, fillOpacity: 1 }).addTo(layer); });
           }
+          var cb = T && T.coastOption && r.minutes >= 20 ? T.coastOption(from, to) : null;
+          if (cb && (cb.generic || cb.minutes + 5 < r.minutes)) {
+            var Bc = function (x) { return "<b>" + esc(x) + "</b>"; };
+            opts += '<div class="bus-opt cb-opt"><div class="bus-opt-top"><span class="bus-badge" style="background:#E47F0B;color:#fff">' + esc(cb.r) + "</span><span>" +
+              esc(cb.generic ? t("Coastal bus {r} towards {dest}", { r: cb.r, dest: cb.dest }) : t("Bus {r}: {ride} min to {stop}", { r: cb.r, ride: cb.ride, stop: cb.to })) + "</span></div><p>" +
+              esc(t("Walk {a} min to {stop}.", { a: Math.max(1, cb.walkTo), stop: "\u0001" })).replace("\u0001", Bc(cb.from)) + " " +
+              (cb.generic ? esc(t("Buses run about every 15 minutes in the day (every 20 at weekends). Get off at {stop}, then walk {w} min.", { stop: "\u0003", w: Math.max(1, cb.walkFrom) })).replace("\u0003", Bc(cb.to))
+                : esc(t("Bus {r} towards {dest} at {time} ({wait}), {ride} min to {stop}, then walk {w} min.", { r: cb.r, dest: cb.dest, time: "\u0002", wait: cb.wait <= 0 ? t("now") : t("in {n} min", { n: cb.wait }), ride: cb.ride, stop: "\u0003", w: Math.max(1, cb.walkFrom) })).replace("\u0002", Bc(T.hhmm(cb.dep))).replace("\u0003", Bc(cb.to))) + "</p>" +
+              (!cb.generic && (cb.hurry || cb.after) ? '<p class="opt-more">' + esc([cb.hurry ? t("If you hurry: {time}", { time: T.hhmm(cb.hurry) }) : "", cb.after ? t("The one after: {time}", { time: T.hhmm(cb.after) }) : ""].filter(Boolean).join(" · ")) + "</p>" : "") +
+              "<small>" + esc(cb.generic ? t("Live times are in the ZOU! app. Pay by tapping your card on board.") : t("About {n} min door to door, including the walks and the wait for the bus.", { n: cb.minutes }) + " " + t("ZOU! timetable. Live times are in the ZOU! app. Pay by tapping your card on board.")) + "</small></div>";
+            [cb.fromPt, cb.toPt].forEach(function (p) { L.circleMarker([p.lat, p.lng], { radius: 9, color: "#fff", weight: 3, fillColor: "#E47F0B", fillOpacity: 1 }).addTo(layer); });
+          }
           var tr = T && T.trainOption && r.minutes >= 25 ? T.trainOption(from, to) : null;
           if (tr && tr.minutes + 5 < r.minutes) {
             var Bt = function (x) { return "<b>" + esc(x) + "</b>"; };
@@ -305,18 +327,6 @@
               (tr.hurry != null || tr.after != null ? '<p class="opt-more">' + esc([tr.hurry != null ? t("If you hurry: {time}", { time: T.hhmm(tr.hurry) }) : "", tr.after != null ? t("The one after: {time}", { time: T.hhmm(tr.after) }) : ""].filter(Boolean).join(" · ")) + "</p>" : "") +
               "<small>" + esc(t("About {n} min door to door, including the walks and the wait for the train.", { n: tr.minutes })) + " " + esc(t("Planned SNCF timetable. Check the SNCF Connect app for delays.")) + "</small></div>";
             [tr.fromPt, tr.toPt].forEach(function (p) { L.circleMarker([p.lat, p.lng], { radius: 9, color: "#fff", weight: 3, fillColor: "#0b2545", fillOpacity: 1 }).addTo(layer); });
-          }
-          var cb = T && T.coastOption && r.minutes >= 20 ? T.coastOption(from, to) : null;
-          if (cb && (cb.generic || cb.minutes + 5 < r.minutes)) {
-            var Bc = function (x) { return "<b>" + esc(x) + "</b>"; };
-            opts += '<div class="bus-opt cb-opt"><div class="bus-opt-top"><span class="bus-badge" style="background:#E47F0B;color:#fff">' + esc(cb.r) + "</span><span>" +
-              esc(cb.generic ? t("Or take the coastal bus {r} towards Nice", { r: cb.r }) : t("Bus {r}: {ride} min to {stop}", { r: cb.r, ride: cb.ride, stop: cb.to })) + "</span></div><p>" +
-              esc(t("Walk {a} min to {stop}.", { a: Math.max(1, cb.walkTo), stop: "\u0001" })).replace("\u0001", Bc(cb.from)) + " " +
-              (cb.generic ? esc(t("Buses run about every 15 minutes in the day (every 20 at weekends). Get off at {stop}, then walk {w} min.", { stop: "\u0003", w: Math.max(1, cb.walkFrom) })).replace("\u0003", Bc(cb.to))
-                : esc(t("Bus {r} towards {dest} at {time} ({wait}), {ride} min to {stop}, then walk {w} min.", { r: cb.r, dest: cb.dest, time: "\u0002", wait: cb.wait <= 0 ? t("now") : t("in {n} min", { n: cb.wait }), ride: cb.ride, stop: "\u0003", w: Math.max(1, cb.walkFrom) })).replace("\u0002", Bc(T.hhmm(cb.dep))).replace("\u0003", Bc(cb.to))) + "</p>" +
-              (!cb.generic && (cb.hurry || cb.after) ? '<p class="opt-more">' + esc([cb.hurry ? t("If you hurry: {time}", { time: T.hhmm(cb.hurry) }) : "", cb.after ? t("The one after: {time}", { time: T.hhmm(cb.after) }) : ""].filter(Boolean).join(" · ")) + "</p>" : "") +
-              "<small>" + esc(cb.generic ? t("Live times are in the ZOU! app. Pay by tapping your card on board.") : t("About {n} min door to door, including the walks and the wait for the bus.", { n: cb.minutes }) + " " + t("ZOU! timetable. Live times are in the ZOU! app. Pay by tapping your card on board.")) + "</small></div>";
-            [cb.fromPt, cb.toPt].forEach(function (p) { L.circleMarker([p.lat, p.lng], { radius: 9, color: "#fff", weight: 3, fillColor: "#E47F0B", fillOpacity: 1 }).addTo(layer); });
           }
           // Long journeys: lead with the train, bus and taxi, and put the walk last.
           if (r.minutes >= 40) {
