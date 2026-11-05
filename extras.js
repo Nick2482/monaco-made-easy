@@ -274,7 +274,7 @@
   // 4. Save the map for use without mobile data
   // ---------------------------------------------------------------------------
   var TILES = "mme-map-tiles";
-  var BOX = { s: 43.708, n: 43.776, w: 7.345, e: 7.495 }; // Èze to Roquebrune-Cap-Martin
+  var BOX = { s: 43.708, n: 43.815, w: 7.345, e: 7.535 }; // Èze to Menton and the Italian border, with the villages above
   // Our own map: one file with every tile of Monaco and the towns next door (about 1.4 MB), and the fonts for its labels.
   var GLYPHS = ["Noto-Sans-Regular", "Noto-Sans-Medium"];
   function tileUrls() {
@@ -287,7 +287,7 @@
   }
   function heightTiles() {
     return [[8528, 5974], [8528, 5975], [8529, 5973], [8529, 5974], [8529, 5975], [8530, 5971], [8530, 5972], [8530, 5973], [8530, 5974],
-      [8531, 5971], [8531, 5972], [8532, 5971], [8532, 5972], [8532, 5973], [8533, 5971], [8533, 5972], [8526, 5972], [8526, 5973], [8526, 5974], [8526, 5975], [8527, 5972], [8527, 5973], [8527, 5974], [8527, 5975], [8528, 5972], [8528, 5973], [8529, 5972]].map(function (xy) { return "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/14/" + xy[0] + "/" + xy[1] + ".png"; });
+      [8531, 5971], [8531, 5972], [8532, 5971], [8532, 5972], [8532, 5973], [8533, 5971], [8533, 5972], [8526, 5972], [8526, 5973], [8526, 5974], [8526, 5975], [8527, 5972], [8527, 5973], [8527, 5974], [8527, 5975], [8528, 5972], [8528, 5973], [8529, 5972], [8530, 5969], [8530, 5970], [8531, 5969], [8531, 5970], [8532, 5969], [8532, 5970], [8533, 5969], [8533, 5970], [8533, 5973], [8534, 5969], [8534, 5970], [8534, 5971], [8534, 5972], [8534, 5973]].map(function (xy) { return "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/14/" + xy[0] + "/" + xy[1] + ".png"; });
   }
   function cartoTileUrls() {
     var r = (window.devicePixelRatio || 1) > 1 ? "@2x" : "", out = [];
@@ -690,6 +690,7 @@
             "<p>" + esc(t(x.what)) + '</p><p class="ab-how"><b>' + esc(t("Getting there:")) + "</b> " + esc(t(x.how)) + "</p>" +
             '<div class="wo-acts"><a class="btn-small wo-ext" href="https://www.google.com/maps/dir/?api=1&destination=' + x.ll[0] + "," + x.ll[1] + '" target="_blank" rel="noopener">' + esc(t("Directions")) + "</a></div></li>";
         }).join("") + "</ol>" +
+        '<p class="ab-more"><a href="#/villages">' + esc(t("Villages above Menton: Sainte-Agnès, Gorbio and Castellar")) + "</a></p>" +
         '<aside class="note note-rule"><strong>' + esc(t("Taxis up the hill")) + "</strong><p>" + esc(t("A Monaco taxi can take you up to La Turbie or Èze, but it can’t collect you there for the trip back. Book a French taxi for the return, or take the bus.")) + "</p></aside>" +
         '<p class="unchecked">' + esc(t("Bus times change with the seasons. Check zou.maregionsud.fr before you go.")) + "</p></section>";
     },
@@ -731,19 +732,71 @@
     var P = C.pts;
     // [point, label, x offset, y offset, anchor, class]
     var L = [["eze", "Èze", 18, 12, "start", ""], ["turbie", "La Turbie", 0, -24, "middle", ""], ["capdail", "Cap d’Ail", -10, 50, "middle", ""],
-      ["beausoleil", "Beausoleil", 18, -22, "start", ""], ["rcm", "Roquebrune", -18, 12, "end", ""], ["capmartin", "Cap Martin", 4, -26, "end", ""]];
+      ["beausoleil", "Beausoleil", 18, -22, "start", ""], ["rcm", "Roquebrune", -18, 12, "end", ""], ["capmartin", "Cap Martin", -16, 12, "end", ""], ["menton", "Menton", 0, -24, "middle", ""], ["agnes", "Sainte-Agnès", 18, 12, "start", ""]];
     var dots = L.map(function (l) { var p = P[l[0]]; return '<circle class="cv-dot" cx="' + p[0] + '" cy="' + p[1] + '" r="9"/>'; }).join("") +
       '<circle class="cv-dot cv-mc" cx="' + P.monaco[0] + '" cy="' + P.monaco[1] + '" r="12"/>';
     var labels = L.map(function (l) { var p = P[l[0]]; return '<text x="' + (p[0] + l[2]) + '" y="' + (p[1] + l[3]) + '" text-anchor="' + l[4] + '">' + esc(t(l[1])) + "</text>"; }).join("") +
       '<text class="cv-mcl" x="' + (P.monaco[0] + 58) + '" y="' + (P.monaco[1] + 84) + '">' + esc(t("Monaco")) + "</text>" +
       '<text class="cv-sea" x="' + (C.w - 40) + '" y="' + (C.h - 34) + '" text-anchor="end">' + esc(t("Mediterranean Sea")) + "</text>";
-    return '<a class="cv" href="#/above" aria-label="' + esc(t("Our map covers the coast from Èze to Cap Martin, with La Turbie on the hill above. See La Turbie and Èze.")) + '">' +
+    return '<a class="cv" href="#/above" aria-label="' + esc(t("Our map covers the coast from Èze to Menton and the Italian border, with the villages on the hills above. See La Turbie and Èze.")) + '">' +
       '<svg viewBox="0 0 ' + C.w + " " + C.h + '" role="img" aria-hidden="true" focusable="false"><rect class="cv-sea-bg" width="' + C.w + '" height="' + C.h + '"/>' +
       '<path class="cv-land" d="' + C.land + '"/><path class="cv-mon" d="' + C.monaco + '"/>' + dots + '<g class="cv-lbl">' + labels + "</g></svg>" +
-      '<span class="cv-cap">' + esc(t("From Èze to Cap Martin, and up to La Turbie.")) + " <u>" + esc(t("See what’s above Monaco")) + "</u></span></a>";
+      '<span class="cv-cap">' + esc(t("From Èze to Menton, and up to the villages above.")) + " <u>" + esc(t("See what’s above Monaco")) + "</u></span></a>";
   }
 
-  window.MMEExtras = { knowCard: knowCard, knowLink: knowLink, coverageFig: coverageFig,
+  // ---------------------------------------------------------------------------
+  // 10. Villages above Menton: Sainte-Agnès, Gorbio and Castellar, and Menton's Zest buses up to them.
+  // ---------------------------------------------------------------------------
+  var VILLAGES = [
+    { name: "Sainte-Agnès village", ll: [43.80041, 7.46150], area: "Sainte-Agnès",
+      what: "One of the highest coastal villages in Europe, about 780 m up, with castle ruins and views down to Menton and the sea. Not step-free.",
+      how: "Zest bus 10 from Menton Gare Routière, about 40 minutes up a winding road. Or a taxi." },
+    { name: "Fort de Sainte-Agnès", ll: [43.79883, 7.46249], area: "Sainte-Agnès",
+      what: "A Maginot Line fort dug into the mountain below the village, open for guided visits on some days. Check opening times before you go.",
+      how: "A short walk down from Sainte-Agnès village." },
+    { name: "Gorbio village", ll: [43.78664, 7.44388], area: "Gorbio",
+      what: "A quiet medieval hill village above Roquebrune and Menton, with an ancient elm on its little square.",
+      how: "Zest bus 7 from Menton Gare Routière, about 30 minutes. Or a taxi." },
+    { name: "Castellar village", ll: [43.80413, 7.49701], area: "Castellar",
+      what: "The last French hill village before Italy, with narrow lanes and walking trails into the mountains.",
+      how: "Zest bus 6 from Menton Gare Routière, about 30 minutes. Or a taxi." }
+  ];
+  var villagesScreen = {
+    html: function () {
+      return '<section class="page whats-on above-page"><a class="back" href="#/transport"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + esc(t("Getting around")) + "</a>" +
+        "<h1>" + esc(t("Villages above Menton")) + '</h1><p class="lede-dark">' + esc(t("Sainte-Agnès, Gorbio and Castellar: medieval villages on the mountains behind Menton, a short bus ride from the sea.")) + "</p>" +
+        (window.L && window.MMEMap ? '<div class="yt-map xm-map" id="vl-map" role="application" aria-label="' + esc(t("Map")) + '"></div>' : "") +
+        '<aside class="note note-rule"><strong>' + esc(t("Buses up from Menton")) + "</strong><p>" + esc(t("Menton’s Zest buses leave from the Gare Routière, next to Menton station: line 10 to Sainte-Agnès, line 7 to Gorbio and line 6 to Castellar. They run a few times a day, so check the times at zestbus.fr before you go.")) + "</p></aside>" +
+        '<h2 class="ab-h">' + esc(t("Places to visit")) + "</h2>" +
+        '<ol class="wo-list xm-list">' + VILLAGES.map(function (x, i) {
+          return '<li class="wo-ev" data-xm="' + i + '">' + (x.photo ? '<img class="ab-photo" src="' + x.photo + '" width="1200" height="675" loading="lazy" alt="' + esc(t(x.alt)) + '">' : "") + '<span class="ev-date">' + esc(t(x.area)) + '</span><strong><span class="yt-num xm-num">' + (i + 1) + "</span>" + esc(t(x.name)) + "</strong>" +
+            "<p>" + esc(t(x.what)) + '</p><p class="ab-how"><b>' + esc(t("Getting there:")) + "</b> " + esc(t(x.how)) + "</p>" +
+            '<div class="wo-acts"><a class="btn-small wo-ext" href="https://www.google.com/maps/dir/?api=1&destination=' + x.ll[0] + "," + x.ll[1] + '" target="_blank" rel="noopener">' + esc(t("Directions")) + "</a></div></li>";
+        }).join("") + "</ol>" +
+        '<p class="ab-more"><a href="#/above">' + esc(t("Above Monaco: La Turbie, Èze and the viewpoints")) + "</a></p>" +
+        '<p class="unchecked">' + esc(t("Bus times change with the seasons. Check zestbus.fr before you go.")) + "</p></section>";
+    },
+    mount: function (el) {
+      if (window.MMEStats) window.MMEStats.track("Villages above Menton opened");
+      var mapEl = el.querySelector("#vl-map"), map = null, marks = [];
+      if (mapEl) {
+        map = window.MMEMap.makeMap(mapEl);
+        VILLAGES.forEach(function (x, i) {
+          marks[i] = L.marker(x.ll, { icon: L.divIcon({ className: "", html: '<span class="yt-mk xm-mk">' + (i + 1) + "</span>", iconSize: [26, 26], iconAnchor: [13, 13] }), title: t(x.name), keyboard: true })
+            .addTo(map).bindPopup("<strong>" + esc(t(x.name)) + "</strong><br>" + esc(t(x.area)));
+        });
+        map.fitBounds(L.latLngBounds(VILLAGES.map(function (x) { return x.ll; })).pad(0.12));
+        setTimeout(function () { map.invalidateSize(); }, 200);
+      }
+      el.addEventListener("click", function (e) {
+        if (e.target.closest("a")) { if (window.MMEStats && e.target.closest(".wo-ext")) window.MMEStats.track("Villages directions"); return; }
+        var li = e.target.closest("[data-xm]");
+        if (li && map && marks[li.dataset.xm]) { map.setView(marks[li.dataset.xm].getLatLng(), 16); marks[li.dataset.xm].openPopup(); mapEl.scrollIntoView({ behavior: "smooth", block: "center" }); }
+      });
+    }
+  };
+
+  window.MMEExtras = { villagesScreen: villagesScreen, knowCard: knowCard, knowLink: knowLink, coverageFig: coverageFig,
     Home: Home, homeCard: homeCard,
     eventBanner: eventBanner, eventsInfo: eventsInfo, whatsOnScreen: whatsOnScreen, routeEventNote: routeEventNote, EVENTS: EVENTS,
     cruise: cruise, shipPoint: shipPoint, cruiseCard: cruiseCard, cruiseScreen: cruiseScreen, mountHome: mountHome,

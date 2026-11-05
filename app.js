@@ -160,7 +160,7 @@
     var pf = placeFilter ? D.places[placeFilter] : null;
     return '<section class="hero">' +
       '<div class="hero-head"><h1>' + esc(t("Monaco, without the climb.")) + "</h1>" +
-      '<p class="lede">' + esc(t("Around 80 free public lifts, 37 escalators and 8 moving walkways, and the easy way to use them. Plus the whole coast around Monaco, from Èze to Cap Martin, with La Turbie on the hill above.")) + "</p>" +
+      '<p class="lede">' + esc(t("Around 80 free public lifts, 37 escalators and 8 moving walkways, and the easy way to use them. Plus the whole coast around Monaco, from Èze to Menton and the Italian border, with the villages on the hills above.")) + "</p>" +
       (X && X.coverageFig ? X.coverageFig() : "") + "</div>" +
       (window.MMEWeather ? window.MMEWeather.strip() : "") +
       (X ? X.eventBanner() + X.cruiseCard() : "") + (window.MMEWalks ? window.MMEWalks.guardCard() : "") +
@@ -248,7 +248,7 @@
       '<h3 class="sos-h">' + esc(t("In Monaco")) + '</h3><ul class="sos-list">' +
       call("+377 97 98 97 69", t("Princess Grace Hospital, emergency department"), "Avenue Pasteur") + call("+377 93 15 30 15", t("Police (Sûreté Publique)")) + "</ul>" +
       '<p class="sos-more"><a href="https://www.monacosante.mc/en/emergency-contact-numbers/emergency-contact-numbers" target="_blank" rel="noopener">' + esc(t("Today’s on-duty doctor and pharmacy in Monaco")) + "</a></p>" +
-      '<h3 class="sos-h">' + esc(t("In France: Beausoleil, Cap d’Ail, Èze, La Turbie and Roquebrune")) + '</h3><ul class="sos-list">' +
+      '<h3 class="sos-h">' + esc(t("In France: Beausoleil, Cap d’Ail, Èze, La Turbie, Roquebrune and Menton")) + '</h3><ul class="sos-list">' +
       call("15", t("Medical emergency (SAMU)")) + call("3237", t("On-duty pharmacy (French side)"), t("Paid call")) + "</ul>" +
       '<p class="sos-more">' + esc(t("Poison centre (Marseille): +33 4 91 75 25 25")) + "</p></section>";
     return '<section class="page"><h1>' + esc(t("Good to know")) + "</h1>" + sos + (X ? X.knowCard() + X.offlineCard() : "") +
@@ -280,6 +280,7 @@
     else if (parts[0] === "yachts" && X) { screen = X.yachtsScreen; tab = "info"; }
     else if (parts[0] === "christmas" && X) { screen = X.xmasScreen; tab = "info"; }
     else if (parts[0] === "above" && X) { screen = X.aboveScreen; tab = "transport"; }
+    else if (parts[0] === "villages" && X) { screen = X.villagesScreen; tab = "transport"; }
     else if (parts[0] === "guide") { screen = window.MMEGuide.screen; tab = "guide"; }
     else if (parts[0].indexOf("pro") === 0) { window.MMEPro.previewSwitch(); screen = window.MMEPro.screen; }
     else if (parts[0] === "cruise") { screen = X.cruiseScreen; tab = "transport"; }

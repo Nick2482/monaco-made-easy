@@ -6,7 +6,7 @@
   var D = window.MME;
   var t = function (s, v) { return window.MMEI18N.t(s, v); };
   var SEARCH_URL = "https://photon.komoot.io/api/";
-  var AREA = { minLng: 7.383, minLat: 43.710, maxLng: 7.495, maxLat: 43.776 }; // Cap d'Ail, Monaco, Beausoleil and Roquebrune-Cap-Martin
+  var AREA = { minLng: 7.345, minLat: 43.708, maxLng: 7.535, maxLat: 43.815 }; // Èze to Menton and the Italian border, with the villages above
   var CENTRE = { lat: 43.7385, lng: 7.4240 };
 
   var state = { from: null, to: null }; // null "from" means "my location"
@@ -282,7 +282,7 @@
               '<div><span class="step-type">' + esc(t(STEP_LABEL[k] || "Arrive")) + "</span><p>" + esc(st.text) + "</p></div></li>";
           }).join("") + "</ol>";
           if (!r.stepFree) h += '<aside class="note"><strong>' + esc(t("Steps on this route")) + "</strong><p>" + esc(t("This is the easiest way we can find, but it still has some steps. A taxi may be easier with heavy bags.")) + "</p></aside>";
-          if (outside) h += '<aside class="note"><strong>' + esc(t("Beyond our map")) + "</strong><p>" + esc(t("Part of this journey is outside the area we cover (from Èze and La Turbie to Roquebrune-Cap-Martin). Use Google Maps for that part.")) + "</p></aside>";
+          if (outside) h += '<aside class="note"><strong>' + esc(t("Beyond our map")) + "</strong><p>" + esc(t("Part of this journey is outside the area we cover (from Èze to Menton and the villages above). Use Google Maps for that part.")) + "</p></aside>";
           var T = window.MMETransit, bus = T && T.ready ? T.busOption(from, to) : null;
           if (bus && (bus.minutes + 2 < r.minutes || (r.climbed > 30 && bus.minutes < r.minutes + 8) || (!r.stepFree && bus.minutes < r.minutes + 8))) {
             var now = T.monacoNow();

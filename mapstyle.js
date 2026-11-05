@@ -53,7 +53,7 @@ function mmeMapStyle(base, dark) {
 // The whole map of Monaco is one compressed file (about 1.4 MB). It's downloaded once, kept on the phone,
 // and the tiles are read from it as the map needs them.
 // Bump MME_MAP_V whenever monaco-map.bin is rebuilt, so phones fetch the new map instead of keeping the old one.
-var MME_MAP_V = "140";
+var MME_MAP_V = "144";
 var mmeMapFile = null;
 function mmeLoadMapFile() {
   if (!mmeMapFile) mmeMapFile = fetch("/tiles/monaco-map.bin?v=" + MME_MAP_V).then(function (r) {

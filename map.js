@@ -55,7 +55,7 @@
   // Nearest first by real walking time: straight-line distance picks the candidates, the route decides the order.
   // La Turbie and Èze are on our walking map, but from Monaco they're a bus or taxi ride, not a walk.
   // So their places get Google Maps directions (with buses and trains), unless you're already within 2.5 km.
-  var FAR = { "La Turbie": 1, "Èze": 1 };
+  var FAR = { "La Turbie": 1, "Èze": 1, "Menton": 1, "Sainte-Agnès": 1, "Gorbio": 1, "Castellar": 1 };
   function isFar(e) {
     if (!e || !FAR[e.a]) return false;
     return !(here && distance(here, e) < 2500);
@@ -91,7 +91,7 @@
       map.getContainer().classList.add("own-map");
       // Our map covers Èze to Roquebrune-Cap-Martin: keep the view on it, and don't zoom out so far that it's mostly empty.
       map.setMinZoom(window.innerWidth > 700 ? 12 : 13);
-      map.setMaxBounds([[43.708, 7.345], [43.780, 7.500]]);
+      map.setMaxBounds([[43.708, 7.345], [43.815, 7.535]]);
       map.options.maxBoundsViscosity = 0.8;
       // After a zoom, a resize, or coming back to the app, redraw so no part of the map is left blank.
       var redraw = function () { var g = gl.getMaplibreMap && gl.getMaplibreMap(); if (g) { try { g.resize(); g.triggerRepaint(); } catch (e) {} } };
@@ -148,7 +148,7 @@
   var CAT_COLOR = { toilets: "#6b4fa0", pharmacy: "#18a058", atm: "#b7791f", drinking_water: "#2b8cc4", defibrillator: "#0f6b45" };
   function essList() { return window.MMEEssentials || []; }
   // Towns we cover, west to east along the coast and up the hill. Lists can be narrowed to one, or split by town.
-  var AREAS = ["Monaco", "Beausoleil", "Cap d'Ail", "Roquebrune-Cap-Martin", "La Turbie", "Èze"];
+  var AREAS = ["Monaco", "Beausoleil", "Cap d'Ail", "Roquebrune-Cap-Martin", "Menton", "La Turbie", "Èze", "Sainte-Agnès", "Gorbio", "Castellar"];
   function getArea() { try { var a = localStorage.getItem("mme-area"); return AREAS.indexOf(a) >= 0 ? a : ""; } catch (e) { return ""; } }
   function setArea(a) { try { if (a) localStorage.setItem("mme-area", a); else localStorage.removeItem("mme-area"); } catch (e) {} }
   function areaChips(sel, counts) {
