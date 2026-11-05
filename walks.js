@@ -65,6 +65,15 @@
         { name: "Cap Martin point", lat: 43.75095, lng: 7.4772, text: "The tip of the cape, among pines and villas, looking out to sea." },
         { name: "Empress Elisabeth monument", lat: 43.75179, lng: 7.48637, text: "A monument to Empress Elisabeth of Austria, “Sissi”, who loved to stay on Cap Martin." },
         { name: "Carnolès seafront", lat: 43.7578, lng: 7.4818, text: "Finish by the beaches and cafés of Carnolès. Carnolès station is about 10 minutes’ walk inland." }
+      ] },
+    { id: "menton", title: "Menton old town and the sea", sub: "From the Biovès gardens along the seafront, up to the basilica and down to the beach. The old town has steps.", stepped: true,
+      stops: [
+        { name: "Jardins Biovès", lat: 43.77521, lng: 7.49583, text: "Start in the gardens, about 5 minutes from Menton station. In February they’re full of the Lemon Festival’s giant citrus sculptures." },
+        { name: "Musée Jean Cocteau, Séverin Wunderman collection", lat: 43.77474, lng: 7.50579, text: "Walk along the seafront to this striking white museum of Cocteau’s drawings, ceramics and films." },
+        { name: "Les Halles", lat: 43.77523, lng: 7.50606, text: "Menton’s covered market, for fruit, local cheeses and the town’s famous lemons. Best in the morning." },
+        { name: "Basilique Saint-Michel-Archange", lat: 43.77706, lng: 7.50707, text: "Climb the old town’s stepped lanes to the Baroque basilica and its square, with views over the sea. This part is steep." },
+        { name: "Musée Jean Cocteau, Le Bastion", lat: 43.77481, lng: 7.50845, text: "Back down by the harbour, Cocteau’s own small museum in a 17th-century fort." },
+        { name: "Plage des Sablettes", lat: 43.77909, lng: 7.50866, text: "Finish on the beach below the old town, with cafés and the classic view back up to the basilica." }
       ] }
   ];
 
@@ -73,7 +82,7 @@
     var blocked = X ? X.Reports.blockedPoints() : [];
     var legs = [];
     // Coastal paths have steps of their own, so follow the path rather than detouring by road to avoid them.
-    for (var i = 1; i < w.stops.length; i++) legs.push(R ? R.route(w.stops[i - 1], w.stops[i], { avoidSteps: !w.coast, wheelchair: wc, blocked: blocked }) : null);
+    for (var i = 1; i < w.stops.length; i++) legs.push(R ? R.route(w.stops[i - 1], w.stops[i], { avoidSteps: !(w.coast || w.stepped), wheelchair: wc, blocked: blocked }) : null);
     return legs;
   }
   function summary(legs) {
@@ -146,7 +155,7 @@
         fit(); setTimeout(fit, 200);
         var h = factsHtml(s);
         if (w.coast) h += '<aside class="note"><strong>' + esc(t("Good to know")) + "</strong><p>" + esc(t("This path is right by the sea, with uneven ground and some steps, so it isn’t suitable for wheelchairs or pushchairs. It can be closed in rough seas, so check the signs at each end. Wear good shoes and take water.")) + "</p></aside>";
-        if (!s.ok && !w.coast) h += '<aside class="note"><p>' + esc(t("We couldn’t find a way between these two places without steps or escalators. A taxi is the easiest option.")) + "</p></aside>";
+        if (!s.ok && !w.coast && !w.stepped) h += '<aside class="note"><p>' + esc(t("We couldn’t find a way between these two places without steps or escalators. A taxi is the easiest option.")) + "</p></aside>";
         h += '<ol class="walk-stops">' + w.stops.map(function (st, i) {
           var leg = i > 0 ? legs[i - 1] : null;
           var how = leg ? '<details class="wk-how"><summary>' + esc(t("How to get there: {n} min", { n: leg.minutes })) + "</summary><ol class=\"steps\">" + leg.directions.map(function (d) {

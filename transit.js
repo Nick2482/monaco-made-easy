@@ -471,7 +471,7 @@
 
 
   // Taxi ranks with a known position (OpenStreetMap, October 2026), for "Take me there".
-  var RANKS = [["Casino Square taxi rank", 43.738676, 7.427912], ["Monaco Monte-Carlo station taxi rank", 43.73808, 7.420031], ["Place des Moulins taxi rank", 43.745283, 7.429359], ["Larvotto taxi rank", 43.74832, 7.435236], ["Beausoleil taxi rank", 43.74165, 7.42545]];
+  var RANKS = [["Casino Square taxi rank", 43.738676, 7.427912], ["Monaco Monte-Carlo station taxi rank", 43.73808, 7.420031], ["Place des Moulins taxi rank", 43.745283, 7.429359], ["Larvotto taxi rank", 43.74832, 7.435236], ["Beausoleil taxi rank", 43.74165, 7.42545], ["Menton station taxi rank", 43.77462, 7.49338], ["Menton Casino taxi rank", 43.77405, 7.49690], ["Menton town hall taxi rank", 43.77500, 7.50303]];
   function rankGo(i) { return ' <button type="button" class="btn-small rank-go" data-rank="' + i + '">' + tb("Take me there") + "</button>"; }
   var taxiScreen = {
     html: function () {
@@ -487,6 +487,9 @@
         '<img class="way-photo" src="img/taxi-beausoleil.jpg" width="1200" height="674" loading="lazy" alt="' + tb("The taxi rank sign in Beausoleil, with its phone number") + '">' +
         '<ul class="info-list">' +
         "<li>" + tb("**Beausoleil taxi rank**, Place Simone Veil (3 Boulevard du Général Leclerc)") + ' · <a href="tel:+33493783923">04 93 78 39 23</a>' + rankGo(4) + "</li></ul>" +
+        '<h2 class="area-h">' + tb("Taxis in Menton (France)") + '</h2><ul class="info-list">' +
+        "<li>" + tb("**Menton station**, at the station exit") + rankGo(5) + "</li><li>" + tb("**Casino**, by the Casino and the Biovès gardens") + rankGo(6) + "</li><li>" + tb("**Town hall**, near the Hôtel de Ville") + rankGo(7) + "</li></ul>" +
+        '<p class="lede-dark">' + tb("Menton taxis are French taxis: they can drop you anywhere, including Monaco, but for the trip back from Monaco you need a Monaco taxi or the train.") + "</p>" +
         '<h2 class="area-h">' + tb("What it costs") + '</h2><ul class="info-list">' +
         "<li>" + tb("Monaco taxis use **fixed fares**, not a meter.") + "</li><li>" + tb("Within Monaco: about **€18** if you hail one, about **€28** if you book ahead.") + "</li><li>" + tb("To the towns next door, such as Beausoleil or Cap d’Ail: about **€25**.") + "</li><li>" + tb("To Nice airport: about **€95 to €100**.") + "</li><li>" + tb("Waiting or slow traffic: about €1.33 a minute after the first 3 minutes.") + "</li><li>" + tb("Some taxis take cash only, so carry some euros.") + "</li></ul>" +
         '<p class="unchecked">' + tb("Fares were published in 2025 and 2026. Confirm the price with the driver before you set off.") + "</p></section>";

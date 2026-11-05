@@ -223,7 +223,7 @@
   // Links to the visitor guide pages, in the visitor's language.
   function guidesBlock(cls) {
     var L = window.MMEI18N.lang(), G = window.MMEGuideTitles && window.MMEGuideTitles[L];
-    return '<section class="gp-links' + cls + '"><h2>' + esc(t("Guides for visitors")) + '</h2><ul>' + [["monaco-public-lifts.html", "Monaco’s free public lifts and escalators"], ["step-free-monaco.html", "Step-free Monaco: wheelchairs and pushchairs"], ["monaco-train-station.html", "Monaco Monte-Carlo station: which exit?"], ["cap-dail-sea-path.html", "The sea path from Cap d’Ail to Monaco"], ["beausoleil.html", "Getting around Beausoleil"], ["roquebrune-cap-martin.html", "Roquebrune-Cap-Martin and the Promenade Le Corbusier"]].map(function (g) {
+    return '<section class="gp-links' + cls + '"><h2>' + esc(t("Guides for visitors")) + '</h2><ul>' + [["monaco-public-lifts.html", "Monaco’s free public lifts and escalators"], ["step-free-monaco.html", "Step-free Monaco: wheelchairs and pushchairs"], ["monaco-train-station.html", "Monaco Monte-Carlo station: which exit?"], ["cap-dail-sea-path.html", "The sea path from Cap d’Ail to Monaco"], ["beausoleil.html", "Getting around Beausoleil"], ["roquebrune-cap-martin.html", "Roquebrune-Cap-Martin and the Promenade Le Corbusier"], ["menton.html", "Menton and the villages above"]].map(function (g) {
       return '<li><a href="' + (L === "en" ? "" : L + "/") + g[0] + '">' + esc(G ? G[g[0]] : g[1]) + "</a></li>";
     }).join("") + "</ul></section>";
   }

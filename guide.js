@@ -13,7 +13,7 @@
     ["asian", "Asian"], ["local", "Monégasque and Niçois"], ["world", "World food"], ["beach", "Beach and sea view"], ["quick", "Burgers and quick bites"]];
   var COLOR = { hotel: "#1f3a5f", bakery: "#a0661a", shop: "#2f7a3d", tabac: "#6b4a2e", eat: "#9c3d54", cafe: "#7a5230", bar: "#8a2f6b", culture: "#0e7c86", yacht: "#1f4e8c", broker: "#2b6a8f", club: "#7a4f1d", info: "#4a5d70" };
   var FREE = {};
-  var SUB = { museum: "Museum", gallery: "Art gallery", theatre: "Theatre", garden: "Garden", venue: "Exhibitions and events", chandlery: "Chandlery", harbour: "Harbour office", pub: "Pub", nightclub: "Nightclub",
+  var SUB = { museum: "Museum", gallery: "Art gallery", theatre: "Theatre", garden: "Garden", beach: "Beach", venue: "Exhibitions and events", chandlery: "Chandlery", harbour: "Harbour office", pub: "Pub", nightclub: "Nightclub",
     motor: "Motor club", yacht: "Yacht club", rowing: "Rowing club", tennis: "Tennis club", sailing: "Sailing club", hiking: "Hiking club", convenience: "Mini-market", pastry: "Pâtisserie", cocktail: "Cocktail bar", wine: "Wine bar", beachbar: "Beach bar",
     market: "Market", butcher: "Butcher and fine food", zoo: "Zoo", church: "Church", castle: "Castle", village: "Old village", tree: "Landmark", walk: "Coastal path", boats: "Boat sales and service", perfume: "Perfume house", cigars: "Cigar shop", presse: "Newsagent and tabac", bartabac: "Bar-tabac" };
   var CUISINE = { italian: "Italian", pizza: "Pizza", burger: "Burgers", mediterranean: "Mediterranean", french: "French", japanese: "Japanese", sushi: "Sushi",
