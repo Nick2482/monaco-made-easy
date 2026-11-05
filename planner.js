@@ -239,7 +239,7 @@
         }
         var h = note ? '<p class="summary">' + note + "</p>" : "";
         h += '<label class="wc-toggle"><input type="checkbox" id="wc-on"' + (wc ? " checked" : "") + '><span class="wc-sw" aria-hidden="true"></span><span>' + esc(t("Wheelchair or pushchair")) + "<small>" + esc(t("Lifts and level paths only: no steps or escalators")) + "</small></span></label>";
-        var outside = r && (r.startGap > 300 || r.endGap > 300);
+        var outside = r && (r.startGap > 300 || r.endGap > 300), opts = "";
         if (!r) {
           h += '<p class="summary">' + esc(wc ? t("We couldn’t find a way between these two places without steps or escalators. A taxi is the easiest option.") : t("We couldn’t find a walking route between these two places on our Monaco map.")) + "</p>";
           L.polyline([[from.lat, from.lng], [to.lat, to.lng]], { color: "#0b2545", weight: 3, dashArray: "6 8" }).addTo(layer);
@@ -250,6 +250,7 @@
           var vert = r.heights
             ? "<li><strong>" + esc(r.climbed < 5 ? t("Hardly any climb") : t("{n} m climb", { n: r.climbed })) + "</strong><span>" + esc(r.saved > 4 ? t("lifts do {n} m for you", { n: r.saved }) : r.lifts ? t(r.lifts === 1 ? "1 lift on the way" : "{n} lifts on the way", { n: r.lifts }) : t("on foot")) + "</span></li>"
             : "<li><strong>" + esc(t(r.lifts === 1 ? "1 lift" : "{n} lifts", { n: r.lifts })) + "</strong><span>" + esc(r.escalators ? t(r.escalators === 1 ? "and 1 escalator" : "and {n} escalators", { n: r.escalators }) : t("on the way")) + "</span></li>";
+          var walkAt = h.length;
           h += '<ul class="facts"><li><strong>' + esc(t("{n} min", { n: r.minutes })) + "</strong><span>" + esc(t("{d} on foot", { d: r.metres >= 1000 ? (r.metres / 1000).toFixed(1) + " km" : r.metres + " m" })) + "</span></li>" +
             "<li><strong>" + esc(r.stepFree ? t("No steps") : t(r.steps === 1 ? "1 set of steps" : "{n} sets of steps", { n: r.steps })) + "</strong><span>" + esc(r.stepFree ? (wc ? t("no escalators") : r.escalators ? t("but uses escalators") : t("step-free")) : t("on this route")) + "</span></li>" + vert + "</ul>";
           if (wc) {
@@ -287,7 +288,7 @@
           if (bus && (bus.minutes + 2 < r.minutes || (r.climbed > 30 && bus.minutes < r.minutes + 8) || (!r.stepFree && bus.minutes < r.minutes + 8))) {
             var now = T.monacoNow();
             var B_ = function (x) { return "<b>" + esc(x) + "</b>"; };
-            h += '<div class="bus-opt"><div class="bus-opt-top">' + T.badge(bus.p.r) + "<span>" + esc(t("Or take the bus: about {n} min in total", { n: bus.minutes })) + "</span></div>" +
+            opts += '<div class="bus-opt"><div class="bus-opt-top">' + T.badge(bus.p.r) + "<span>" + esc(t("Or take the bus: about {n} min in total", { n: bus.minutes })) + "</span></div>" +
               "<p>" + esc(t("Walk {a} min to {stop}.", { a: Math.max(1, bus.walkTo), stop: "\u0001" })).replace("\u0001", B_(T.stopName(bus.from))) + " " +
               esc(t("Next bus towards {dest} at {time} ({wait}).", { dest: bus.p.h, time: "\u0002", wait: bus.wait <= 0 ? t("now") : t("in {n} min", { n: bus.wait }) })).replace("\u0002", B_(T.hhmm(bus.dep))) + " " +
               esc(t("Ride {r} min to {stop}, then walk {w} min.", { r: bus.ride, stop: "\u0003", w: Math.max(1, bus.walkFrom) })).replace("\u0003", B_(T.stopName(bus.to))) + "</p>" +
@@ -298,12 +299,30 @@
           var tr = T && T.trainOption && r.minutes >= 25 ? T.trainOption(from, to) : null;
           if (tr && tr.minutes + 5 < r.minutes) {
             var Bt = function (x) { return "<b>" + esc(x) + "</b>"; };
-            h += '<div class="bus-opt tr-opt"><div class="bus-opt-top"><span class="bus-badge" style="background:#0b2545;color:#fff">' + esc(t("Train")) + "</span><span>" + esc(t("Or take the train: about {n} min in total", { n: tr.minutes })) + "</span></div>" +
+            opts += '<div class="bus-opt tr-opt"><div class="bus-opt-top"><span class="bus-badge" style="background:#0b2545;color:#fff">' + esc(t("Train")) + "</span><span>" + esc(t("Or take the train: about {n} min in total", { n: tr.minutes })) + "</span></div>" +
               "<p>" + esc(t("Walk {a} min to {stop}.", { a: Math.max(1, tr.walkTo), stop: "\u0001" })).replace("\u0001", Bt(t(tr.from))) + " " +
               esc(t("Train at {time} ({wait}), {r} min to {stop}, then walk {w} min.", { time: "\u0002", wait: tr.wait <= 0 ? t("now") : t("in {n} min", { n: tr.wait }), r: tr.ride, stop: "\u0003", w: Math.max(1, tr.walkFrom) })).replace("\u0002", Bt(T.hhmm(tr.dep))).replace("\u0003", Bt(t(tr.to))) + "</p>" +
               "<small>" + esc(t("Planned SNCF timetable. Check the SNCF Connect app for delays.")) + "</small></div>";
             [tr.fromPt, tr.toPt].forEach(function (p) { L.circleMarker([p.lat, p.lng], { radius: 9, color: "#fff", weight: 3, fillColor: "#0b2545", fillOpacity: 1 }).addTo(layer); });
           }
+          var cb = T && T.coastOption && r.minutes >= 20 ? T.coastOption(from, to) : null;
+          if (cb && (cb.generic || cb.minutes + 5 < r.minutes)) {
+            var Bc = function (x) { return "<b>" + esc(x) + "</b>"; };
+            opts += '<div class="bus-opt cb-opt"><div class="bus-opt-top"><span class="bus-badge" style="background:#E47F0B;color:#fff">' + esc(cb.r) + "</span><span>" +
+              esc(cb.generic ? t("Or take the coastal bus {r} towards Nice", { r: cb.r }) : t("Or take the coastal bus: about {n} min in total", { n: cb.minutes })) + "</span></div><p>" +
+              esc(t("Walk {a} min to {stop}.", { a: Math.max(1, cb.walkTo), stop: "\u0001" })).replace("\u0001", Bc(cb.from)) + " " +
+              (cb.generic ? esc(t("Buses run about every 15 minutes in the day (every 20 at weekends). Get off at {stop}, then walk {w} min.", { stop: "\u0003", w: Math.max(1, cb.walkFrom) })).replace("\u0003", Bc(cb.to))
+                : esc(t("Bus {r} towards {dest} at {time} ({wait}), {ride} min to {stop}, then walk {w} min.", { r: cb.r, dest: cb.dest, time: "\u0002", wait: cb.wait <= 0 ? t("now") : t("in {n} min", { n: cb.wait }), ride: cb.ride, stop: "\u0003", w: Math.max(1, cb.walkFrom) })).replace("\u0002", Bc(T.hhmm(cb.dep))).replace("\u0003", Bc(cb.to))) + "</p>" +
+              "<small>" + esc(cb.generic ? t("Live times are in the ZOU! app. Pay by tapping your card on board.") : t("ZOU! timetable. Live times are in the ZOU! app. Pay by tapping your card on board.")) + "</small></div>";
+            [cb.fromPt, cb.toPt].forEach(function (p) { L.circleMarker([p.lat, p.lng], { radius: 9, color: "#fff", weight: 3, fillColor: "#E47F0B", fillOpacity: 1 }).addTo(layer); });
+          }
+          // Long journeys: lead with the train, bus and taxi, and put the walk last.
+          if (r.minutes >= 40) {
+            opts += '<div class="bus-opt tx-opt"><div class="bus-opt-top"><span class="bus-badge" style="background:#5b4b8a;color:#fff">' + esc(t("Taxi")) + "</span><span>" + esc(t("Or take a taxi")) + "</span></div><p>" +
+              esc(t("The easiest way with bags. Monaco taxis can take you anywhere but only pick up in Monaco; in France, book a local taxi.")) + ' <a href="#/taxis">' + esc(t("Taxi numbers and ranks")) + "</a></p></div>";
+            h = h.slice(0, walkAt) + (opts ? '<h2 class="steps-h">' + esc(t("Best ways to get there")) + "</h2>" + opts : "") +
+              '<h2 class="steps-h">' + esc(t("Or walk all the way")) + "</h2>" + h.slice(walkAt);
+          } else h += opts;
           if (X) h = X.routeReportNote(avoided) + X.routeEventNote(r) + h;
           if (state.arrival) h = '<aside class="note note-welcome"><strong>' + esc(t("Welcome to Monaco")) + "</strong><p>" + esc(t(arrivalTip())) + (r.minutes > 20 || !r.stepFree ? " " + esc(t("With heavy bags, a taxi may be easier for this one.")) : "") + "</p>" + (state.arrival === "ship" ? '<a class="btn btn-navy ship-link" href="#/cruise">' + esc(t("Set your all-aboard time")) + "</a>" : "") + "</aside>" + h;
           var cur = curatedFor(state.from, to);

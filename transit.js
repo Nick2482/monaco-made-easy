@@ -199,6 +199,52 @@
     return best;
   }
 
+  // ZOU! coastal bus 600 (and night bus 601) along the coast from Èze to Menton (coastbus.js).
+  // The open data has the buses towards Menton in full but only a few towards Nice, so westbound we
+  // show the stop and the line without inventing times.
+  var CB = window.MMECoast;
+  var CB_DEST = { "Gare Routière": "Menton", "Square de Normandie": "Nice", "Casino": "Monaco", "Sporting (Bay Hôtel)": "Monaco" };
+  function cbRuns(si, now) {
+    var c = CB.svc[si];
+    if (c[4].indexOf(now.ymd) >= 0) return false;
+    if (c[3].indexOf(now.ymd) >= 0) return true;
+    if (c[0].charAt(now.wd) !== "1") return false;
+    if (now.ymd > CB.valid[1]) return true;
+    return now.ymd >= c[1] && now.ymd <= c[2];
+  }
+  function coastOption(from, to, now) {
+    if (!CB) return null;
+    now = now || monacoNow();
+    var near = function (pt) {
+      return CB.stops.map(function (s, i) { return { i: i, d: metres(pt, { lat: s[1], lng: s[2] }) }; }).filter(function (x) { return x.d <= 1300; });
+    };
+    var A = near(from), Z = near(to);
+    if (!A.length || !Z.length) return null;
+    var dA = {}, dZ = {};
+    A.forEach(function (x) { dA[x.i] = Math.ceil(x.d * 1.3 / 70); });
+    Z.forEach(function (x) { dZ[x.i] = Math.ceil(x.d * 1.3 / 70); });
+    var best = null;
+    CB.trips.forEach(function (tr) {
+      if (!cbRuns(tr[1], now)) return;
+      var q = tr[3], bi = -1;
+      for (var k = 0; k < q.length; k += 2) {
+        var si = q[k], m = q[k + 1];
+        if (bi < 0) { if (dA[si] != null && m >= now.min + dA[si] + 1) bi = k; continue; }
+        if (dZ[si] != null && dA[si] == null) {
+          var arrive = m + dZ[si];
+          if (!best || arrive < best.arrive) best = { r: tr[0], dest: CB_DEST[tr[2]] || tr[2], a: q[bi], z: si, dep: q[bi + 1], ride: m - q[bi + 1], walkTo: dA[q[bi]], walkFrom: dZ[si], arrive: arrive };
+        } else if (dA[si] != null && m >= now.min + dA[si] + 1 && (dA[si] < dA[q[bi]])) bi = k;   // a closer stop further along
+      }
+    });
+    if (best) { best.wait = best.dep - now.min; best.minutes = best.arrive - now.min; if (best.wait > 150) best = null; }
+    if (!best && to.lng < from.lng - 0.01) {   // towards Nice: no reliable times in the open data
+      var a0 = A.sort(function (x, y) { return x.d - y.d; })[0], z0 = Z.sort(function (x, y) { return x.d - y.d; })[0];
+      best = { generic: true, r: "600", dest: "Nice", a: a0.i, z: z0.i, walkTo: dA[a0.i], walkFrom: dZ[z0.i] };
+    }
+    if (best) { var sa = CB.stops[best.a], sz = CB.stops[best.z]; best.from = sa[0]; best.to = sz[0]; best.fromPt = { lat: sa[1], lng: sa[2] }; best.toPt = { lat: sz[1], lng: sz[2] }; }
+    return best;
+  }
+
   // Trains from Nice airport (Nice Saint-Augustin) to Monaco, for the airport page.
   function trFromAirport(now) {
     var esc = ui().esc, mon = trStationIdx("Monaco-Monte-Carlo");
@@ -537,5 +583,5 @@
   }
   setTimeout(refreshBus, 300);
 
-  window.MMETransit = { bikeScreen: bikeScreen, refreshBus: refreshBus, inMonaco: inMonaco, taxiScreen: taxiScreen, busOption: busOption, trainOption: trainOption, departures: departures, monacoNow: monacoNow, hhmm: hhmm, badge: badge, stopName: function (i) { return B.stops[i][0]; }, stopPt: stopPt, transportScreen: transportScreen, lineScreen: lineScreen, airportScreen: airportScreen, ready: !!B };
+  window.MMETransit = { bikeScreen: bikeScreen, refreshBus: refreshBus, inMonaco: inMonaco, taxiScreen: taxiScreen, busOption: busOption, trainOption: trainOption, coastOption: coastOption, departures: departures, monacoNow: monacoNow, hhmm: hhmm, badge: badge, stopName: function (i) { return B.stops[i][0]; }, stopPt: stopPt, transportScreen: transportScreen, lineScreen: lineScreen, airportScreen: airportScreen, ready: !!B };
 })();
