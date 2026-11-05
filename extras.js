@@ -692,7 +692,7 @@
         '<ol class="wo-list xm-list">' + ABOVE.map(function (x, i) {
           return '<li class="wo-ev" data-xm="' + i + '">' + (x.photo ? '<img class="ab-photo" src="' + x.photo + '" width="1200" height="675" loading="lazy" alt="' + esc(t(x.alt)) + '">' : "") + '<span class="ev-date">' + esc(t(x.area)) + '</span><strong><span class="yt-num xm-num">' + (i + 1) + "</span>" + esc(t(x.name)) + "</strong>" +
             "<p>" + esc(t(x.what)) + '</p><p class="ab-how"><b>' + esc(t("Getting there:")) + "</b> " + esc(t(x.how)) + "</p>" +
-            '<div class="wo-acts"><a class="btn-small wo-ext" href="https://www.google.com/maps/dir/?api=1&destination=' + x.ll[0] + "," + x.ll[1] + '" target="_blank" rel="noopener">' + esc(t("Directions")) + "</a></div></li>";
+            '<div class="wo-acts"><button type="button" class="btn-small" data-goto="' + x.ll[0] + "," + x.ll[1] + '" data-label="' + esc(x.name) + '">' + esc(t("Take me there")) + "</button></div></li>";
         }).join("") + "</ol>" +
         '<p class="ab-more"><a href="#/villages">' + esc(t("Villages above Menton: Sainte-Agnès, Gorbio and Castellar")) + "</a></p>" +
         '<aside class="note note-rule"><strong>' + esc(t("Taxis up the hill")) + "</strong><p>" + esc(t("A Monaco taxi can take you up to La Turbie or Èze, but it can’t collect you there for the trip back. Book a French taxi for the return, or take the bus.")) + "</p></aside>" +
@@ -776,7 +776,7 @@
         '<ol class="wo-list xm-list">' + VILLAGES.map(function (x, i) {
           return '<li class="wo-ev" data-xm="' + i + '">' + (x.photo ? '<img class="ab-photo" src="' + x.photo + '" width="1200" height="675" loading="lazy" alt="' + esc(t(x.alt)) + '">' : "") + '<span class="ev-date">' + esc(t(x.area)) + '</span><strong><span class="yt-num xm-num">' + (i + 1) + "</span>" + esc(t(x.name)) + "</strong>" +
             "<p>" + esc(t(x.what)) + '</p><p class="ab-how"><b>' + esc(t("Getting there:")) + "</b> " + esc(t(x.how)) + "</p>" +
-            '<div class="wo-acts"><a class="btn-small wo-ext" href="https://www.google.com/maps/dir/?api=1&destination=' + x.ll[0] + "," + x.ll[1] + '" target="_blank" rel="noopener">' + esc(t("Directions")) + "</a></div></li>";
+            '<div class="wo-acts"><button type="button" class="btn-small" data-goto="' + x.ll[0] + "," + x.ll[1] + '" data-label="' + esc(x.name) + '">' + esc(t("Take me there")) + "</button></div></li>";
         }).join("") + "</ol>" +
         '<p class="ab-more"><a href="#/above">' + esc(t("Above Monaco: La Turbie, Èze and the viewpoints")) + "</a></p>" +
         '<p class="unchecked">' + esc(t("Bus times change with the seasons. Check zestbus.fr before you go.")) + "</p></section>";
@@ -796,6 +796,14 @@
       }
       el.addEventListener("click", function (e) {
         if (e.target.closest("a")) { if (window.MMEStats && e.target.closest(".wo-ext")) window.MMEStats.track("Villages directions"); return; }
+        var go = e.target.closest("[data-goto]");
+        if (go) {
+          var ll = go.dataset.goto.split(",");
+          window.MMEPlanner.state.to = { label: go.dataset.label, lat: +ll[0], lng: +ll[1], kind: "place" };
+          window.MMEPlanner.state.from = null; window.MMEPlanner.state.arrival = null;
+          if (window.MMEStats) window.MMEStats.track("Villages take me there");
+          location.hash = "#/plan"; return;
+        }
         var li = e.target.closest("[data-xm]");
         if (li && map && marks[li.dataset.xm]) { map.setView(marks[li.dataset.xm].getLatLng(), 16); marks[li.dataset.xm].openPopup(); mapEl.scrollIntoView({ behavior: "smooth", block: "center" }); }
       });

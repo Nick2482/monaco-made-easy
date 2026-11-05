@@ -307,19 +307,33 @@
             [a, z].forEach(function (p) { L.circleMarker([p.lat, p.lng], { radius: 9, color: "#fff", weight: 3, fillColor: window.MMEBus.routes[bus.p.r].c, fillOpacity: 1 }).addTo(layer); });
           }
           var cb = T && T.coastOption && r.minutes >= 20 ? T.coastOption(from, to) : null;
-          if (cb && (cb.generic || cb.minutes + 5 < r.minutes)) {
+          if (cb && (cb.generic || cb.minutes + 5 < r.minutes || r.minutes >= 40)) {
             var Bc = function (x) { return "<b>" + esc(x) + "</b>"; };
-            opts += '<div class="bus-opt cb-opt"><div class="bus-opt-top"><span class="bus-badge" style="background:#E47F0B;color:#fff">' + esc(cb.r) + "</span><span>" +
-              esc(cb.generic ? t("Coastal bus {r} towards {dest}", { r: cb.r, dest: cb.dest }) : t("Bus {r}: {ride} min to {stop}", { r: cb.r, ride: cb.ride, stop: cb.to })) + "</span></div><p>" +
-              esc(t("Walk {a} min to {stop}.", { a: Math.max(1, cb.walkTo), stop: "\u0001" })).replace("\u0001", Bc(cb.from)) + " " +
-              (cb.generic ? esc(t("Buses run about every 15 minutes in the day (every 20 at weekends). Get off at {stop}, then walk {w} min.", { stop: "\u0003", w: Math.max(1, cb.walkFrom) })).replace("\u0003", Bc(cb.to))
-                : esc(t("Bus {r} towards {dest} at {time} ({wait}), {ride} min to {stop}, then walk {w} min.", { r: cb.r, dest: cb.dest, time: "\u0002", wait: cb.wait <= 0 ? t("now") : t("in {n} min", { n: cb.wait }), ride: cb.ride, stop: "\u0003", w: Math.max(1, cb.walkFrom) })).replace("\u0002", Bc(T.hhmm(cb.dep))).replace("\u0003", Bc(cb.to))) + "</p>" +
+            var L1 = cb.legs[0], L2 = cb.legs[1];
+            var badgeOf = function (L) { return '<span class="bus-badge" style="background:' + L.c + ';color:#fff">' + esc(L.r) + "</span>"; };
+            var nets = cb.legs.map(function (L) { return L.net; }).filter(function (n, k, a) { return n && a.indexOf(n) === k; }).join(" / ");
+            var head = cb.generic ? t("Bus {r} towards {dest}", { r: L1.r, dest: L1.dest })
+              : L2 ? t("Bus {r}, then bus {r2}: about {n} min door to door", { r: L1.r, r2: L2.r, n: cb.minutes })
+              : t("Bus {r}: {ride} min to {stop}", { r: L1.r, ride: L1.arr - L1.dep, stop: L1.to });
+            var body = esc(t("Walk {a} min to {stop}.", { a: Math.max(1, cb.walkTo), stop: "\u0001" })).replace("\u0001", Bc(L1.from)) + " ";
+            if (cb.generic) {
+              body += esc(L1.r === "600" ? t("Buses run about every 15 minutes in the day (every 20 at weekends). Get off at {stop}, then walk {w} min.", { stop: "\u0003", w: Math.max(1, cb.walkFrom) })
+                : t("There are no more buses on this line in the next couple of hours. Get off at {stop}, then walk {w} min.", { stop: "\u0003", w: Math.max(1, cb.walkFrom) })).replace("\u0003", Bc(L1.to));
+            } else {
+              body += esc(t("Bus {r} towards {dest} at {time} ({wait}), {ride} min to {stop}.", { r: L1.r, dest: L1.dest, time: "\u0002", wait: cb.wait <= 0 ? t("now") : t("in {n} min", { n: cb.wait }), ride: L1.arr - L1.dep, stop: "\u0003" }))
+                .replace("\u0002", Bc(T.hhmm(L1.dep))).replace("\u0003", Bc(L1.to)) + " ";
+              if (L2) body += esc(t("Change to bus {r} towards {dest} at {time}, {ride} min to {stop}.", { r: L2.r, dest: L2.dest, time: "\u0002", ride: L2.arr - L2.dep, stop: "\u0003" }))
+                .replace("\u0002", Bc(T.hhmm(L2.dep))).replace("\u0003", Bc(L2.to)) + " ";
+              body += esc(t("Then walk {w} min.", { w: Math.max(1, cb.walkFrom) }));
+            }
+            opts += '<div class="bus-opt cb-opt"><div class="bus-opt-top">' + badgeOf(L1) + (L2 ? badgeOf(L2) : "") + "<span>" + esc(head) + "</span></div><p>" + body + "</p>" +
               (!cb.generic && (cb.hurry || cb.after) ? '<p class="opt-more">' + esc([cb.hurry ? t("If you hurry: {time}", { time: T.hhmm(cb.hurry) }) : "", cb.after ? t("The one after: {time}", { time: T.hhmm(cb.after) }) : ""].filter(Boolean).join(" · ")) + "</p>" : "") +
-              "<small>" + esc(cb.generic ? t("Live times are in the ZOU! app. Pay by tapping your card on board.") : t("About {n} min door to door, including the walks and the wait for the bus.", { n: cb.minutes }) + " " + t("ZOU! timetable. Live times are in the ZOU! app. Pay by tapping your card on board.")) + "</small></div>";
-            [cb.fromPt, cb.toPt].forEach(function (p) { L.circleMarker([p.lat, p.lng], { radius: 9, color: "#fff", weight: 3, fillColor: "#E47F0B", fillOpacity: 1 }).addTo(layer); });
+              "<small>" + esc((cb.generic ? "" : t("About {n} min door to door, including the walks and the wait for the bus.", { n: cb.minutes }) + " ") + t("{net} timetable. Live times are in the {net} app. Pay on board.", { net: nets })) + "</small></div>";
+            cb.legs.forEach(function (L) { [L.fromPt, L.toPt].forEach(function (pt) { window.L.circleMarker([pt.lat, pt.lng], { radius: 9, color: "#fff", weight: 3, fillColor: L.c, fillOpacity: 1 }).addTo(layer); }); });
           }
           var tr = T && T.trainOption && r.minutes >= 25 ? T.trainOption(from, to) : null;
-          if (tr && tr.minutes + 5 < r.minutes) {
+          var busBest = cb && !cb.generic ? cb.minutes : null;
+          if (tr && (tr.minutes + 5 < r.minutes || r.minutes >= 40) && tr.walkTo + tr.walkFrom <= 45 && !(busBest !== null && tr.minutes > busBest + 30)) {
             var Bt = function (x) { return "<b>" + esc(x) + "</b>"; };
             opts += '<div class="bus-opt tr-opt"><div class="bus-opt-top"><span class="bus-badge" style="background:#0b2545;color:#fff">' + esc(t("Train")) + "</span><span>" + esc(t("Train: {r} min to {stop}", { r: tr.ride, stop: t(tr.to) })) + "</span></div>" +
               "<p>" + esc(t("Walk {a} min to {stop}.", { a: Math.max(1, tr.walkTo), stop: "\u0001" })).replace("\u0001", Bt(t(tr.from))) + " " +

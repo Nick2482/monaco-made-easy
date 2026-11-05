@@ -62,7 +62,7 @@
   }
   function goHtml(e, label, cls, text) {
     var esc = window.MMEUI.esc;
-    if (isFar(e)) return '<a class="' + cls + '" href="https://www.google.com/maps/dir/?api=1&destination=' + e.lat + "," + e.lng + '" target="_blank" rel="noopener">' + esc(t("Directions")) + "</a>";
+    // Far places go to our planner too: for long trips it leads with the bus, then the train, then a taxi.
     return '<button type="button" class="' + cls + '" data-goto="' + e.lat + "," + e.lng + '" data-label="' + esc(label) + '">' + esc(t(text || "Take me there")) + "</button>";
   }
   function byWalk(items, pos, get) {

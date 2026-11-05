@@ -202,68 +202,120 @@
     return best;
   }
 
-  // ZOU! coastal bus 600 (and night bus 601) along the coast from Èze to Menton (coastbus.js).
-  // The open data has the buses towards Menton in full but only a few towards Nice, so westbound we
-  // show the stop and the line without inventing times.
-  var CB = window.MMECoast;
-  var CB_DEST = { "Gare Routière": "Menton", "Square de Normandie": "Nice", "Casino": "Monaco", "Sporting (Bay Hôtel)": "Monaco" };
+  // Regional buses (coastbus.js): ZOU! along the coast and up to La Turbie and Èze, and Zest around Menton,
+  // Roquebrune, Beausoleil and up to the villages. Finds the best journey with one bus, or two with a change.
+  var CB = window.MMECoast, CBX = null;
   function cbRuns(si, now) {
     var c = CB.svc[si];
     if (c[4].indexOf(now.ymd) >= 0) return false;
     if (c[3].indexOf(now.ymd) >= 0) return true;
     if (c[0].charAt(now.wd) !== "1") return false;
     if (now.ymd > CB.valid[1]) return true;
-    return now.ymd >= c[1] && now.ymd <= c[2];
+    return (!c[1] || now.ymd >= c[1]) && (!c[2] || now.ymd <= c[2]);
+  }
+  function cbIndex() {
+    if (CBX) return CBX;
+    var at = CB.stops.map(function () { return []; }), nb = CB.stops.map(function () { return []; });
+    CB.pats.forEach(function (p, pi) { p[2].forEach(function (si, k) { at[si].push([pi, k]); }); });
+    // Stops close enough to change buses on foot (same stop, across the road, round the corner).
+    var S = CB.stops;
+    for (var a = 0; a < S.length; a++) for (var b = a; b < S.length; b++) {
+      if (Math.abs(S[a][1] - S[b][1]) > 0.003 || Math.abs(S[a][2] - S[b][2]) > 0.004) continue;
+      var d = metres({ lat: S[a][1], lng: S[a][2] }, { lat: S[b][1], lng: S[b][2] });
+      if (d <= 220) { var w = Math.ceil(d * 1.3 / 70); nb[a].push([b, w]); if (a !== b) nb[b].push([a, w]); }
+    }
+    CBX = { at: at, nb: nb };
+    return CBX;
+  }
+  // First bus of pattern p leaving position k at or after "ready" (and within the next "within" minutes).
+  function cbFirst(p, k, ready, within, now) {
+    var off = p[3][k], T = p[4];
+    for (var i = 0; i < T.length; i++) {
+      var dep = T[i][1] + off;
+      if (dep < ready) continue;
+      if (dep > ready + within) return null;
+      if (cbRuns(T[i][0], now)) return T[i][1];
+    }
+    return null;
+  }
+  // Stops within reach of a point. At the start we look a little wider (a longer walk to a better bus is fine);
+  // at the end we want a stop close to where you're going, and only look further if there isn't one.
+  function cbNear(pt, tiers) {
+    var all = CB.stops.map(function (s, i) { return { i: i, d: metres(pt, { lat: s[1], lng: s[2] }) }; }), close = [];
+    for (var k = 0; k < tiers.length && !close.length; k++) close = all.filter(function (x) { return x.d <= tiers[k]; });
+    var m = {}; close.forEach(function (x) { m[x.i] = Math.ceil(x.d * 1.3 / 70); });
+    return m;
+  }
+  function cbLeg(p, s, i, j) {
+    var st = CB.stops, a = st[p[2][i]], z = st[p[2][j]];
+    return { r: p[0], dest: p[1], net: CB.routes[p[0]] ? CB.routes[p[0]].n : "", c: CB.routes[p[0]] ? CB.routes[p[0]].c : "#E47F0B",
+      from: a[0], to: z[0], fromPt: { lat: a[1], lng: a[2] }, toPt: { lat: z[1], lng: z[2] }, dep: s + p[3][i], arr: s + p[3][j] };
   }
   function coastOption(from, to, now) {
     if (!CB) return null;
     now = now || monacoNow();
-    var near = function (pt) {
-      var all = CB.stops.map(function (s, i) { return { i: i, d: metres(pt, { lat: s[1], lng: s[2] }) }; });
-      var close = all.filter(function (x) { return x.d <= 1300; });
-      return close.length ? close : all.filter(function (x) { return x.d <= 2200; });   // a longer walk still beats no bus at all
-    };
-    var A = near(from), Z = near(to);
-    if (!A.length || !Z.length) return null;
-    var dA = {}, dZ = {};
-    A.forEach(function (x) { dA[x.i] = Math.ceil(x.d * 1.3 / 70); });
-    Z.forEach(function (x) { dZ[x.i] = Math.ceil(x.d * 1.3 / 70); });
-    var best = null;
-    CB.trips.forEach(function (tr) {
-      if (!cbRuns(tr[1], now)) return;
-      var q = tr[3], bi = -1;
-      for (var k = 0; k < q.length; k += 2) {
-        var si = q[k], m = q[k + 1];
-        if (bi < 0) { if (dA[si] != null && m >= now.min + dA[si] + 1) bi = k; continue; }
-        if (dZ[si] != null && dA[si] == null) {
-          var arrive = m + dZ[si];
-          if (!best || arrive < best.arrive) best = { r: tr[0], dest: CB_DEST[tr[2]] || tr[2], a: q[bi], z: si, dep: q[bi + 1], ride: m - q[bi + 1], walkTo: dA[q[bi]], walkFrom: dZ[si], arrive: arrive };
-        } else if (dA[si] != null && m >= now.min + dA[si] + 1 && (dA[si] < dA[q[bi]])) bi = k;   // a closer stop further along
-      }
+    var X = cbIndex(), A = cbNear(from, [1300, 2200]), Z = cbNear(to, [700, 1300, 2200]), best = null, bestOne = null, anyLine = null;
+    var zPos = {};   // pattern -> positions that are near the destination
+    Object.keys(Z).forEach(function (zi) { X.at[zi].forEach(function (pk) { (zPos[pk[0]] = zPos[pk[0]] || []).push(pk[1]); }); });
+    function consider(legs, walkTo, walkFrom) {
+      var c = { legs: legs, walkTo: walkTo, walkFrom: walkFrom, dep: legs[0].dep, arrive: legs[legs.length - 1].arr + walkFrom };
+      // Rank by arrival time, counting long walks (often uphill here) as worse than the minutes suggest.
+      c.score = c.arrive + Math.max(0, walkTo - 8) * 0.7 + Math.max(0, walkFrom - 8) * 0.7;
+      var better = function (o) { return !o || c.score < o.score || (c.score === o.score && c.walkTo + c.walkFrom < o.walkTo + o.walkFrom); };
+      if (legs.length === 1) { if (better(bestOne)) bestOne = c; }
+      else if (better(best)) best = c;
+    }
+    Object.keys(A).forEach(function (ai) {
+      var wA = A[ai];
+      X.at[ai].forEach(function (pk) {
+        var p = CB.pats[pk[0]], i = pk[1];
+        if (i === p[2].length - 1) return;
+        if (zPos[pk[0]]) zPos[pk[0]].forEach(function (j) { if (j > i && !(p[2][j] in A)) anyLine = anyLine || { p: p, i: i, j: j, wA: wA, wZ: Z[p[2][j]] }; });
+        var s = cbFirst(p, i, now.min + wA + 1, 150, now);
+        if (s === null) return;
+        // One bus all the way.
+        (zPos[pk[0]] || []).forEach(function (j) { if (j > i && !(p[2][j] in A)) consider([cbLeg(p, s, i, j)], wA, Z[p[2][j]]); });
+        // Or change once.
+        for (var k = i + 1; k < p[2].length; k++) {
+          var x = p[2][k], t1 = s + p[3][k];
+          if (x in Z) break;
+          X.nb[x].forEach(function (yw) {
+            X.at[yw[0]].forEach(function (qm) {
+              var q = CB.pats[qm[0]], m = qm[1];
+              if (q[0] === p[0] || !zPos[qm[0]]) return;
+              var s2 = cbFirst(q, m, t1 + yw[1] + 2, 75, now);
+              if (s2 === null) return;
+              zPos[qm[0]].forEach(function (j2) { if (j2 > m) consider([cbLeg(p, s, i, k), cbLeg(q, s2, m, j2)], wA, Z[q[2][j2]]); });
+            });
+          });
+        }
+      });
     });
-    if (best) {
-      best.wait = best.dep - now.min; best.minutes = best.arrive - now.min;
-      if (best.wait > 150) best = null;
-      else {   // the bus after this one, and one you might just catch if you walk quickly
+    // Prefer one bus unless changing saves a good 10 minutes.
+    var pick = bestOne && (!best || bestOne.score <= best.score + 10) ? bestOne : best;
+    if (pick) {
+      pick.wait = pick.dep - now.min; pick.minutes = pick.arrive - now.min;
+      var L0 = pick.legs[0]; pick.r = L0.r;
+      if (pick.legs.length === 1) {   // the bus after, and one you might just catch if you walk quickly
         var times = [];
-        CB.trips.forEach(function (tr) {
-          if (!cbRuns(tr[1], now)) return;
-          var q = tr[3], ia = -1, iz = -1;
-          for (var k = 0; k < q.length; k += 2) { if (q[k] === best.a && ia < 0) ia = k; if (q[k] === best.z && ia >= 0) iz = k; }
-          if (ia >= 0 && iz > ia) times.push(q[ia + 1]);
+        CB.pats.forEach(function (p) {
+          var ia = -1, iz = -1;
+          p[2].forEach(function (si, k) { if (ia < 0 && CB.stops[si][0] === L0.from) ia = k; else if (ia >= 0 && iz < 0 && CB.stops[si][0] === L0.to) iz = k; });
+          if (ia < 0 || iz < 0 || p[0] !== L0.r) return;
+          p[4].forEach(function (tr) { if (cbRuns(tr[0], now)) times.push(tr[1] + p[3][ia]); });
         });
-        times.sort(function (x, y) { return x - y; });
-        var soon = now.min + Math.ceil(best.walkTo * 0.7) + 1;
-        best.hurry = times.filter(function (m) { return m < best.dep && m >= soon; }).pop() || null;
-        best.after = times.filter(function (m) { return m > best.dep; })[0] || null;
+        times.sort(function (a, b) { return a - b; });
+        var soon = now.min + Math.ceil(pick.walkTo * 0.7) + 1;
+        pick.hurry = times.filter(function (m) { return m < L0.dep && m >= soon; }).pop() || null;
+        pick.after = times.filter(function (m) { return m > L0.dep; })[0] || null;
       }
+      return pick;
     }
-    if (!best && Math.abs(to.lng - from.lng) > 0.01) {   // no timed bus soon (or towards Nice, where the open data is thin): show the line and stops
-      var a0 = A.sort(function (x, y) { return x.d - y.d; })[0], z0 = Z.sort(function (x, y) { return x.d - y.d; })[0];
-      best = { generic: true, r: "600", dest: to.lng < from.lng ? "Nice" : "Menton", a: a0.i, z: z0.i, walkTo: dA[a0.i], walkFrom: dZ[z0.i] };
+    if (anyLine) {   // the right bus exists, but not in the next couple of hours
+      var g = cbLeg(anyLine.p, 0, anyLine.i, anyLine.j);
+      return { generic: true, r: g.r, legs: [g], walkTo: anyLine.wA, walkFrom: anyLine.wZ };
     }
-    if (best) { var sa = CB.stops[best.a], sz = CB.stops[best.z]; best.from = sa[0]; best.to = sz[0]; best.fromPt = { lat: sa[1], lng: sa[2] }; best.toPt = { lat: sz[1], lng: sz[2] }; }
-    return best;
+    return null;
   }
 
   // Trains from Nice airport (Nice Saint-Augustin) to Monaco, for the airport page.
