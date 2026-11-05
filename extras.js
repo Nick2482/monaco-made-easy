@@ -637,7 +637,7 @@
     { name: "Roman quarry of Mont de Justice", ll: [43.74774, 7.41097], area: "La Turbie",
       what: "The quarry where the stone for the Trophée d’Auguste was cut 2,000 years ago, with paths and information panels.",
       how: "A short walk from La Turbie village." },
-    { name: "The Maybourne Riviera", ll: [43.75655, 7.44386], area: "Roquebrune-Cap-Martin",
+    { name: "The Maybourne Riviera", ll: [43.75655, 7.44386], area: "Roquebrune-Cap-Martin", photo: "img/maybourne-cliff.jpg", alt: "The Maybourne Riviera on its clifftop, seen from Roquebrune-Cap-Martin",
       what: "A luxury hotel on the cliff edge high above Monaco, with sweeping views from its terraces and restaurants. Book ahead to visit.",
       how: "By taxi, on the Grande Corniche above Roquebrune-Cap-Martin." },
     { name: "Èze village", ll: [43.7282, 7.3615], area: "Èze",
@@ -658,7 +658,7 @@
         (window.MMEZouBus ? window.MMEZouBus.html() : "") +
         '<h2 class="ab-h">' + esc(t("Places to visit")) + "</h2>" +
         '<ol class="wo-list xm-list">' + ABOVE.map(function (x, i) {
-          return '<li class="wo-ev" data-xm="' + i + '"><span class="ev-date">' + esc(t(x.area)) + '</span><strong><span class="yt-num xm-num">' + (i + 1) + "</span>" + esc(t(x.name)) + "</strong>" +
+          return '<li class="wo-ev" data-xm="' + i + '">' + (x.photo ? '<img class="ab-photo" src="' + x.photo + '" width="1200" height="675" loading="lazy" alt="' + esc(t(x.alt)) + '">' : "") + '<span class="ev-date">' + esc(t(x.area)) + '</span><strong><span class="yt-num xm-num">' + (i + 1) + "</span>" + esc(t(x.name)) + "</strong>" +
             "<p>" + esc(t(x.what)) + '</p><p class="ab-how"><b>' + esc(t("Getting there:")) + "</b> " + esc(t(x.how)) + "</p>" +
             '<div class="wo-acts"><a class="btn-small wo-ext" href="https://www.google.com/maps/dir/?api=1&destination=' + x.ll[0] + "," + x.ll[1] + '" target="_blank" rel="noopener">' + esc(t("Directions")) + "</a></div></li>";
         }).join("") + "</ol>" +

@@ -109,7 +109,7 @@
   function itemHtml(e, d, w) {
     var esc = ui().esc, open = e.hx ? null : openNow(e.h), hrs = hoursLine(e);
     var webUrl = e.w && /^https?:\/\//.test(e.w) ? e.w : e.w ? "https://" + e.w : "";
-    return '<li class="g-item"><span class="step-ico" style="--c:' + COLOR[e.k] + '">' + ui().icon(e.k) + "</span><div>" +
+    return '<li class="g-item' + (e.img ? " has-photo" : "") + '">' + (e.img ? '<img class="g-photo-item" src="' + esc(e.img) + '" width="1200" height="675" loading="lazy" alt="' + esc(t(e.n)) + '">' : "") + '<span class="step-ico" style="--c:' + COLOR[e.k] + '">' + ui().icon(e.k) + "</span><div>" +
       "<strong>" + esc(t(e.n)) + (e.pick ? ' <b class="g-pick">★ ' + esc(t("Our pick")) + "</b>" : "") +
         (e.mich ? ' <b class="g-mich" title="' + esc(t(e.mich === 1 ? "1 Michelin star" : "{n} Michelin stars", { n: e.mich })) + '">' + new Array(e.mich + 1).join("★") + " Michelin</b>" : "") + "</strong><span>" + esc(subtitle(e)) + "</span>" +
       (e.d ? '<p class="g-desc">' + esc(t(e.d)) + "</p>" : "") +

@@ -25,6 +25,7 @@
     } catch (e) {}
     if (window.navigator.standalone) return true;
     if (window.MMEPro && window.MMEPro.inPlayApp && window.MMEPro.inPlayApp()) return true;
+    if (window.MMEPro && window.MMEPro.inSamsungApp && window.MMEPro.inSamsungApp()) return true;
     return false;
   }
   function isIOS() {

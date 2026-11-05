@@ -1224,3 +1224,7 @@ a.pop-go, .leaflet-popup-content a.pop-go { display: inline-block; color: #fff; 
 /* Our own map: the space around it while it redraws is the colour of the land, not grey. */
 .leaflet-container.own-map { background: #f4efe3; }
 :root[data-theme="dark"] .leaflet-container.own-map { background: #1c232c; }
+/* Photos on the Above Monaco places and on guide entries */
+.ab-photo { display: block; width: calc(100% + 32px); max-width: none; height: auto; aspect-ratio: 16 / 9; object-fit: cover; margin: -14px -16px 12px; border-radius: 14px 14px 0 0; }
+.g-photo-item { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 12px; margin: 8px 0 6px; }
+.g-item .g-photo-item { grid-column: 1 / -1; margin: 0 0 4px; }

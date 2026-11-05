@@ -26,8 +26,17 @@
     return "locked";
   }
   function isPro() { return status() !== "locked"; }
+  // The Galaxy Store app opens at /?store=samsung. Samsung allows our own (Stripe) payment, so there it sells Pro like the website.
+  function inSamsungApp() {
+    try {
+      if (/[?&]store=samsung\b/.test(location.search)) { localStorage.setItem("mme-store", "samsung"); sessionStorage.setItem("mme-store", "samsung"); }
+      return sessionStorage.getItem("mme-store") === "samsung" || (localStorage.getItem("mme-store") === "samsung" && /^android-app:\/\//.test(document.referrer));
+    } catch (e) { return /[?&]store=samsung\b/.test(location.search); }
+  }
+  inSamsungApp();
   // Inside the Google Play app, Google requires its own payment system for things like Pro, so we don't sell there (yet).
   function inPlayApp() {
+    if (inSamsungApp()) return false;
     try { if (/^android-app:\/\//.test(document.referrer)) sessionStorage.setItem("mme-twa", "1"); return sessionStorage.getItem("mme-twa") === "1"; } catch (e) { return /^android-app:\/\//.test(document.referrer); }
   }
   inPlayApp();
@@ -212,5 +221,5 @@
   }
 
   playInit();
-  window.MMEPro = { CONFIG: CONFIG, inPlayApp: inPlayApp, status: status, isPro: isPro, lockCard: lockCard, badge: badge, screen: screen, tipAfterRoute: tipAfterRoute, checkReturn: checkReturn, retryPending: retryPending, previewSwitch: previewSwitch };
+  window.MMEPro = { CONFIG: CONFIG, inPlayApp: inPlayApp, inSamsungApp: inSamsungApp, status: status, isPro: isPro, lockCard: lockCard, badge: badge, screen: screen, tipAfterRoute: tipAfterRoute, checkReturn: checkReturn, retryPending: retryPending, previewSwitch: previewSwitch };
 })();
