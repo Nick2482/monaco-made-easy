@@ -190,10 +190,13 @@
       var ready = now.min + wa.m + 3;   // a few minutes to get to the platform
       var list = trNext(function (o) { return o[0] === c.a.i && o[5][c.b.k] > o[1] ? o[1] : null; }, now);
       if (!list) return;
-      var x = list.filter(function (y) { return y.at >= ready; })[0];
+      var ok = list.filter(function (y) { return y.at >= ready; }), x = ok[0];
       if (!x) return;
+      // A train you might just catch if you walk quickly, and the one after the suggested train.
+      var rush = list.filter(function (y) { return y.at < ready && y.at >= now.min + Math.ceil(wa.m * 0.7) + 1; }).pop();
       var ride = x.o[5][c.b.k] - x.o[1], arrive = x.at + ride + 2 + wz.m;
-      if (!best || arrive < best.arrive) best = { from: c.a.label, to: c.b.label, fromPt: c.a.pt, toPt: c.b.pt, dep: x.at, ride: ride, walkTo: wa.m, walkFrom: wz.m, wait: x.at - now.min, arrive: arrive };
+      if (!best || arrive < best.arrive) best = { from: c.a.label, to: c.b.label, fromPt: c.a.pt, toPt: c.b.pt, dep: x.at, ride: ride, walkTo: wa.m, walkFrom: wz.m, wait: x.at - now.min, arrive: arrive,
+        hurry: rush ? rush.at : null, after: ok[1] ? ok[1].at : null };
     });
     if (best) best.minutes = best.arrive - now.min;
     return best;
@@ -236,7 +239,23 @@
         } else if (dA[si] != null && m >= now.min + dA[si] + 1 && (dA[si] < dA[q[bi]])) bi = k;   // a closer stop further along
       }
     });
-    if (best) { best.wait = best.dep - now.min; best.minutes = best.arrive - now.min; if (best.wait > 150) best = null; }
+    if (best) {
+      best.wait = best.dep - now.min; best.minutes = best.arrive - now.min;
+      if (best.wait > 150) best = null;
+      else {   // the bus after this one, and one you might just catch if you walk quickly
+        var times = [];
+        CB.trips.forEach(function (tr) {
+          if (!cbRuns(tr[1], now)) return;
+          var q = tr[3], ia = -1, iz = -1;
+          for (var k = 0; k < q.length; k += 2) { if (q[k] === best.a && ia < 0) ia = k; if (q[k] === best.z && ia >= 0) iz = k; }
+          if (ia >= 0 && iz > ia) times.push(q[ia + 1]);
+        });
+        times.sort(function (x, y) { return x - y; });
+        var soon = now.min + Math.ceil(best.walkTo * 0.7) + 1;
+        best.hurry = times.filter(function (m) { return m < best.dep && m >= soon; }).pop() || null;
+        best.after = times.filter(function (m) { return m > best.dep; })[0] || null;
+      }
+    }
     if (!best && to.lng < from.lng - 0.01) {   // towards Nice: no reliable times in the open data
       var a0 = A.sort(function (x, y) { return x.d - y.d; })[0], z0 = Z.sort(function (x, y) { return x.d - y.d; })[0];
       best = { generic: true, r: "600", dest: "Nice", a: a0.i, z: z0.i, walkTo: dA[a0.i], walkFrom: dZ[z0.i] };
