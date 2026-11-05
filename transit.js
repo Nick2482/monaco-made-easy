@@ -151,21 +151,23 @@
     var esc = ui().esc, si = trStationIdx(fromName), K = TR.keys;
     var list = trNext(function (o) { return o[0] === si && o[2] === west ? o[1] : null; }, now);
     if (list === null) return '<p class="tr-none">' + tb("This timetable has expired. Check the SNCF Connect app.") + "</p>";
+    var today = trDay(now.ymd), anyToday = TR.dep.some(function (o) { return o[0] === si && trRuns(o[4], today); });
+    var noneNote = anyToday ? "" : '<p class="tr-none">' + tb("SNCF has no trains planned at this station today, which usually means engineering works or a strike. Check the SNCF Connect app for replacement buses.") + "</p>";
     // Last train of tonight's service (trains after midnight still count as tonight).
     var tonight = list.filter(function (x) { return x.at < now.min + (now.min < 240 ? 300 : 1440 + 240 - now.min); });
     var last = tonight.length ? tonight[tonight.length - 1] : null;
     var rows = list.slice(0, 5).map(function (x) {
       var o = x.o, inMin = x.at - now.min;
       var arr = west ? [o[5][0] >= 0 ? tb("Nice-Ville {t}", { t: hhmm(o[5][0]) }) : "", o[5][1] >= 0 ? tb("Nice Saint-Augustin (airport) {t}", { t: hhmm(o[5][1]) }) : ""].filter(Boolean).join(" · ")
-                     : (o[5][2] >= 0 ? tb("Menton {t}", { t: hhmm(o[5][2]) }) : "");
+                     : (o[5][2] > o[1] ? tb("Menton {t}", { t: hhmm(o[5][2]) }) : o[5][7] > o[1] ? tb("Menton-Garavan {t}", { t: hhmm(o[5][7]) }) : "");
       return '<li><b class="tr-time">' + hhmm(x.at) + '</b><span class="tr-to">' + (tb("to {place}", { place: TR.places[o[3]] })) + (arr ? "<small>" + arr + "</small>" : "") + "</span>" +
         '<span class="tr-in">' + (inMin <= 0 ? tb("now") : inMin < 60 ? tb("in {n} min", { n: inMin }) : x.at >= 1440 + 240 || (now.min >= 240 && x.at >= 1440 && x.at - now.min > 300) ? tb("tomorrow") : "") + "</span></li>";
     }).join("");
-    return (rows ? '<ul class="tr-board">' + rows + "</ul>" : '<p class="tr-none">' + tb("No more trains today.") + "</p>") +
+    return noneNote + (rows ? '<ul class="tr-board">' + rows + "</ul>" : '<p class="tr-none">' + tb("No more trains today.") + "</p>") +
       (last ? '<p class="tr-last">' + tb("**Last train tonight:** {t} to {place}", { t: hhmm(last.at), place: TR.places[last.o[3]] }) + "</p>" : '<p class="tr-last">' + tb("**No more trains tonight.** The times above are tomorrow’s.") + "</p>");
   }
   // Best train for a journey along the coast: walk to one of our four stations, ride, walk on.
-  var TR_ST = { "Monaco-Monte-Carlo": [43.7393, 7.4199, "Monaco Monte-Carlo station"], "Cap-d'Ail": [43.7206, 7.39438, "Cap d’Ail station"], "Roquebrune-Cap-Martin": [43.76062, 7.45734, "Roquebrune-Cap-Martin station"], "Carnoles": [43.76204, 7.48143, "Carnolès station"] };
+  var TR_ST = { "Monaco-Monte-Carlo": [43.7393, 7.4199, "Monaco Monte-Carlo station"], "Cap-d'Ail": [43.7206, 7.39438, "Cap d’Ail station"], "Roquebrune-Cap-Martin": [43.76062, 7.45734, "Roquebrune-Cap-Martin station"], "Carnoles": [43.76204, 7.48143, "Carnolès station"], "Menton": [43.774703, 7.4931157, "Menton station"], "Menton Garavan": [43.7852801, 7.517236, "Menton-Garavan station"], "Èze": [43.7222004, 7.3568809, "Èze-sur-Mer station"] };
   function trainOption(from, to, now) {
     if (!TR || !TR.dep) return null;
     now = now || monacoNow();
@@ -212,7 +214,7 @@
   }
   function trainsCard() {
     if (!TR) return "";
-    var st = [["Monaco-Monte-Carlo", "Monaco"], ["Cap-d'Ail", "Cap d’Ail"], ["Roquebrune-Cap-Martin", "Roquebrune"], ["Carnoles", "Carnolès"]];
+    var st = [["Monaco-Monte-Carlo", "Monaco"], ["Cap-d'Ail", "Cap d’Ail"], ["Roquebrune-Cap-Martin", "Roquebrune"], ["Carnoles", "Carnolès"], ["Menton", "Menton"], ["Menton Garavan", "Menton-Garavan"], ["Èze", "Èze-sur-Mer"]];
     return '<section class="tr-trains tr-sec" id="tr-trains"><h2 class="tr-sec-h">' + tb("Trains") + "</h2>" +
       '<div class="ess-chips" role="group" aria-label="' + tb("Station") + '">' + st.map(function (x, i) { return '<button type="button" class="chip' + (i ? "" : " on") + '" data-st="' + x[0] + '">' + tb(x[1]) + "</button>"; }).join("") + "</div>" +
       '<div class="tr-dir" role="group"><button type="button" class="chip on" data-w="1">' + tb("Towards Nice") + '</button><button type="button" class="chip" data-w="0">' + tb("Towards Menton and Italy") + "</button></div>" +

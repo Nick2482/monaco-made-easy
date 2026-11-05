@@ -754,13 +754,13 @@
   var VILLAGES = [
     { name: "Sainte-Agnès village", ll: [43.80041, 7.46150], area: "Sainte-Agnès",
       what: "One of the highest coastal villages in Europe, about 780 m up, with castle ruins and views down to Menton and the sea. Not step-free.",
-      how: "Zest bus 10 from Menton Gare Routière, about 40 minutes up a winding road. Or a taxi." },
+      how: "Zest bus 10 from Menton Gare Routière, about 35 minutes up a winding road. Or a taxi." },
     { name: "Fort de Sainte-Agnès", ll: [43.79883, 7.46249], area: "Sainte-Agnès",
       what: "A Maginot Line fort dug into the mountain below the village, open for guided visits on some days. Check opening times before you go.",
       how: "A short walk down from Sainte-Agnès village." },
     { name: "Gorbio village", ll: [43.78664, 7.44388], area: "Gorbio",
       what: "A quiet medieval hill village above Roquebrune and Menton, with an ancient elm on its little square.",
-      how: "Zest bus 7 from Menton Gare Routière, about 30 minutes. Or a taxi." },
+      how: "Zest bus 5 from Menton Gare Routière, about 35 minutes. Or a taxi." },
     { name: "Castellar village", ll: [43.80413, 7.49701], area: "Castellar",
       what: "The last French hill village before Italy, with narrow lanes and walking trails into the mountains.",
       how: "Zest bus 6 from Menton Gare Routière, about 30 minutes. Or a taxi." }
@@ -770,7 +770,8 @@
       return '<section class="page whats-on above-page"><a class="back" href="#/transport"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + esc(t("Getting around")) + "</a>" +
         "<h1>" + esc(t("Villages above Menton")) + '</h1><p class="lede-dark">' + esc(t("Sainte-Agnès, Gorbio and Castellar: medieval villages on the mountains behind Menton, a short bus ride from the sea.")) + "</p>" +
         (window.L && window.MMEMap ? '<div class="yt-map xm-map" id="vl-map" role="application" aria-label="' + esc(t("Map")) + '"></div>' : "") +
-        '<aside class="note note-rule"><strong>' + esc(t("Buses up from Menton")) + "</strong><p>" + esc(t("Menton’s Zest buses leave from the Gare Routière, next to Menton station: line 10 to Sainte-Agnès, line 7 to Gorbio and line 6 to Castellar. They run a few times a day, so check the times at zestbus.fr before you go.")) + "</p></aside>" +
+        '<aside class="note note-rule"><strong>' + esc(t("Buses up from Menton")) + "</strong><p>" + esc(t("Menton’s Zest buses leave from the Gare Routière, next to Menton station: line 10 to Sainte-Agnès, line 5 to Gorbio and line 6 to Castellar. They run only a few times a day, so check the times below before you go.")) + "</p></aside>" +
+        (window.MMEZestBus ? window.MMEZestBus.html() : "") +
         '<h2 class="ab-h">' + esc(t("Places to visit")) + "</h2>" +
         '<ol class="wo-list xm-list">' + VILLAGES.map(function (x, i) {
           return '<li class="wo-ev" data-xm="' + i + '">' + (x.photo ? '<img class="ab-photo" src="' + x.photo + '" width="1200" height="675" loading="lazy" alt="' + esc(t(x.alt)) + '">' : "") + '<span class="ev-date">' + esc(t(x.area)) + '</span><strong><span class="yt-num xm-num">' + (i + 1) + "</span>" + esc(t(x.name)) + "</strong>" +
@@ -782,6 +783,7 @@
     },
     mount: function (el) {
       if (window.MMEStats) window.MMEStats.track("Villages above Menton opened");
+      if (window.MMEZestBus) window.MMEZestBus.mount(el);
       var mapEl = el.querySelector("#vl-map"), map = null, marks = [];
       if (mapEl) {
         map = window.MMEMap.makeMap(mapEl);
