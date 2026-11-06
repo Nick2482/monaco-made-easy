@@ -7,11 +7,11 @@
   function places() { return window.MMEGuidePlaces || []; }
   function lang() { var l = window.MMEI18N.lang(); return l === "en" ? "en-GB" : l === "zh" ? "zh-CN" : l; }
 
-  var CATS = [["hotel", "Hotels"], ["eat", "Restaurants"], ["cafe", "Cafés"], ["bakery", "Bakeries"], ["bar", "Bars"], ["shop", "Supermarkets and markets"], ["tabac", "Cigars and tabacs"], ["culture", "Museums and galleries"], ["yacht", "Yachting"], ["broker", "Yacht brokers"], ["club", "Clubs"], ["info", "Tourist information"]];
+  var CATS = [["hotel", "Hotels"], ["eat", "Restaurants"], ["cafe", "Cafés"], ["bakery", "Bakeries"], ["bar", "Bars"], ["shop", "Supermarkets and markets"], ["tabac", "Cigars and tabacs"], ["culture", "Sights and museums"], ["beach", "Beaches"], ["view", "Viewpoints"], ["spa", "Spas and wellness"], ["yacht", "Yachting"], ["broker", "Yacht brokers"], ["club", "Clubs"], ["info", "Tourist information"]];
   // Sections inside Restaurants.
   var GRPS = [["fine", "Michelin and fine dining"], ["french", "French and brasseries"], ["italian", "Italian and pizza"], ["seafood", "Seafood and Mediterranean"],
     ["asian", "Asian"], ["local", "Monégasque and Niçois"], ["world", "World food"], ["beach", "Beach and sea view"], ["quick", "Burgers and quick bites"]];
-  var COLOR = { hotel: "#1f3a5f", bakery: "#a0661a", shop: "#2f7a3d", tabac: "#6b4a2e", eat: "#9c3d54", cafe: "#7a5230", bar: "#8a2f6b", culture: "#0e7c86", yacht: "#1f4e8c", broker: "#2b6a8f", club: "#7a4f1d", info: "#4a5d70" };
+  var COLOR = { hotel: "#1f3a5f", bakery: "#a0661a", shop: "#2f7a3d", tabac: "#6b4a2e", eat: "#9c3d54", cafe: "#7a5230", bar: "#8a2f6b", culture: "#0e7c86", beach: "#1c8fb8", view: "#5b7f2a", spa: "#8a5a9e", yacht: "#1f4e8c", broker: "#2b6a8f", club: "#7a4f1d", info: "#4a5d70" };
   var FREE = {};
   var SUB = { museum: "Museum", gallery: "Art gallery", theatre: "Theatre", garden: "Garden", beach: "Beach", venue: "Exhibitions and events", chandlery: "Chandlery", harbour: "Harbour office", pub: "Pub", nightclub: "Nightclub",
     motor: "Motor club", yacht: "Yacht club", rowing: "Rowing club", tennis: "Tennis club", sailing: "Sailing club", hiking: "Hiking club", convenience: "Mini-market", pastry: "Pâtisserie", cocktail: "Cocktail bar", wine: "Wine bar", beachbar: "Beach bar",
