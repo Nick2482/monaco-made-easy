@@ -35,3 +35,9 @@ body { padding-bottom: 0; background: #fff; }
   .gp-hero { max-width: 680px; margin: 22px auto 0; padding: 0 16px; }
   .gp-hero img, .gp-hero.gp-two img { height: 360px; border-radius: 16px; }
 }
+
+.gp-fig { margin: 18px 0 22px; }
+.gp-fig img { display: block; width: 100%; height: auto; border-radius: 14px; }
+.gp-fig.gp-fig-two { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.gp-fig.gp-fig-two img { aspect-ratio: 4 / 3; object-fit: cover; }
+.gp-fig figcaption { margin-top: 6px; font-size: .86em; font-style: italic; opacity: .75; }
