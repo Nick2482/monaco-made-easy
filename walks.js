@@ -67,7 +67,7 @@
         { name: "Carnolès seafront", lat: 43.7578, lng: 7.4818, text: "Finish by the beaches and cafés of Carnolès. Carnolès station is about 10 minutes’ walk inland." }
       ] },
     { id: "menton", title: "Menton old town and the sea", sub: "From the Biovès gardens along the seafront, up to the basilica and down to the beach. The old town has steps.", stepped: true,
-      photos: ["img/menton-view.jpg"], photoCredit: "Menton from the old cemetery above the old town. Photo: Nick Hutton",
+      photos: ["img/menton-view.jpg", "img/menton-halles.jpg"], photoCredit: "Menton from the old cemetery above the old town, and Les Halles, the covered market. Photos: Nick Hutton",
       stops: [
         { name: "Jardins Biovès", lat: 43.77521, lng: 7.49583, text: "Start in the gardens, about 5 minutes from Menton station. In February they’re full of the Lemon Festival’s giant citrus sculptures." },
         { name: "Musée Jean Cocteau, Séverin Wunderman collection", lat: 43.77474, lng: 7.50579, text: "Walk along the seafront to this striking white museum of Cocteau’s drawings, ceramics and films." },
