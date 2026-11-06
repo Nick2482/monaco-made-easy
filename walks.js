@@ -70,7 +70,7 @@
       photos: ["img/menton-view.jpg", "img/menton-halles.jpg", "img/menton-rampes.jpg"], photoCredit: "Menton from the old cemetery above the old town, Les Halles, and the Rampes Saint-Michel up to the basilica. Photos: Nick Hutton",
       stops: [
         { name: "Jardins Biovès", lat: 43.77521, lng: 7.49583, text: "Start in the gardens, about 5 minutes from Menton station. In February they’re full of the Lemon Festival’s giant citrus sculptures." },
-        { name: "Musée Jean Cocteau, Séverin Wunderman collection", lat: 43.77474, lng: 7.50579, text: "Walk along the seafront to this striking white museum of Cocteau’s drawings, ceramics and films." },
+        { name: "Musée Jean Cocteau, Séverin Wunderman collection", lat: 43.77474, lng: 7.50579, text: "Walk along the seafront to Rudy Ricciotti’s striking white Cocteau museum. It has been closed since storm damage in 2018, but the building is worth seeing; part of the collection is on show at the Galerie des Musées, back by the Biovès gardens." },
         { name: "Les Halles", lat: 43.77523, lng: 7.50606, text: "Menton’s covered market, for fruit, local cheeses and the town’s famous lemons. Best in the morning." },
         { name: "Basilique Saint-Michel-Archange", lat: 43.77706, lng: 7.50707, text: "Climb the old town’s stepped lanes to the Baroque basilica and its square, with views over the sea. This part is steep." },
         { name: "Musée Jean Cocteau, Le Bastion", lat: 43.77481, lng: 7.50845, text: "Back down by the harbour, Cocteau’s own small museum in a 17th-century fort." },
