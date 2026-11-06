@@ -757,7 +757,7 @@
       what: "One of the highest coastal villages in Europe, about 780 m up, with castle ruins and views down to Menton and the sea. Not step-free.",
       how: "Zest bus 10 from Menton Gare Routière, about 35 minutes up a winding road. Or a taxi." },
     { name: "Sainte-Agnès castle ruins", ll: [43.80048, 7.46330], area: "Sainte-Agnès",
-      photo: "img/sainte-agnes-from-castle.jpg", alt: "Sainte-Agnès village seen from the castle ruins, with mountains behind",
+      photo: "img/menton-from-sainte-agnes.jpg", alt: "Menton and the sea far below, seen from the top of Sainte-Agnès castle",
       what: "The ruins of the medieval castle on the rock above the village, with a little medieval garden and huge views over the village, the valley and down to the sea.",
       how: "On foot from the village only. The path up is very steep and rough: go only if you’re fit, in good shoes, and allow time to come back down." },
     { name: "Fort de Sainte-Agnès", ll: [43.79883, 7.46249], area: "Sainte-Agnès",
