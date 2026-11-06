@@ -41,3 +41,4 @@ body { padding-bottom: 0; background: #fff; }
 .gp-fig.gp-fig-two { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .gp-fig.gp-fig-two img { aspect-ratio: 4 / 3; object-fit: cover; }
 .gp-fig figcaption { margin-top: 6px; font-size: .86em; font-style: italic; opacity: .75; }
+.gp-fig.gp-fig-two figcaption { grid-column: 1 / -1; }
