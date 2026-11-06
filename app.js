@@ -7,6 +7,7 @@
   if (window.MMEOsmLifts) D.lifts = window.MMEOsmLifts.concat(D.lifts.filter(function (l) { return l.area === "Beausoleil"; }));
   var main = document.getElementById("main");
   var filter = "all";      // all | stepfree | beausoleil
+  var allRoutes = false, allCats = false;   // home: show every route / every guide category
   var placeFilter = null;  // a place id from the height chart
 
   var COLORS = { lift: "#ce1126", escalator: "#1d6fa5", walk: "#8a96a3", bus: "#0f8b6e", arrive: "#0b2545", steps: "#d9480f" };
@@ -172,7 +173,6 @@
       (window.MMEInstall ? window.MMEInstall.card("home") + window.MMEInstall.rateCard() : "") +
       (window.MMEGuide ? guideBlock() : "") +
       (window.MMEWalks ? window.MMEWalks.walksBlock() : "") +
-      guidesBlock(" block") +
       (window.MMEInstall ? window.MMEInstall.shareCard() : "") +
       '<section class="block" id="routes" aria-labelledby="routes-h">' +
       '<div class="block-head"><h2 id="routes-h">' + esc(pf ? t("Routes for {place}", { place: placeShort(pf) }) : t("Popular routes")) + "</h2>" +
@@ -180,21 +180,24 @@
       '<div class="chips" role="group" aria-label="' + esc(t("Filter routes")) + '">' + chips.map(function (c) {
         return '<button type="button" class="chip' + (filter === c[0] ? " on" : "") + '" data-filter="' + c[0] + '" aria-pressed="' + (filter === c[0]) + '">' + esc(c[1]) + "</button>";
       }).join("") + "</div>" +
-      (list.length ? '<ul class="rlist">' + list.map(routeCard).join("") + "</ul>" :
+      (list.length ? '<ul class="rlist">' + (allRoutes || pf || filter !== "all" ? list : list.slice(0, 4)).map(routeCard).join("") + "</ul>" +
+        (!allRoutes && !pf && filter === "all" && list.length > 4 ? '<button type="button" class="btn btn-line more-btn" data-allroutes>' + esc(t("Show all {n} routes", { n: list.length })) + "</button>" : "") :
         '<p class="empty">' + esc(t("We haven’t written a route with that filter yet.")) + " " + (pf ? '<a href="https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=' + pf.lat + "," + pf.lng + '" target="_blank" rel="noopener">' + esc(t("Walking directions in Google Maps")) + "</a>" : "") + "</p>") +
       "</section>" +
       '<section class="side-on"><figure class="chart-card"><figcaption><span>' + esc(t("Monaco, side on")) + '</span><span class="key"><i class="k-sf"></i>' + esc(t("Step-free")) + ' <i class="k-st"></i>' + esc(t("Some steps")) + "</span></figcaption>" + heightChart() + '<p class="chart-hint">' + esc(t("Monaco climbs 100 m from the sea. Tap a place to see its routes.")) + "</p></figure></section>";
   }
 
-  // The guide: eat, drink, see.
+  // The guide: eat, drink, see. The home screen shows the most-used categories; "All categories" opens the rest.
+  var HOME_CATS = ["hotel", "eat", "bar", "culture", "beach", "view"];
   function guideBlock() {
     var P = window.MMEPro, G = window.MMEGuide;
     return '<section class="block guide-block"><div class="block-head"><h2>' + esc(t("Stay, eat, drink and see")) + "</h2>" + (P ? P.badge() : "") + '</div><p class="block-lede">' +
       esc(t("Hotels, restaurants, bars, museums and more, each with the way there.")) + '</p>' +
       '<a class="g-searchlink" href="#/guide/find"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 3a7 7 0 0 1 5.6 11.2l5.1 5.1-1.4 1.4-5.1-5.1A7 7 0 1 1 10 3zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10z"/></svg><span>' + esc(t("Search the guide")) + '</span></a>' +
-      '<nav class="g-quick"><a href="#/guide/saved"><span class="eq-ico" style="--c:#ce1126"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.5-9.2C1 8.3 3.2 5 6.6 5c2 0 3.4 1.1 4.4 2.5C12 6.1 13.4 5 15.4 5 18.8 5 21 8.3 19.5 11.8 17.5 16.4 12 21 12 21z"/></svg></span>' + esc(t("My places")) + "</a>" + G.CATS.map(function (c) {
-        return '<a href="#/guide/' + c[0] + '"><span class="eq-ico" style="--c:' + G.COLOR[c[0]] + '">' + icon(c[0]) + "</span>" + esc(t(c[1])) + "</a>";
-      }).join("") + "</nav></section>";
+      '<nav class="g-quick' + (allCats ? " all" : "") + '"><a href="#/guide/saved"><span class="eq-ico" style="--c:#ce1126"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.5-9.2C1 8.3 3.2 5 6.6 5c2 0 3.4 1.1 4.4 2.5C12 6.1 13.4 5 15.4 5 18.8 5 21 8.3 19.5 11.8 17.5 16.4 12 21 12 21z"/></svg></span>' + esc(t("My places")) + "</a>" + G.CATS.map(function (c) {
+        var top = HOME_CATS.indexOf(c[0]) >= 0;
+        return '<a href="#/guide/' + c[0] + '"' + (top ? "" : ' class="g-extra"') + '><span class="eq-ico" style="--c:' + G.COLOR[c[0]] + '">' + icon(c[0]) + "</span>" + esc(t(c[1])) + "</a>";
+      }).join("") + (allCats ? "" : '<button type="button" class="g-all" data-allcats><span class="eq-ico" style="--c:#6b6b6b"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4zm10 0h6v6h-6zM4 14h6v6H4zm10 0h6v6h-6z"/></svg></span>' + esc(t("All categories")) + "</button>") + "</nav></section>";
   }
 
   // The visit, in one quiet list: arriving, where you're staying, the season, and what to know.
@@ -326,6 +329,8 @@
     if (f) { filter = f.dataset.filter; render(); return; }
     var p = e.target.closest("[data-place]");
     if (p) { placeFilter = placeFilter === p.dataset.place ? null : p.dataset.place; render(); return; }
+    if (e.target.closest("[data-allroutes]")) { allRoutes = true; render(); return; }
+    if (e.target.closest("[data-allcats]")) { allCats = true; var y = window.scrollY; render(); window.scrollTo(0, y); return; }
     if (e.target.closest("[data-clear]")) { placeFilter = null; render(); }
   });
   main.addEventListener("keydown", function (e) {

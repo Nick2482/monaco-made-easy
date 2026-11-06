@@ -123,7 +123,7 @@
   }
   function walksBlock() {
     var esc = ui().esc;
-    return '<section class="block walks-block"><div class="block-head"><h2>' + esc(t("Walks")) + "</h2>" + (window.MMEPro ? window.MMEPro.badge() : "") + '</div><p class="block-lede">' + esc(t("Sightseeing walks that use the lifts, and two coastal walks right by the sea.")) + '</p><ul class="walk-list">' + WALKS.map(walkCard).join("") + "</ul></section>";
+    return '<section class="block walks-block"><div class="block-head"><h2>' + esc(t("Walks")) + "</h2>" + (window.MMEPro ? window.MMEPro.badge() : "") + '</div><p class="block-lede">' + esc(t("Sightseeing walks that use the lifts, walks right by the sea, and Menton’s old town. Swipe to see them all.")) + '</p><ul class="walk-list">' + WALKS.map(walkCard).join("") + "</ul></section>";
   }
 
   var walkScreen = {

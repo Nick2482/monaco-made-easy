@@ -1234,3 +1234,15 @@ a.pop-go, .leaflet-popup-content a.pop-go { display: inline-block; color: #fff; 
 .live-dot { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 9px; background: #1f8a4c; color: #fff; font-size: .78em; font-weight: 700; vertical-align: 1px; }
 .wk-photos.wk-p3 img:first-child { grid-column: 1 / -1; height: 210px; }
 .wk-photos img[src$="menton-rampes.jpg"] { object-position: 30% center; }
+
+/* Home screen, kept short: guide categories collapse to the most-used, walks swipe sideways, routes show four. */
+.g-quick:not(.all) .g-extra { display: none; }
+.g-quick .g-all { font: inherit; text-align: left; cursor: pointer; }
+.walks-block .walk-list { grid-auto-flow: column; grid-auto-columns: 84%; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; margin: 0 -16px; padding-left: 16px; padding-right: 16px; scroll-padding-left: 16px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.walks-block .walk-list::-webkit-scrollbar { display: none; }
+.walks-block .walk-list li { scroll-snap-align: start; display: flex; }
+.walks-block .walk-card { width: 100%; align-content: start; }
+.walks-block .wk-stops { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.more-btn { display: block; width: 100%; margin-top: 12px; }
+.walk-list li .walk-card.wk-menton { background: linear-gradient(180deg, rgba(10, 31, 60, 0.35), rgba(10, 31, 60, 0.92)), url(img/menton-view.jpg) center 60% / cover; }
+.g-quick .g-all { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; border: 1px dashed var(--line); background: transparent; color: var(--head); font-weight: 700; font-size: 15.5px; line-height: 1.25; min-width: 0; }
