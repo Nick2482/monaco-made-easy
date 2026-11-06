@@ -310,8 +310,9 @@
           if (cb && (cb.generic || cb.minutes + 5 < r.minutes || r.minutes >= 40)) {
             var Bc = function (x) { return "<b>" + esc(x) + "</b>"; };
             var L1 = cb.legs[0], L2 = cb.legs[1];
-            var badgeOf = function (L) { return '<span class="bus-badge" style="background:' + L.c + ';color:#fff">' + esc(L.r) + "</span>"; };
+            var badgeOf = function (L) { return '<span class="bus-badge" style="background:' + L.c + ";color:" + (L.tc || "#fff") + '">' + esc(L.r) + "</span>"; };
             var nets = cb.legs.map(function (L) { return L.net; }).filter(function (n, k, a) { return n && a.indexOf(n) === k; }).join(" / ");
+            var hasCam = cb.legs.some(function (L) { return !L.net; });
             var head = cb.generic ? t("Bus {r} towards {dest}", { r: L1.r, dest: L1.dest })
               : L2 ? t("Bus {r}, then bus {r2}: about {n} min door to door", { r: L1.r, r2: L2.r, n: cb.minutes })
               : t("Bus {r}: {ride} min to {stop}", { r: L1.r, ride: L1.arr - L1.dep, stop: L1.to });
@@ -328,7 +329,7 @@
             }
             opts += '<div class="bus-opt cb-opt"' + (cb.generic && L1.net === "ZOU!" ? ' id="cb-live"' : "") + '><div class="bus-opt-top">' + badgeOf(L1) + (L2 ? badgeOf(L2) : "") + "<span>" + esc(head) + "</span></div><p>" + body + "</p>" +
               (!cb.generic && (cb.hurry || cb.after) ? '<p class="opt-more">' + esc([cb.hurry ? t("If you hurry: {time}", { time: T.hhmm(cb.hurry) }) : "", cb.after ? t("The one after: {time}", { time: T.hhmm(cb.after) }) : ""].filter(Boolean).join(" · ")) + "</p>" : "") +
-              "<small>" + esc((cb.generic ? "" : t("About {n} min door to door, including the walks and the wait for the bus.", { n: cb.minutes }) + " ") + t("{net} timetable. Live times are in the {net} app. Pay on board.", { net: nets })) + "</small></div>";
+              "<small>" + esc((cb.generic ? "" : t("About {n} min door to door, including the walks and the wait for the bus.", { n: cb.minutes }) + " ") + t("{net} timetable. Live times are in the {net} app. Pay on board.", { net: nets }) + (hasCam ? " " + t("Monaco city buses: CAM timetable.") : "")) + "</small></div>";
             cb.legs.forEach(function (L) { [L.fromPt, L.toPt].forEach(function (pt) { window.L.circleMarker([pt.lat, pt.lng], { radius: 9, color: "#fff", weight: 3, fillColor: L.c, fillOpacity: 1 }).addTo(layer); }); });
           }
           var tr = T && T.trainOption && r.minutes >= 25 ? T.trainOption(from, to) : null;

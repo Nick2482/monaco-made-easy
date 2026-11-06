@@ -255,6 +255,38 @@
     return { r: p[0], dest: p[1], net: CB.routes[p[0]] ? CB.routes[p[0]].n : "", c: CB.routes[p[0]] ? CB.routes[p[0]].c : "#E47F0B",
       from: a[0], to: z[0], fromPt: { lat: a[1], lng: a[2] }, toPt: { lat: z[1], lng: z[2] }, dep: s + p[3][i], arr: s + p[3][j] };
   }
+  // Monaco's own city buses (CAM, bus.js) can be the first or last leg of a regional journey,
+  // e.g. city bus up to Jardin Exotique, then Zest 11 to La Turbie. Stops close enough to change on foot:
+  var CBM = null;
+  function cbCam() {
+    if (CBM && CBM.B === B) return CBM;
+    var camToCb = B.stops.map(function () { return []; }), cbToCam = CB.stops.map(function () { return []; }), camAt = B.stops.map(function () { return []; });
+    B.patterns.forEach(function (p, pi) { p.s.forEach(function (si, k) { camAt[si].push([pi, k]); }); });
+    var X = cbIndex();
+    B.stops.forEach(function (bs, bi) {
+      CB.stops.forEach(function (cs, ci) {
+        if (!X.at[ci].length || Math.abs(bs[1] - cs[1]) > 0.003 || Math.abs(bs[2] - cs[2]) > 0.004) return;
+        var d = metres({ lat: bs[1], lng: bs[2] }, { lat: cs[1], lng: cs[2] });
+        if (d <= 250) { var w = Math.ceil(d * 1.3 / 70); camToCb[bi].push([ci, w]); cbToCam[ci].push([bi, w]); }
+      });
+    });
+    CBM = { B: B, camToCb: camToCb, cbToCam: cbToCam, camAt: camAt };
+    return CBM;
+  }
+  function camLeg(p, trip, i, j) {
+    var R = B.routes[p.r] || {}, a = B.stops[p.s[i]], z = B.stops[p.s[j]];
+    return { r: R.n || "", dest: p.h || "", net: "", c: R.c || "#C4362C", tc: R.t || "#fff", from: a[0], to: z[0],
+      fromPt: { lat: a[1], lng: a[2] }, toPt: { lat: z[1], lng: z[2] }, dep: trip[1 + i], arr: trip[1 + j] };
+  }
+  function camFirst(p, k, ready, within, now) {
+    for (var t = 0; t < p.t.length; t++) {
+      var trip = p.t[t], d = trip[1 + k];
+      if (d < ready || d > ready + within) continue;
+      if (runs(trip[0], now)) return trip;
+    }
+    return null;
+  }
+
   function coastOption(from, to, now) {
     if (!CB) return null;
     now = now || monacoNow();
@@ -265,10 +297,9 @@
       var c = { legs: legs, walkTo: walkTo, walkFrom: walkFrom, dep: legs[0].dep, arrive: legs[legs.length - 1].arr + walkFrom };
       // Rank by arrival time, counting long walks (often uphill here) as worse than the minutes suggest.
       c.score = c.arrive + Math.max(0, walkTo - 8) * 0.7 + Math.max(0, walkFrom - 8) * 0.7;
-      var better = function (o) { return !o || c.score < o.score || (c.score === o.score && c.walkTo + c.walkFrom < o.walkTo + o.walkFrom); };
-      if (legs.length === 1) { if (better(bestOne)) bestOne = c; }
-      else if (better(best)) best = c;
+      all.push(c);
     }
+    var all = [];
     Object.keys(A).forEach(function (ai) {
       var wA = A[ai];
       X.at[ai].forEach(function (pk) {
@@ -287,7 +318,7 @@
             X.at[yw[0]].forEach(function (qm) {
               var q = CB.pats[qm[0]], m = qm[1];
               if (q[0] === p[0] || !zPos[qm[0]]) return;
-              var s2 = cbFirst(q, m, t1 + yw[1] + 2, 75, now);
+              var s2 = cbFirst(q, m, t1 + yw[1] + 2, 150, now);
               if (s2 === null) return;
               zPos[qm[0]].forEach(function (j2) { if (j2 > m) consider([cbLeg(p, s, i, k), cbLeg(q, s2, m, j2)], wA, Z[q[2][j2]]); });
             });
@@ -295,7 +326,74 @@
         }
       });
     });
+    // Monaco city bus first, then a regional bus; or a regional bus, then a Monaco city bus.
+    if (B && B.patterns) {
+      var M = cbCam(), camA = {}, camZ = {};
+      nearStops(from, 600).forEach(function (x) { camA[x.i] = Math.ceil(x.d * 1.3 / 70); });
+      nearStops(to, 600).forEach(function (x) { camZ[x.i] = Math.ceil(x.d * 1.3 / 70); });
+      B.patterns.forEach(function (p) {
+        for (var i = 0; i < p.s.length - 1; i++) {
+          var wa = camA[p.s[i]];
+          if (wa == null) continue;
+          var trip = camFirst(p, i, now.min + wa + 1, 120, now);
+          if (!trip) continue;
+          for (var k = i + 1; k < p.s.length; k++) {
+            if (camZ[p.s[k]] != null) break;   // a city bus alone gets you there: that's the Monaco bus card's job
+            var t1 = trip[1 + k];
+            M.camToCb[p.s[k]].forEach(function (yw) {
+              X.at[yw[0]].forEach(function (qm) {
+                var q = CB.pats[qm[0]], m = qm[1];
+                if (!zPos[qm[0]]) return;
+                var s2 = cbFirst(q, m, t1 + yw[1] + 2, 150, now);
+                if (s2 === null) return;
+                zPos[qm[0]].forEach(function (j2) { if (j2 > m) consider([camLeg(p, trip, i, k), cbLeg(q, s2, m, j2)], wa, Z[q[2][j2]]); });
+              });
+            });
+          }
+        }
+      });
+      Object.keys(A).forEach(function (ai) {
+        var wA = A[ai];
+        X.at[ai].forEach(function (pk) {
+          var p = CB.pats[pk[0]], i = pk[1];
+          if (i === p[2].length - 1) return;
+          var s = cbFirst(p, i, now.min + wA + 1, 150, now);
+          if (s === null) return;
+          for (var k = i + 1; k < p[2].length; k++) {
+            var x = p[2][k], t1 = s + p[3][k];
+            if (x in Z) break;
+            M.cbToCam[x].forEach(function (bw) {
+              M.camAt[bw[0]].forEach(function (qm) {
+                var q = B.patterns[qm[0]], m = qm[1];
+                for (var j = m + 1; j < q.s.length; j++) {
+                  if (camZ[q.s[j]] == null) continue;
+                  var trip2 = camFirst(q, m, t1 + bw[1] + 2, 60, now);
+                  if (trip2) consider([cbLeg(p, s, i, k), camLeg(q, trip2, m, j)], wA, camZ[q.s[j]]);
+                }
+              });
+            });
+          }
+        });
+      });
+    }
     // Prefer one bus unless changing saves a good 10 minutes.
+    // Check the most promising journeys with real walking times: straight lines badly underestimate
+    // the hills here (Èze-sur-Mer station to Èze village is over an hour on foot).
+    all.sort(function (x, y) { return x.score - y.score; });
+    var seen = {}, wcache = {}, picked = 0;
+    function realWalk(a, b) { var k = a.lat.toFixed(5) + "," + a.lng.toFixed(5) + ">" + b.lat.toFixed(5) + "," + b.lng.toFixed(5); if (!wcache[k]) wcache[k] = walkMins(a, b); return wcache[k]; }
+    all.forEach(function (c) {
+      if (picked >= 30) return;
+      var L0 = c.legs[0], Ln = c.legs[c.legs.length - 1], key = Ln.to + ">" + c.legs.map(function (L) { return L.r; }).join("+");
+      if (seen[key]) return;
+      seen[key] = 1; picked++;
+      var wa = realWalk(from, L0.fromPt), wz = realWalk(Ln.toPt, to);
+      if (now.min + wa.m + 1 > c.dep) return;   // can't reach the stop in time
+      c.walkTo = wa.m; c.walkFrom = wz.m; c.arrive = Ln.arr + wz.m + (wa.steps || wz.steps ? 2 : 0);
+      c.score = c.arrive + Math.max(0, c.walkTo - 8) * 0.7 + Math.max(0, c.walkFrom - 8) * 0.7;
+      if (c.legs.length === 1) { if (!bestOne || c.score < bestOne.score) bestOne = c; }
+      else if (!best || c.score < best.score) best = c;
+    });
     var pick = bestOne && (!best || bestOne.score <= best.score + 10) ? bestOne : best;
     if (pick) {
       pick.wait = pick.dep - now.min; pick.minutes = pick.arrive - now.min;
