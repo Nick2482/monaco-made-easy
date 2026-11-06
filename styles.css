@@ -1231,3 +1231,4 @@ a.pop-go, .leaflet-popup-content a.pop-go { display: inline-block; color: #fff; 
 .ab-more { margin: 18px 0 6px; }
 .ab-more a { color: var(--red); font-weight: 700; text-underline-offset: 3px; }
 .bus-opt .opt-more { font-weight: 600; font-size: .92em; }
+.live-dot { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 9px; background: #1f8a4c; color: #fff; font-size: .78em; font-weight: 700; vertical-align: 1px; }

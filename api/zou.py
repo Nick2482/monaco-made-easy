@@ -3,6 +3,9 @@
 # This function fetches that feed, keeps only the stops the app shows, and returns
 # [trip_id, stop_id, predicted time (unix seconds)] for each. The app matches these against the
 # timetable bundled in zou.js. Vercel's CDN keeps each answer for 30 seconds.
+# With ?coast=1 it returns the coastal buses 600 and 601 at every stop from Èze to Menton instead,
+# as [trip_id, stop_id, time, route_id]: the published timetable is missing most buses towards Nice,
+# so the route planner uses these live times for that direction.
 from http.server import BaseHTTPRequestHandler
 import json, time, urllib.request
 
@@ -15,7 +18,10 @@ STOPS = {
     "ZOP:03864-0615000", "ZOP:03444-0615000",
     "ZOP:00593-0605900", "ZOP:00612-0605900", "ZOP:00653-0605900",
 }
-_cache = {"at": 0, "body": None}
+# Towns along the coast, by the code at the end of ZOU! stop ids: Monaco, Cap d'Ail, Roquebrune, Menton, Èze.
+COAST_TOWNS = ("-9800000", "-0603200", "-0610400", "-0608300", "-0605900")
+COAST_ROUTES = {"ZOP:600", "ZOP:601"}
+_cache = {}
 
 
 # ---- A tiny protocol-buffer reader: just the GTFS-RT fields we need. ----
@@ -55,7 +61,7 @@ def event_time(b):   # StopTimeEvent: delay = 1, time = 2
     return None
 
 
-def parse(feed):
+def parse(feed, coast=False):
     out, stamp = [], 0
     for f, w, v in fields(feed):
         if f == 1 and w == 2:                       # FeedHeader
@@ -66,12 +72,14 @@ def parse(feed):
             for ef, ew, ev in fields(v):
                 if ef != 3 or ew != 2:              # trip_update
                     continue
-                trip, ups, times = None, [], []
+                trip, route, ups, times = None, None, [], []
                 for tf, tw, tv in fields(ev):
-                    if tf == 1 and tw == 2:         # TripDescriptor.trip_id = 1
+                    if tf == 1 and tw == 2:         # TripDescriptor: trip_id = 1, route_id = 5
                         for df, dw, dv in fields(tv):
                             if df == 1 and dw == 2:
                                 trip = dv.decode("utf-8", "replace")
+                            elif df == 5 and dw == 2:
+                                route = dv.decode("utf-8", "replace")
                     elif tf == 2 and tw == 2:       # StopTimeUpdate
                         stop, arr, dep = None, None, None
                         for sf, sw, sv in fields(tv):
@@ -84,19 +92,25 @@ def parse(feed):
                         at = dep or arr
                         if at:
                             times.append(at)
-                        if stop in STOPS and at:
+                        if at and stop and (stop.endswith(COAST_TOWNS) if coast else stop in STOPS):
                             ups.append([stop, at])
                 # Skip broken predictions: every stop at the same time means the feed has no real data for this bus.
                 if trip and ups and len(set(times)) > 1:
-                    for stop, at in ups:
-                        out.append([trip, stop, at])
+                    if coast:
+                        if route and route not in COAST_ROUTES:
+                            continue
+                        for stop, at in ups:
+                            out.append([trip, stop, at, route or ""])
+                    else:
+                        for stop, at in ups:
+                            out.append([trip, stop, at])
     return stamp, out
 
 
-def build():
+def build(coast=False):
     req = urllib.request.Request(FEED, headers=UA)
     with urllib.request.urlopen(req, timeout=15) as r:
-        stamp, ups = parse(r.read())
+        stamp, ups = parse(r.read(), coast)
     now = stamp or int(time.time())
     ups = [u for u in ups if u[2] > now - 600]   # buses that left more than 10 minutes ago don't matter
     return json.dumps({"t": stamp or int(time.time()), "u": ups}, separators=(",", ":")).encode()
@@ -105,9 +119,11 @@ def build():
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
-            if not _cache["body"] or time.time() - _cache["at"] > 20:
-                _cache["body"] = build(); _cache["at"] = time.time()
-            body = _cache["body"]
+            coast = "coast=1" in (self.path or "")
+            c = _cache.setdefault(coast, {"at": 0, "body": None})
+            if not c["body"] or time.time() - c["at"] > 20:
+                c["body"] = build(coast); c["at"] = time.time()
+            body = c["body"]
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.send_header("Cache-Control", "public, max-age=20, s-maxage=30, stale-while-revalidate=60")

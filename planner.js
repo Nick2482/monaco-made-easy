@@ -326,12 +326,14 @@
                 .replace("\u0002", Bc(T.hhmm(L2.dep))).replace("\u0003", Bc(L2.to)) + " ";
               body += esc(t("Then walk {w} min.", { w: Math.max(1, cb.walkFrom) }));
             }
-            opts += '<div class="bus-opt cb-opt"><div class="bus-opt-top">' + badgeOf(L1) + (L2 ? badgeOf(L2) : "") + "<span>" + esc(head) + "</span></div><p>" + body + "</p>" +
+            opts += '<div class="bus-opt cb-opt"' + (cb.generic && L1.net === "ZOU!" ? ' id="cb-live"' : "") + '><div class="bus-opt-top">' + badgeOf(L1) + (L2 ? badgeOf(L2) : "") + "<span>" + esc(head) + "</span></div><p>" + body + "</p>" +
               (!cb.generic && (cb.hurry || cb.after) ? '<p class="opt-more">' + esc([cb.hurry ? t("If you hurry: {time}", { time: T.hhmm(cb.hurry) }) : "", cb.after ? t("The one after: {time}", { time: T.hhmm(cb.after) }) : ""].filter(Boolean).join(" · ")) + "</p>" : "") +
               "<small>" + esc((cb.generic ? "" : t("About {n} min door to door, including the walks and the wait for the bus.", { n: cb.minutes }) + " ") + t("{net} timetable. Live times are in the {net} app. Pay on board.", { net: nets })) + "</small></div>";
             cb.legs.forEach(function (L) { [L.fromPt, L.toPt].forEach(function (pt) { window.L.circleMarker([pt.lat, pt.lng], { radius: 9, color: "#fff", weight: 3, fillColor: L.c, fillOpacity: 1 }).addTo(layer); }); });
           }
           var tr = T && T.trainOption && r.minutes >= 25 ? T.trainOption(from, to) : null;
+          // Towards Nice the published 600 timetable is thin, so leave a slot for the next live 600 (filled in after the page draws).
+          if (r.minutes >= 20 && to.lng < from.lng - 0.01 && !(cb && cb.generic && cb.legs[0].net === "ZOU!") && T && T.coastLive) opts += '<div class="bus-opt cb-opt" id="cb-live" hidden></div>';
           var busBest = cb && !cb.generic ? cb.minutes : null;
           if (tr && (tr.minutes + 5 < r.minutes || r.minutes >= 40) && tr.walkTo + tr.walkFrom <= 45 && !(busBest !== null && tr.minutes > busBest + 30)) {
             var Bt = function (x) { return "<b>" + esc(x) + "</b>"; };
@@ -364,6 +366,21 @@
         var body = root.querySelector("#plan-body");
         Voice.stop();
         body.innerHTML = h;
+        // Coastal bus towards Nice: swap the "how often" card for the next live bus when the ZOU! feed has one.
+        var liveCard = body.querySelector("#cb-live");
+        if (liveCard && window.MMETransit && window.MMETransit.coastLive) window.MMETransit.coastLive(from, to, function (lv) {
+          if (!lv || !liveCard.isConnected) return;
+          liveCard.hidden = false;
+          var firstBus = body.querySelector(".cb-opt");   // a live bus goes to the top of the list
+          if (firstBus && firstBus !== liveCard) firstBus.parentNode.insertBefore(liveCard, firstBus);
+          var Bl = function (x) { return "<b>" + esc(x) + "</b>"; }, TT = window.MMETransit;
+          liveCard.innerHTML = '<div class="bus-opt-top"><span class="bus-badge" style="background:#E47F0B;color:#fff">' + esc(lv.r) + "</span><span>" +
+            esc(t("Bus {r}: {ride} min to {stop}", { r: lv.r, ride: lv.ride, stop: lv.to })) + ' <span class="live-dot">' + esc(t("Live")) + "</span></span></div><p>" +
+            esc(t("Walk {a} min to {stop}.", { a: Math.max(1, lv.walkTo), stop: "\u0001" })).replace("\u0001", Bl(lv.from)) + " " +
+            esc(t("Bus {r} towards {dest} at {time} ({wait}), {ride} min to {stop}.", { r: lv.r, dest: to.lng < from.lng ? "Nice" : "Menton", time: "\u0002", wait: lv.wait <= 0 ? t("now") : t("in {n} min", { n: lv.wait }), ride: lv.ride, stop: "\u0003" }))
+              .replace("\u0002", Bl(TT.hhmm(lv.dep))).replace("\u0003", Bl(lv.to)) + " " + esc(t("Then walk {w} min.", { w: Math.max(1, lv.walkFrom) })) + "</p><small>" +
+            esc(t("About {n} min door to door, including the walks and the wait for the bus.", { n: lv.minutes }) + " " + t("Live time from ZOU!. Pay on board.")) + "</small>";
+        });
         var vg = body.querySelector("#voice-go");
         if (vg) vg.addEventListener("click", function () { Voice.start(voiceList, body.querySelector("ol.steps")); });
         if (r && window.MMEPro) window.MMEPro.tipAfterRoute(body);

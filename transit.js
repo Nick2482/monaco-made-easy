@@ -240,8 +240,12 @@
   }
   // Stops within reach of a point. At the start we look a little wider (a longer walk to a better bus is fine);
   // at the end we want a stop close to where you're going, and only look further if there isn't one.
-  function cbNear(pt, tiers) {
-    var all = CB.stops.map(function (s, i) { return { i: i, d: metres(pt, { lat: s[1], lng: s[2] }) }; }), close = [];
+  function cbNear(pt, tiers, ok) {
+    var X = cbIndex();
+    ok = ok || function (i) { return X.at[i].length > 0; };   // by default, only stops the timetable uses
+    var all = [];
+    CB.stops.forEach(function (s, i) { if (ok(i)) all.push({ i: i, d: metres(pt, { lat: s[1], lng: s[2] }) }); });
+    var close = [];
     for (var k = 0; k < tiers.length && !close.length; k++) close = all.filter(function (x) { return x.d <= tiers[k]; });
     var m = {}; close.forEach(function (x) { m[x.i] = Math.ceil(x.d * 1.3 / 70); });
     return m;
@@ -316,6 +320,43 @@
       return { generic: true, r: g.r, legs: [g], walkTo: anyLine.wA, walkFrom: anyLine.wZ };
     }
     return null;
+  }
+
+  // Live coastal buses (600/601) from /api/zou?coast=1: the published timetable is missing most buses
+  // towards Nice, so for that direction the planner asks for the buses actually on the road.
+  var cbLive = { at: 0, data: null, wait: [] };
+  function coastLive(from, to, done) {
+    if (!CB || !CB.zid || typeof fetch !== "function") return done(null);
+    var go = function (d) {
+      if (!d || !d.u) return done(null);
+      var zset = {}; Object.keys(CB.zid).forEach(function (k) { zset[CB.zid[k]] = 1; });
+      var isZ = function (i) { return !!zset[i]; };
+      var A = cbNear(from, [800, 1300], isZ), Z = cbNear(to, [800, 1300, 2200], isZ);
+      var trips = {}, nowS = Date.now() / 1000, best = null;
+      d.u.forEach(function (u) { var si = CB.zid[u[1]]; if (si == null) return; (trips[u[0]] = trips[u[0]] || { r: u[3], s: [] }).s.push([si, u[2]]); });
+      Object.keys(trips).forEach(function (k) {
+        var tr = trips[k], s = tr.s.sort(function (x, y) { return x[1] - y[1]; }), board = null;
+        s.forEach(function (x) {
+          var mins = Math.round((x[1] - nowS) / 60);
+          if (!board) { if (A[x[0]] != null && mins >= A[x[0]] + 1 && Z[x[0]] == null) board = { i: x[0], m: mins, w: A[x[0]] }; return; }
+          if (Z[x[0]] != null && A[x[0]] == null) {
+            var arrive = mins + Z[x[0]];
+            if (!best || arrive < best.minutes) best = { r: (tr.r || "ZOP:600").replace("ZOP:", ""), a: board.i, z: x[0], wait: board.m, ride: mins - board.m, walkTo: board.w, walkFrom: Z[x[0]], minutes: arrive };
+          }
+        });
+      });
+      if (best) {
+        var sa = CB.stops[best.a], sz = CB.stops[best.z];
+        best.from = sa[0]; best.to = sz[0]; best.fromPt = { lat: sa[1], lng: sa[2] }; best.toPt = { lat: sz[1], lng: sz[2] };
+        best.dep = monacoNow().min + best.wait;
+      }
+      done(best);
+    };
+    if (cbLive.data && Date.now() - cbLive.at < 30000) return go(cbLive.data);
+    cbLive.wait.push(go);
+    if (cbLive.wait.length > 1) return;
+    var finish = function (d) { cbLive.data = d; cbLive.at = Date.now(); var w = cbLive.wait; cbLive.wait = []; w.forEach(function (f) { f(d); }); };
+    fetch("/api/zou?coast=1").then(function (r) { return r.ok ? r.json() : null; }).then(finish, function () { finish(null); });
   }
 
   // Trains from Nice airport (Nice Saint-Augustin) to Monaco, for the airport page.
@@ -656,5 +697,5 @@
   }
   setTimeout(refreshBus, 300);
 
-  window.MMETransit = { bikeScreen: bikeScreen, refreshBus: refreshBus, inMonaco: inMonaco, taxiScreen: taxiScreen, busOption: busOption, trainOption: trainOption, coastOption: coastOption, departures: departures, monacoNow: monacoNow, hhmm: hhmm, badge: badge, stopName: function (i) { return B.stops[i][0]; }, stopPt: stopPt, transportScreen: transportScreen, lineScreen: lineScreen, airportScreen: airportScreen, ready: !!B };
+  window.MMETransit = { bikeScreen: bikeScreen, refreshBus: refreshBus, inMonaco: inMonaco, taxiScreen: taxiScreen, busOption: busOption, trainOption: trainOption, coastOption: coastOption, coastLive: coastLive, departures: departures, monacoNow: monacoNow, hhmm: hhmm, badge: badge, stopName: function (i) { return B.stops[i][0]; }, stopPt: stopPt, transportScreen: transportScreen, lineScreen: lineScreen, airportScreen: airportScreen, ready: !!B };
 })();
