@@ -753,7 +753,7 @@
   // ---------------------------------------------------------------------------
   var VILLAGES = [
     { name: "Sainte-Agnès village", ll: [43.80041, 7.46150], area: "Sainte-Agnès",
-      photo: "img/sainte-agnes-square.jpg", alt: "The church square at the entrance to Sainte-Agnès village",
+      photo: "img/sainte-agnes-arches.jpg", alt: "Stepped lanes and arches on Rue des Comtes Léotardi, Sainte-Agnès",
       what: "One of the highest coastal villages in Europe, about 780 m up, with castle ruins and views down to Menton and the sea. Not step-free.",
       how: "Zest bus 10 from Menton Gare Routière, about 35 minutes up a winding road. Or a taxi." },
     { name: "Fort de Sainte-Agnès", ll: [43.79883, 7.46249], area: "Sainte-Agnès",
