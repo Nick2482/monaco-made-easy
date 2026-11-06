@@ -73,6 +73,7 @@
         { name: "Musée Jean Cocteau, Séverin Wunderman collection", lat: 43.77474, lng: 7.50579, text: "Walk along the seafront to Rudy Ricciotti’s striking white Cocteau museum. It has been closed since storm damage in 2018, but the building is worth seeing; part of the collection is on show at the Galerie des Musées, back by the Biovès gardens." },
         { name: "Les Halles", lat: 43.77523, lng: 7.50606, text: "Menton’s covered market, for fruit, local cheeses and the town’s famous lemons. Best in the morning." },
         { name: "Basilique Saint-Michel-Archange", lat: 43.77706, lng: 7.50707, text: "Climb the old town’s stepped lanes to the Baroque basilica and its square, with views over the sea. This part is steep." },
+        { name: "Cimetière du Vieux-Château", lat: 43.77813, lng: 7.50574, text: "Climb on above the basilica to the old cemetery on the site of the castle, with grand tombs of the winter visitors who made Menton famous and the best view over the town. Please be respectful." },
         { name: "Musée Jean Cocteau, Le Bastion", lat: 43.77481, lng: 7.50845, text: "Back down by the harbour, Cocteau’s own small museum in a 17th-century fort." },
         { name: "Plage des Sablettes", lat: 43.77909, lng: 7.50866, text: "Finish on the beach below the old town, with cafés and the classic view back up to the basilica." }
       ] }
