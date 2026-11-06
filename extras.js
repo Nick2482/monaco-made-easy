@@ -768,6 +768,7 @@
   var villagesScreen = {
     html: function () {
       return '<section class="page whats-on above-page"><a class="back" href="#/transport"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + esc(t("Getting around")) + "</a>" +
+        '<img class="pg-photo" src="img/menton-harbour.jpg" width="1200" height="675" alt="' + esc(t("Menton harbour and the old town, with the mountains behind")) + '">' +
         "<h1>" + esc(t("Villages above Menton")) + '</h1><p class="lede-dark">' + esc(t("Sainte-Agnès, Gorbio and Castellar: medieval villages on the mountains behind Menton, a short bus ride from the sea.")) + "</p>" +
         (window.L && window.MMEMap ? '<div class="yt-map xm-map" id="vl-map" role="application" aria-label="' + esc(t("Map")) + '"></div>' : "") +
         '<aside class="note note-rule"><strong>' + esc(t("Buses up from Menton")) + "</strong><p>" + esc(t("Menton’s Zest buses leave from the Gare Routière, next to Menton station: line 10 to Sainte-Agnès, line 5 to Gorbio and line 6 to Castellar. They run only a few times a day, so check the times below before you go.")) + "</p></aside>" +
