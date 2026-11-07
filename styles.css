@@ -1246,3 +1246,6 @@ a.pop-go, .leaflet-popup-content a.pop-go { display: inline-block; color: #fff; 
 .more-btn { display: block; width: 100%; margin-top: 12px; }
 .walk-list li .walk-card.wk-menton { background: linear-gradient(180deg, rgba(10, 31, 60, 0.35), rgba(10, 31, 60, 0.92)), url(img/menton-view.jpg) center 60% / cover; }
 .g-quick .g-all { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; border: 1px dashed var(--line); background: transparent; color: var(--head); font-weight: 700; font-size: 15.5px; line-height: 1.25; min-width: 0; }
+.theme-tip { position: fixed; top: 64px; right: 12px; max-width: 250px; z-index: 1200; display: flex; gap: 8px; align-items: flex-start; padding: 10px 12px; border-radius: 12px; background: #1b2633; color: #f1f4f8; font-size: 14px; line-height: 1.35; box-shadow: 0 8px 24px rgba(0, 0, 0, .25); }
+.theme-tip::before { content: ""; position: absolute; top: -6px; right: 86px; width: 12px; height: 12px; background: #1b2633; transform: rotate(45deg); }
+.theme-tip button { background: none; border: 0; color: inherit; font-size: 20px; line-height: 1; padding: 0 2px; cursor: pointer; }

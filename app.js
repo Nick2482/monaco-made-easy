@@ -349,13 +349,26 @@
       var dark = root.getAttribute("data-theme") === "dark";
       b.setAttribute("aria-pressed", String(dark));
       b.setAttribute("aria-label", t(dark ? "Light mode" : "Dark mode"));
-      var m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute("content", dark ? "#121d29" : "#fffdf8");
+      var m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute("content", dark ? "#1b2633" : "#fffdf8");
     }
+    // In the evening, point out night mode once (until it's tried or dismissed).
+    var tip = null;
+    function closeTip() { if (tip) { tip.remove(); tip = null; } try { localStorage.setItem("mme-dark-tip", "1"); } catch (e) {} }
+    setTimeout(function () {
+      var seen = "1", h = new Date().getHours();
+      try { seen = localStorage.getItem("mme-dark-tip"); } catch (e) {}
+      if (seen || root.getAttribute("data-theme") === "dark" || (h >= 7 && h < 19)) return;
+      tip = document.createElement("div");
+      tip.className = "theme-tip"; tip.setAttribute("role", "status");
+      tip.innerHTML = "<span>" + window.MMEUI.esc(t("Night mode: tap here for a darker screen and a night map, easier on the eyes after dark.")) + '</span><button type="button" aria-label="' + window.MMEUI.esc(t("Close")) + '">×</button>';
+      document.body.appendChild(tip);
+      tip.querySelector("button").addEventListener("click", closeTip);
+    }, 2500);
     b.addEventListener("click", function () {
       var next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
       root.setAttribute("data-theme", next);
       try { localStorage.setItem("mme-theme", next); } catch (e) {}
-      show();
+      show(); closeTip();
       if (window.MMEStats) window.MMEStats.track("Theme", { theme: next });
     });
     window.addEventListener("mme-lang", show);
