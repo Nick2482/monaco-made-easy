@@ -15,15 +15,19 @@
   }
 
   // One location watcher shared by the map and survey screens.
-  var here = null, watchers = [], watchId = null;
+  var here = null, watchers = [], watchId = null, errFns = [], lastErr = null;
   function startLocating(onError) {
-    if (!("geolocation" in navigator)) { if (onError) onError(t("This phone can’t share its location.")); return; }
-    if (watchId !== null) return;
+    if (!("geolocation" in navigator)) { if (onError) onError(t("This phone can’t share its location."), 2); return; }
+    if (onError && errFns.indexOf(onError) < 0) errFns.push(onError);
+    if (watchId !== null) { if (lastErr && onError && !here) onError(lastErr[0], lastErr[1]); return; }
     watchId = navigator.geolocation.watchPosition(function (pos) {
       here = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy, t: pos.timestamp };
       watchers.forEach(function (fn) { fn(here); });
     }, function (err) {
-      if (onError) onError(err.code === 1 ? t("Location is switched off for this app. Turn it on in your phone’s settings to see lifts near you.") : t("We couldn’t find your location just now."));
+      var msg = err.code === 1 ? t("Location is switched off for this app. Turn it on in your phone’s settings to see lifts near you.") : t("We couldn’t find your location just now.");
+      lastErr = [msg, err.code];
+      errFns.forEach(function (fn) { fn(msg, err.code); });
+      if (onError && errFns.indexOf(onError) < 0) onError(msg, err.code);
     }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
   }
   function onLocation(fn) { watchers.push(fn); if (here) fn(here); return function () { watchers = watchers.filter(function (f) { return f !== fn; }); }; }

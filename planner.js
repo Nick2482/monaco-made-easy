@@ -431,17 +431,36 @@
       draw = function (f, n) { heightsReady.then(function () { draw0(f, n); }); };
       if (state.from) draw(state.from);
       else {
-        M().startLocating(function (msg) { if (fromPt) return; root.querySelector("#plan-body").innerHTML = '<p class="loc-error">' + esc(msg) + '</p><p><a class="btn btn-line" href="#/">' + esc(t("Choose a starting point instead")) + "</a></p>"; });
+        // Start from Monaco station when we can't use where you are (too far away, no fix yet, or no signal),
+        // and switch to your real position if a fix inside the area arrives afterwards.
+        var fromStation = false, slow = null;
+        function stationStart(note) {
+          if (fromPt && !fromStation) return;
+          fromStation = true;
+          root.querySelector("#plan-from").textContent = t("Monaco station (you’re not in Monaco yet)");
+          state.from = { label: "Monaco Monte-Carlo station", lat: D.places.station.lat, lng: D.places.station.lng, kind: "station" };
+          draw(state.from, esc(note));
+          state.from = null;
+        }
+        M().startLocating(function (msg, code) {
+          if (fromPt && !fromStation) return;
+          if (code === 1) { clearTimeout(slow); stationStart(t("Location is switched off for this app, so we’ve started from Monaco station. Turn it on in your phone’s settings, or tap Change to pick your starting point.")); return; }
+          stationStart(t("We couldn’t find where you are just now, so we’ve started from Monaco station. Tap Change to pick your starting point."));
+        });
+        slow = setTimeout(function () {
+          if (!fromPt && document.body.contains(root)) stationStart(t("Still finding where you are, so for now we’ve started from Monaco station. The route will update when your phone finds you."));
+        }, 8000);
         var done = false;
         var stop = M().onLocation(function (pos) {
-          if (done) return; done = true; setTimeout(function () { stop(); }, 0);
+          if (done) return;
           if (!inArea(pos)) {
-            root.querySelector("#plan-from").textContent = t("Monaco station (you’re not in Monaco yet)");
-            state.from = { label: "Monaco Monte-Carlo station", lat: D.places.station.lat, lng: D.places.station.lng, kind: "station" };
-            draw(state.from, esc(t("You’re not in Monaco, Beausoleil, Cap d’Ail or Roquebrune-Cap-Martin right now, so we’ve started from the train station. When you’re here, we’ll use where you are.")));
-            state.from = null;
+            done = true; clearTimeout(slow); setTimeout(function () { stop(); }, 0);
+            stationStart(t("You’re not on this stretch of coast right now (Èze to Menton), so we’ve started from Monaco station. When you’re here, we’ll use where you are."));
             return;
           }
+          done = true; clearTimeout(slow); setTimeout(function () { stop(); }, 0);
+          fromStation = false;
+          root.querySelector("#plan-from").textContent = t("My location");
           draw(pos);
         });
       }
