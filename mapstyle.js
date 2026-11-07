@@ -1,9 +1,10 @@
 // Monaco Made Easy map style: champagne land, Riviera-blue sea, charcoal and gold labels.
 function mmeMapStyle(base, dark) {
   var C = dark ? {
-    sea: "#1b2c3a", earth: "#1c232c", park: "#21302a", wood: "#1f2d26", beach: "#2b2a25", ped: "#232a33", bld: "#283039", bldLine: "#313b46",
-    pier: "#262e37", roadCase: "#3a4450", road: "#2f3842", major: "#3d4752", majorCase: "#7a6a45", path: "#6a6252", rail: "#55606b",
-    label: "#d9dee4", halo: "#141b22", roadLabel: "#aab3bd", place: "#e6d3a3"
+    // Night palette: clearly blue sea, slate land, lighter roads so streets read like a lit city.
+    sea: "#163d5c", earth: "#2c3540", park: "#2e4535", wood: "#2a4031", beach: "#4d4636", ped: "#36414d", bld: "#3c4753", bldLine: "#4f5d6c",
+    pier: "#3c4652", roadCase: "#232b34", road: "#5d6a79", major: "#8592a0", majorCase: "#b29a5c", path: "#b9a77f", rail: "#8d99a6",
+    label: "#f1f4f8", halo: "#1c242d", roadLabel: "#d3dae2", place: "#f2d898"
   } : {
     sea: "#c6dfe8", earth: "#f4efe3", park: "#dde7cc", wood: "#d2e0c2", beach: "#f1e5c4", ped: "#eee6d3", bld: "#e6dbc5", bldLine: "#cbb995",
     pier: "#ebe3d2", roadCase: "#dccca9", road: "#fffdf8", major: "#fff8ea", majorCase: "#d4bd8a", path: "#bfa979", rail: "#b7ad9b",
