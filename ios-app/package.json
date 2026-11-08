@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@capacitor/core": "8.6.0",
+    "@capacitor/geolocation": "^8.2.4",
     "@capacitor/ios": "8.6.0"
   },
   "devDependencies": {
