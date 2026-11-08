@@ -22,6 +22,7 @@
     if (get("mme-pro-test") === "locked") return "locked";   // lets us see the paid version during the preview
     if (get("mme-pro")) return "bought";
     if (inPlayApp() && !play.ready) return "playapp";   // Play app without Google's payment system (older version): Pro stays free
+    if (inIosApp()) return "iosapp";   // iPhone app: Apple's payment system isn't connected yet, so Pro stays free there
     if (!CONFIG.launch || new Date().toISOString().slice(0, 10) < CONFIG.launch) return "preview";
     return "locked";
   }
@@ -40,6 +41,8 @@
     try { if (/^android-app:\/\//.test(document.referrer)) sessionStorage.setItem("mme-twa", "1"); return sessionStorage.getItem("mme-twa") === "1"; } catch (e) { return /^android-app:\/\//.test(document.referrer); }
   }
   inPlayApp();
+  // Inside the iPhone (App Store) app. Apple requires its own payment system, so the website's card payment is never shown there.
+  function inIosApp() { return !!window.MMENative; }
 
   // ---------- Google Play Billing (inside the Play Store app) ----------
   // Google requires its own payment system there. Works once the app is built with Play Billing switched on
@@ -99,7 +102,7 @@
   function lockCard(what) {
     return '<aside class="pro-lock"><div class="pl-head">' + badge() + "<strong>" + esc(t(what)) + "</strong></div>" +
       "<p>" + esc(t("Part of Monaco Made Easy Pro: the guide to restaurants, bars, museums and more, guided walks, cruise mode and the offline map.")) + "</p>" +
-      '<a class="btn btn-red" href="#/pro">' + esc(inPlayApp() && !play.ready ? t("What’s included, and how to get it") : t("Get Pro for {price}, once", { price: play.price || CONFIG.price })) + "</a>" +
+      '<a class="btn btn-red" href="#/pro">' + esc((inPlayApp() && !play.ready) || inIosApp() ? t("What’s included, and how to get it") : t("Get Pro for {price}, once", { price: play.price || CONFIG.price })) + "</a>" +
       '<p class="pl-free">' + esc(t("Lifts, step-free routes, buses and essentials stay free.")) + "</p></aside>";
   }
 
@@ -119,6 +122,7 @@
         "<h1>" + badge() + esc(t("Monaco Made Easy Pro")) + "</h1>";
       var state = "";
       if (st === "bought") state = '<p class="pro-ok">' + esc(t("Pro is switched on for this phone. Thank you for supporting Monaco Made Easy.")) + '</p><p class="pro-code">' + esc(t("Your unlock code: {code}", { code: get("mme-pro") })) + "</p>";
+      else if (st === "iosapp") state = '<p class="pro-ok">' + esc(t("Pro is free in the iPhone app for now.")) + "</p>";
       else if (st === "playapp") state = '<p class="pro-ok">' + esc(t("Pro is free in the Google Play version of the app for now.")) + "</p>";
       else if (st === "preview") state = '<p class="pro-ok">' + esc(t("Pro is free for everyone while the app is in preview.")) + "</p>";
       var list = '<ul class="pro-list">' + FEATURES.map(function (f) { return "<li><strong>" + esc(t(f[0])) + "</strong><span>" + esc(t(f[1])) + "</span></li>"; }).join("") + "</ul>";
@@ -130,7 +134,7 @@
       }
       if (st !== "bought" && (get("mme-pro-pending") || get("mme-pro-playpending"))) state += '<div class="pro-pending" role="alert"><p>' + esc(t("We couldn’t confirm your payment yet. Your payment is safe. Tap “Try again”, or email us and we’ll sort it out.")) + "</p>" +
         (lastError ? '<p class="pro-small">(' + esc(lastError) + ")</p>" : "") + '<button type="button" class="btn btn-navy" id="pro-retry">' + esc(t("Try again")) + "</button></div>";
-      var have = st === "bought" || st === "preview" || st === "playapp" ? "" :
+      var have = st === "bought" || st === "preview" || st === "playapp" || st === "iosapp" ? "" :
         '<details class="pro-have"><summary>' + esc(t("Already bought Pro?")) + "</summary>" +
         '<form id="pro-code-f" class="pro-f"><label for="pro-code">' + esc(t("Enter your unlock code")) + '</label><input id="pro-code" autocomplete="off" autocapitalize="characters" placeholder="MME-XXXXX-XXXXXX"><button class="btn btn-navy" type="submit">' + esc(t("Switch on Pro")) + "</button></form>" +
         '<form id="pro-mail-f" class="pro-f"><label for="pro-mail">' + esc(t("Or the email address you paid with")) + '</label><input id="pro-mail" type="email" autocomplete="email"><button class="btn btn-line" type="submit">' + esc(t("Find my purchase")) + "</button></form>" +
@@ -178,7 +182,7 @@
     box.innerHTML = '<button type="button" class="pt-x" aria-label="' + esc(t("No thanks")) + '">×</button>' +
       '<div class="pl-head">' + badge() + "<strong>" + esc(t("Enjoying the app?")) + "</strong></div>" +
       "<p>" + esc(t("Pro adds restaurants, bars and museums with the step-free way there, sightseeing walks, cruise mode and the offline map.")) + "</p>" +
-      '<div class="pt-actions"><a class="btn btn-red" href="#/pro">' + esc(inPlayApp() && !play.ready ? t("What’s included, and how to get it") : t("Get Pro for {price}, once", { price: play.price || CONFIG.price })) + "</a>" +
+      '<div class="pt-actions"><a class="btn btn-red" href="#/pro">' + esc((inPlayApp() && !play.ready) || inIosApp() ? t("What’s included, and how to get it") : t("Get Pro for {price}, once", { price: play.price || CONFIG.price })) + "</a>" +
       '<button type="button" class="btn btn-line pt-no">' + esc(t("No thanks")) + "</button></div>";
     var ref = body.querySelector(".route-fb");
     if (ref) ref.parentNode.insertBefore(box, ref); else body.appendChild(box);

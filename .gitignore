@@ -1,0 +1,4 @@
+ios-app/node_modules/
+ios-app/www/
+ios-app/ios/App/build/
+__pycache__/

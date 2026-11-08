@@ -1,0 +1,51 @@
+# Builds the iPhone app on one of GitHub's Macs and photographs it running on a simulated iPhone.
+# The pictures and build log go to the "ios-results" branch.
+name: iPhone app
+on:
+  push:
+    branches: [main]
+    paths: ["ios-app/**", ".github/workflows/ios.yml"]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: ios
+  cancel-in-progress: true
+jobs:
+  simulator:
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Prepare the app
+        working-directory: ios-app
+        run: npm ci && SHOTS=1 npm run sync
+      - name: Build for the iPhone simulator
+        working-directory: ios-app/ios/App
+        run: |
+          xcodebuild -version
+          xcodebuild -project App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' -derivedDataPath build CODE_SIGNING_ALLOWED=NO build \
+            > "$GITHUB_WORKSPACE/build.log" 2>&1 || true
+          grep -E "error:|BUILD (SUCCEEDED|FAILED)" "$GITHUB_WORKSPACE/build.log" | head -50
+          test -d build/Build/Products/Debug-iphonesimulator/App.app
+      - name: Run it and take screenshots
+        run: bash ios-app/simshots.sh
+      - name: Publish the results
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/r" && cd "$RUNNER_TEMP/r"
+          cp "$GITHUB_WORKSPACE"/shots/* . 2>/dev/null || true
+          tail -c 60000 "$GITHUB_WORKSPACE/build.log" > build-log-tail.txt 2>/dev/null || true
+          grep -E "error:" "$GITHUB_WORKSPACE/build.log" | head -100 > build-errors.txt 2>/dev/null || true
+          echo '{"git":{"deploymentEnabled":false}}' > vercel.json
+          echo "${{ github.sha }} ${{ job.status }}" > commit.txt
+          git init -q && git checkout -q -b ios-results
+          git -c user.name="iPhone build" -c user.email="actions@github.com" add -A
+          git -c user.name="iPhone build" -c user.email="actions@github.com" commit -qm "iPhone build results for ${{ github.sha }}"
+          git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" ios-results

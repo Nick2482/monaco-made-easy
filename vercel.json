@@ -27,6 +27,19 @@
           "value": "application/json"
         }
       ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "capacitor://localhost"
+        },
+        {
+          "key": "Vary",
+          "value": "Origin"
+        }
+      ]
     }
   ],
   "functions": {

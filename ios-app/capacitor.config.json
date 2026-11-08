@@ -1,0 +1,10 @@
+{
+  "appId": "com.monacomadeeasy.app",
+  "appName": "Monaco Made Easy",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#ffffff",
+    "limitsNavigationsToAppBoundDomains": false
+  }
+}
