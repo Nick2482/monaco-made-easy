@@ -18,6 +18,7 @@ step xcrun simctl location "$DEV" set 43.7393,7.4278      # Casino Square, Monac
 step xcrun simctl install "$DEV" "$APP"
 step xcrun simctl privacy "$DEV" grant location com.monacomadeeasy.app
 step xcrun simctl launch --terminate-running-process "$DEV" com.monacomadeeasy.app
+T0=$(date +%s)
 sleep 5
 step xcrun simctl io "$DEV" screenshot shots/0-after-launch.png
 if ! xcrun simctl spawn "$DEV" launchctl list 2>/dev/null | grep -q monacomadeeasy; then
@@ -25,10 +26,12 @@ if ! xcrun simctl spawn "$DEV" launchctl list 2>/dev/null | grep -q monacomadeea
   step xcrun simctl launch "$DEV" com.monacomadeeasy.app
 fi
 xcrun simctl spawn "$DEV" launchctl list 2>/dev/null | grep monacomadeeasy >> "$LOG"
-sleep 12
+# The app changes screen 20 s after starting, then every 15 s: photograph each one in the middle of its turn.
+k=0
 for n in 1-home 2-map 3-transport 4-guide-eat 5-villages 6-info 7-pro; do
+  w=$(( T0 + 14 + 15 * k - $(date +%s) )); [ $w -gt 0 ] && sleep $w
   step xcrun simctl io "$DEV" screenshot "shots/$n.png"
-  sleep 10
+  k=$((k + 1))
 done
 perl -e 'alarm 60; exec @ARGV' xcrun simctl spawn "$DEV" log show --last 3m --style compact --predicate 'process == "App"' 2>/dev/null | grep -iE "error|fail|⚡️|crash" | tail -80 > shots/app-log.txt || true
 cp ~/Library/Logs/DiagnosticReports/App-*.ips shots/ 2>/dev/null || true

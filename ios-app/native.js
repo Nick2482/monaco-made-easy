@@ -14,8 +14,18 @@
   };
 
   // Location through the iPhone's own permission (not the web view's "localhost would like to use your location").
-  var Cap = window.Capacitor, Geo = Cap && Cap.registerPlugin ? Cap.registerPlugin("Geolocation") : null;
-  if (Geo && navigator.geolocation) {
+  // The Capacitor bridge is looked up when location is first asked for, so the order scripts load in doesn't matter.
+  var G = navigator.geolocation;
+  if (G) {
+    var web = { get: G.getCurrentPosition.bind(G), watch: G.watchPosition.bind(G), clear: G.clearWatch.bind(G) };
+    var plugin = null;
+    var geo = function () {
+      if (plugin) return plugin;
+      var C = window.Capacitor;
+      if (C && C.isNativePlatform && C.isNativePlatform() && C.registerPlugin) plugin = C.registerPlugin("Geolocation");
+      return plugin;
+    };
+    window.MMENative.geo = function () { var C = window.Capacitor; return (C ? "bridge " + (C.getPlatform && C.getPlatform()) : "no bridge") + (geo() ? ", plugin" : ", no plugin"); };
     var seq = 0, ids = {};
     var errOf = function (e) {
       var m = String((e && (e.message || e.code)) || e || "");
@@ -23,33 +33,36 @@
         PERMISSION_DENIED: 1, POSITION_UNAVAILABLE: 2, TIMEOUT: 3 };
     };
     var opts = function (o) { o = o || {}; return { enableHighAccuracy: !!o.enableHighAccuracy, timeout: o.timeout || 20000, maximumAge: o.maximumAge || 0 }; };
-    var allowed = function () {
-      return Geo.checkPermissions().then(function (p) {
+    var allowed = function (P) {
+      return P.checkPermissions().then(function (p) {
         if (p.location === "granted") return true;
         if (p.location === "denied") return false;
-        return Geo.requestPermissions({ permissions: ["location"] }).then(function (r) { return r.location === "granted"; });
+        return P.requestPermissions({ permissions: ["location"] }).then(function (r) { return r.location === "granted"; });
       });
     };
     var denied = { message: "Location permission was denied" };
-    navigator.geolocation.getCurrentPosition = function (ok, fail, o) {
-      allowed().then(function (yes) { if (!yes) throw denied; return Geo.getCurrentPosition(opts(o)); })
+    G.getCurrentPosition = function (ok, fail, o) {
+      var P = geo(); if (!P) return web.get(ok, fail, o);
+      allowed(P).then(function (yes) { if (!yes) throw denied; return P.getCurrentPosition(opts(o)); })
         .then(ok, function (e) { if (fail) fail(errOf(e)); });
     };
-    navigator.geolocation.watchPosition = function (ok, fail, o) {
-      var id = ++seq; ids[id] = null;
-      allowed().then(function (yes) {
+    G.watchPosition = function (ok, fail, o) {
+      var P = geo(); if (!P) return web.watch(ok, fail, o);
+      var id = "n" + (++seq); ids[id] = null;
+      allowed(P).then(function (yes) {
         if (!yes) throw denied;
         if (!(id in ids)) return;
-        return Geo.watchPosition(opts(o), function (pos, err) {
+        return P.watchPosition(opts(o), function (pos, err) {
           if (!(id in ids)) return;
           if (err) { if (fail) fail(errOf(err)); } else if (pos) ok(pos);
-        }).then(function (cid) { if (id in ids) ids[id] = cid; else Geo.clearWatch({ id: cid }); });
+        }).then(function (cid) { if (id in ids) ids[id] = cid; else P.clearWatch({ id: cid }); });
       }).catch(function (e) { if (fail) fail(errOf(e)); });
       return id;
     };
-    navigator.geolocation.clearWatch = function (id) {
+    G.clearWatch = function (id) {
+      if (!(id in ids)) return web.clear(id);
       var cid = ids[id]; delete ids[id];
-      if (cid) Geo.clearWatch({ id: cid });
+      if (cid && plugin) plugin.clearWatch({ id: cid });
     };
   }
 })();
