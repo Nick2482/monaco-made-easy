@@ -1249,3 +1249,15 @@ a.pop-go, .leaflet-popup-content a.pop-go { display: inline-block; color: #fff; 
 .theme-tip { position: fixed; top: 64px; right: 12px; max-width: 250px; z-index: 1200; display: flex; gap: 8px; align-items: flex-start; padding: 10px 12px; border-radius: 12px; background: #1b2633; color: #f1f4f8; font-size: 14px; line-height: 1.35; box-shadow: 0 8px 24px rgba(0, 0, 0, .25); }
 .theme-tip::before { content: ""; position: absolute; top: -6px; right: 86px; width: 12px; height: 12px; background: #1b2633; transform: rotate(45deg); }
 .theme-tip button { background: none; border: 0; color: inherit; font-size: 20px; line-height: 1; padding: 0 2px; cursor: pointer; }
+
+/* ---------- Festive season (29 November to 6 January): gold joins the red in the Grimaldi band, and a few gold accents.
+   Switched on by extras.js (html.festive). Kept deliberately quiet. ---------- */
+html.festive { --fusil-fest: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='14'%3E%3Crect width='20' height='14' fill='%23fffdf8'/%3E%3Cpath d='M5 0L10 7 5 14 0 7z' fill='%23ce1126'/%3E%3Cpath d='M15 0L20 7 15 14 10 7z' fill='%23b8923f'/%3E%3C/svg%3E"); --fest-gold: #b8923f; }
+html.festive[data-theme="dark"] { --fusil-fest: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='14'%3E%3Crect width='20' height='14' fill='%23fff'/%3E%3Cpath d='M5 0L10 7 5 14 0 7z' fill='%23c8102e'/%3E%3Cpath d='M15 0L20 7 15 14 10 7z' fill='%23c9a24a'/%3E%3C/svg%3E"); --fest-gold: #d4b062; }
+html.festive .bar::before { background: var(--fusil-fest) center 0 / 20px 14px repeat-x; }
+html.festive .event-banner::before { background: var(--fusil-fest) center 0 / 12px 8px repeat-x; }
+html.festive .tabs a[aria-current="page"]::before { background: var(--fest-gold); }
+html.festive .sl-season .sl-ico { background: var(--fest-gold) !important; border-color: var(--fest-gold) !important; }
+html.festive .sl-season { box-shadow: inset 0 0 0 1px var(--fest-gold); }
+html.festive .xmas-page h1::after { content: " ✦"; color: var(--fest-gold); font-size: .7em; vertical-align: .15em; }
+html.festive .xm-mk { background: var(--fest-gold); border-color: #fff; }

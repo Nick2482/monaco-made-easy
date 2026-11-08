@@ -49,7 +49,7 @@
     { id: "national-day", name: "Monaco National Day", start: "2026-11-19", end: "2026-11-19", kind: "rock",
       about: "Monaco’s national holiday, also called the Fête du Prince.", where: "Place du Palais", ll: PALACE,
       text: "Ceremonies at the Palace and the Cathedral make Monaco-Ville very busy, especially in the morning. Expect crowds and some road closures on the Rock, and allow extra time." },
-    { id: "christmas", name: "Christmas Village", start: "2026-12-04", end: "2027-01-03", kind: "festive", tbc: "December to early January",
+    { id: "christmas", name: "Christmas Village", start: "2026-12-04", end: "2027-01-03", kind: "festive",
       about: "Chalets, festive food and shows along the harbour, usually with an ice rink.", where: "Quai Albert 1er, Port Hercule", ll: PORT,
       text: "Busiest in the evenings and at weekends." },
     { id: "rallye", name: "Rallye Monte-Carlo", start: "2027-01-21", end: "2027-01-24", kind: "outside",
@@ -575,25 +575,39 @@
 
   // ---------------------------------------------------------------------------
   // 7. Christmas in Monaco: the village, the ice rink, the tree and New Year, and the easy way between them.
-  // Dates follow the usual pattern until Monaco announces this year's programme (usually mid-November).
+  // 2026 dates checked on 8 November 2026: Mairie de Monaco (village), Monte-Carlo SBM (tree, light shows, chalets).
+  // Menton hadn't published its 2026 programme yet.
   // ---------------------------------------------------------------------------
   var XMAS_SEASON = ["20261030", "20270106"];
   function xmasSeason() { var d = now().ymd; return d >= XMAS_SEASON[0] && d <= XMAS_SEASON[1]; }
+  // The festive look (gold in the header band and accents): from the Casino lights switch-on to Epiphany.
+  var FESTIVE = ["20261129", "20270106"];
+  function festiveOn() {   // Monaco's date, from the phone's clock
+    try { var d = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Monaco" }).format(new Date()).replace(/-/g, ""); }
+    catch (e) { var n = new Date(); d = "" + n.getFullYear() + ("0" + (n.getMonth() + 1)).slice(-2) + ("0" + n.getDate()).slice(-2); }
+    return d >= FESTIVE[0] && d <= FESTIVE[1];
+  }
+  function festiveApply() { document.documentElement.classList.toggle("festive", festiveOn() || /[?&]festive=1/.test(location.search)); }
+  festiveApply();
+  setInterval(festiveApply, 3600000);
   var XMAS = [
-    { name: "Christmas Village", where: "Quai Albert 1er, Port Hercule", ll: PORT, when: "Early December to early January",
-      what: "Wooden chalets with gifts and festive food, a big wheel over the harbour, a carousel and street parades. Open every day from 11:00.",
-      tip: "Busiest in the evenings and at weekends. Lunchtime is quieter." },
+    { name: "Christmas tree and Casino lights", where: "Place du Casino", ll: [43.7397, 7.4277], from: "2026-11-29", to: "2027-01-10",
+      what: "The giant Christmas tree in front of the Casino is lit on Sunday 29 November at 18:00. Light shows play on the Casino front every 30 minutes from 18:00 to midnight on 4–6 and 11–13 December, then every evening from 18 December to 10 January. Christmas chalets line the Avenue de Monte-Carlo until 3 January.",
+      tip: "From the Christmas village, the public lifts by the Auditorium take you straight up. No climb.", route: "port-casino" },
+    { name: "Christmas Village", where: "Quai Albert 1er, Port Hercule", ll: PORT, from: "2026-12-04", to: "2027-01-03",
+      what: "This year’s theme is “The Enchanted Forest”: wooden chalets with gifts and festive food, a big wheel over the harbour and rides for children. Open every day from 11:00, and from 16:00 on the opening day.",
+      tip: "On Christmas Eve it closes at 19:30, and on New Year’s Eve it stays open until 2:30. Busiest in the evenings and at weekends; lunchtime is quieter." },
     { name: "Ice rink", where: "Stade Nautique Rainier III", ll: [43.7359, 7.4226], when: "Early December to early March",
       what: "In winter the harbour’s open-air pool becomes an ice rink, right next to the Christmas village. Skates are included in the price." },
-    { name: "Christmas tree and Casino lights", where: "Place du Casino", ll: [43.7397, 7.4277], when: "December to early January",
-      what: "A giant Christmas tree in front of the Casino, with light shows on the Casino front in the evenings in the second half of December.",
-      tip: "From the Christmas village, the public lifts by the Auditorium take you straight up. No climb.", route: "port-casino" },
     { name: "Christmas Eve Mass", where: "Monaco Cathedral, Monaco-Ville", ll: [43.7303, 7.4230], when: "24 December", photo: "img/cathedral.jpg",
       what: "Usually a vigil at 23:30 followed by Midnight Mass, in the Cathedral on the Rock where Princess Grace is buried. It fills up, so arrive early.",
       tip: "Lifts from the harbour take you up to the Rock.", route: "port-palace" },
     { name: "New Year’s Eve", where: "Port Hercule", ll: [43.7343, 7.4214], when: "31 December",
       what: "Fireworks over the harbour at midnight, and the Christmas village stays open late with music.",
-      tip: "The quays get very crowded. The Rock, above the harbour, has a good view of the fireworks." }
+      tip: "The quays get very crowded. The Rock, above the harbour, has a good view of the fireworks." },
+    { name: "Christmas in Menton", where: "Mail du Bastion and Esplanade Francis-Palmero, Menton", ll: [43.77481, 7.50845], when: "Early December to early January", noMap: true,
+      what: "Usually around 35 chalets by the sea, with an ice rink and rides, open from 10:00. Menton announces this year’s programme in November.",
+      tip: "The train from Monaco takes about 10 minutes." }
   ];
   var XMAS_TIPS = [
     "On 25 December and 1 January most shops are closed and buses run a holiday timetable. Check the live times in the app.",
@@ -613,13 +627,13 @@
         "<h1>" + esc(t("Christmas in Monaco")) + '</h1><p class="lede-dark">' + esc(t("The Christmas village, the ice rink, the lights and New Year’s Eve, and the easy way between them.")) + "</p>" +
         (window.L && window.MMEMap ? '<div class="yt-map xm-map" id="xm-map" role="application" aria-label="' + esc(t("Map")) + '"></div>' : "") +
         '<ol class="wo-list xm-list">' + XMAS.map(function (x, i) {
-          return '<li class="wo-ev" data-xm="' + i + '">' + (x.photo ? '<img class="way-photo photo-full" src="' + x.photo + '" width="1200" height="800" loading="lazy" alt="' + esc(t("Monaco Cathedral, on the Rock")) + '">' : "") + '<span class="ev-date">' + esc(t(x.when)) + '</span><strong><span class="yt-num xm-num">' + (i + 1) + "</span>" + esc(t(x.name)) + "</strong>" +
+          return '<li class="wo-ev" data-xm="' + i + '">' + (x.photo ? '<img class="way-photo photo-full" src="' + x.photo + '" width="1200" height="800" loading="lazy" alt="' + esc(t("Monaco Cathedral, on the Rock")) + '">' : "") + '<span class="ev-date">' + esc(x.from ? dateRange(x.from, x.to) : t(x.when)) + '</span><strong><span class="yt-num xm-num">' + (i + 1) + "</span>" + esc(t(x.name)) + "</strong>" +
             '<span class="wo-where">' + esc(x.where) + "</span><p>" + esc(t(x.what)) + (x.tip ? " " + esc(t(x.tip)) : "") + "</p>" +
             '<div class="wo-acts">' + goBtn(t(x.name), x.ll) + (x.route ? '<a class="btn-small" href="#/go/' + x.route + '">' + esc(t("See the lift route")) + "</a>" : "") + "</div></li>";
         }).join("") + "</ol>" +
         "<h2>" + esc(t("Good to know at Christmas")) + '</h2><ul class="xm-tips">' + XMAS_TIPS.map(function (s) { return "<li>" + esc(t(s)) + "</li>"; }).join("") + "</ul>" +
         '<a class="know-link" href="#/whats-on">' + esc(t("In January: the Rallye Monte-Carlo, the Circus Festival and Sainte-Dévote")) + ARROW + "</a>" +
-        '<p class="unchecked">' + esc(t("Monaco announces this year’s Christmas dates in November. Check before you travel.")) + "</p></section>";
+        '<p class="unchecked">' + esc(t("Dates come from the organisers. Check before you travel.")) + "</p></section>";
     },
     mount: function (el) {
       if (window.MMEStats) window.MMEStats.track("Christmas opened");
@@ -627,10 +641,11 @@
       if (mapEl) {
         map = window.MMEMap.makeMap(mapEl);
         XMAS.forEach(function (x, i) {
+          if (x.noMap) return;
           marks[i] = L.marker(x.ll, { icon: L.divIcon({ className: "", html: '<span class="yt-mk xm-mk">' + (i + 1) + "</span>", iconSize: [26, 26], iconAnchor: [13, 13] }), title: t(x.name), keyboard: true })
             .addTo(map).bindPopup("<strong>" + esc(t(x.name)) + "</strong><br>" + esc(x.where));
         });
-        map.fitBounds(L.latLngBounds(XMAS.map(function (x) { return x.ll; })).pad(0.2), { maxZoom: 17 });
+        map.fitBounds(L.latLngBounds(XMAS.filter(function (x) { return !x.noMap; }).map(function (x) { return x.ll; })).pad(0.2), { maxZoom: 17 });
         setTimeout(function () { map.invalidateSize(); }, 200);
       }
       el.addEventListener("click", function (e) {
