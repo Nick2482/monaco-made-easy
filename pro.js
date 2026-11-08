@@ -11,7 +11,8 @@
     // One link, two currencies: Stripe charges €3.49, or £2.99 to buyers in the UK.
     payLink: "https://buy.stripe.com/14A7sLaqu7mc2630lcgYU01",
     price: (function () { try { return Intl.DateTimeFormat().resolvedOptions().timeZone === "Europe/London" ? "£2.99" : "€3.49"; } catch (e) { return "€3.49"; } })(),
-    playSku: "pro_unlock"           // the in-app product id in Play Console
+    playSku: "pro_unlock",          // the in-app product id in Play Console
+    iosSku: "pro_unlock"            // the in-app purchase product id in App Store Connect (non-consumable)
   };
   function t(s, v) { return window.MMEI18N.t(s, v); }
   function esc(s) { return window.MMEUI.esc(s); }
@@ -22,7 +23,6 @@
     if (get("mme-pro-test") === "locked") return "locked";   // lets us see the paid version during the preview
     if (get("mme-pro")) return "bought";
     if (inPlayApp() && !play.ready) return "playapp";   // Play app without Google's payment system (older version): Pro stays free
-    if (inIosApp()) return "iosapp";   // iPhone app: Apple's payment system isn't connected yet, so Pro stays free there
     if (!CONFIG.launch || new Date().toISOString().slice(0, 10) < CONFIG.launch) return "preview";
     return "locked";
   }
@@ -41,7 +41,8 @@
     try { if (/^android-app:\/\//.test(document.referrer)) sessionStorage.setItem("mme-twa", "1"); return sessionStorage.getItem("mme-twa") === "1"; } catch (e) { return /^android-app:\/\//.test(document.referrer); }
   }
   inPlayApp();
-  // Inside the iPhone (App Store) app. Apple requires its own payment system, so the website's card payment is never shown there.
+  // Inside the iPhone (App Store) app. Apple requires its own payment system (in-app purchase), so the website's
+  // card payment and unlock codes are never shown there.
   function inIosApp() { return !!window.MMENative; }
 
   // ---------- Google Play Billing (inside the Play Store app) ----------
@@ -84,6 +85,51 @@
     }).catch(function () { return false; });   // cancelled by the visitor
   }
 
+  // ---------- Apple in-app purchase (inside the iPhone app) ----------
+  // A one-off "non-consumable" purchase. Apple checks it on the phone; Restore brings it back on a new iPhone.
+  var ios = { ready: false, price: null, P: null };
+  function iosPlugin() {
+    if (ios.P) return ios.P;
+    var C = window.Capacitor;
+    if (C && C.registerPlugin) ios.P = C.registerPlugin("NativePurchases");
+    return ios.P;
+  }
+  function iosOwned(list) {
+    return (list || []).filter(function (p) { return p.productIdentifier === CONFIG.iosSku && !p.revocationDate; })[0];
+  }
+  function iosCheckOwned(how) {
+    var P = iosPlugin();
+    if (!P) return Promise.resolve(false);
+    return P.getPurchases({ onlyCurrentEntitlements: true }).then(function (r) {
+      var mine = iosOwned(r && r.purchases);
+      if (mine) { if (!get("mme-pro")) unlock("APPLE-" + mine.transactionId, how); return true; }
+      if (/^APPLE-/.test(get("mme-pro") || "")) { set("mme-pro", null); window.dispatchEvent(new Event("mme-pro")); }   // refunded
+      return false;
+    }).catch(function () { return false; });
+  }
+  function iosInit() {
+    if (!inIosApp() || !iosPlugin()) return;
+    ios.P.getProducts({ productIdentifiers: [CONFIG.iosSku] }).then(function (r) {
+      var pr = r && r.products && r.products[0];
+      if (pr) { ios.price = pr.priceString; ios.ready = true; }
+    }).catch(function () {}).then(function () { return iosCheckOwned("apple-restore"); })
+      .then(function () { window.dispatchEvent(new Event("mme-pro")); });
+  }
+  function buyOnIos() {
+    var P = iosPlugin();
+    if (!P || !ios.ready) return Promise.resolve(false);
+    return P.purchaseProduct({ productIdentifier: CONFIG.iosSku }).then(function (tx) {
+      if (tx && tx.transactionId) { unlock("APPLE-" + tx.transactionId, "apple"); return true; }
+      return false;
+    }).catch(function () { return false; });   // cancelled, or waiting for a parent's approval
+  }
+  function restoreOnIos() {
+    var P = iosPlugin();
+    if (!P) return Promise.resolve(false);
+    return P.restorePurchases().catch(function () {}).then(function () { return iosCheckOwned("apple-restore"); });
+  }
+  function shopPrice() { return (inIosApp() && ios.price) || (inPlayApp() && play.price) || CONFIG.price; }
+
   function api(body) {
     return fetch("/api/pro", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
       .then(function (r) { return r.json().catch(function () { return { ok: false, error: "unavailable" }; }); })
@@ -102,7 +148,7 @@
   function lockCard(what) {
     return '<aside class="pro-lock"><div class="pl-head">' + badge() + "<strong>" + esc(t(what)) + "</strong></div>" +
       "<p>" + esc(t("Part of Monaco Made Easy Pro: the guide to restaurants, bars, museums and more, guided walks, cruise mode and the offline map.")) + "</p>" +
-      '<a class="btn btn-red" href="#/pro">' + esc((inPlayApp() && !play.ready) || inIosApp() ? t("What’s included, and how to get it") : t("Get Pro for {price}, once", { price: play.price || CONFIG.price })) + "</a>" +
+      '<a class="btn btn-red" href="#/pro">' + esc((inPlayApp() && !play.ready) || (inIosApp() && !ios.ready) ? t("What’s included, and how to get it") : t("Get Pro for {price}, once", { price: shopPrice() })) + "</a>" +
       '<p class="pl-free">' + esc(t("Lifts, step-free routes, buses and essentials stay free.")) + "</p></aside>";
   }
 
@@ -121,20 +167,26 @@
       var head = '<section class="page pro-page"><a class="back" href="#/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + esc(t("Home")) + "</a>" +
         "<h1>" + badge() + esc(t("Monaco Made Easy Pro")) + "</h1>";
       var state = "";
-      if (st === "bought") state = '<p class="pro-ok">' + esc(t("Pro is switched on for this phone. Thank you for supporting Monaco Made Easy.")) + '</p><p class="pro-code">' + esc(t("Your unlock code: {code}", { code: get("mme-pro") })) + "</p>";
-      else if (st === "iosapp") state = '<p class="pro-ok">' + esc(t("Pro is free in the iPhone app for now.")) + "</p>";
+      if (st === "bought") state = '<p class="pro-ok">' + esc(t("Pro is switched on for this phone. Thank you for supporting Monaco Made Easy.")) + "</p>" +
+        (inIosApp() ? "" : '<p class="pro-code">' + esc(t("Your unlock code: {code}", { code: get("mme-pro") })) + "</p>");
       else if (st === "playapp") state = '<p class="pro-ok">' + esc(t("Pro is free in the Google Play version of the app for now.")) + "</p>";
       else if (st === "preview") state = '<p class="pro-ok">' + esc(t("Pro is free for everyone while the app is in preview.")) + "</p>";
       var list = '<ul class="pro-list">' + FEATURES.map(function (f) { return "<li><strong>" + esc(t(f[0])) + "</strong><span>" + esc(t(f[1])) + "</span></li>"; }).join("") + "</ul>";
       var buy = "";
-      if (st === "locked") {
+      if (st === "locked" && inIosApp()) {
+        buy = '<div class="pro-buy"><p class="pro-price"><strong>' + esc(shopPrice()) + "</strong> " + esc(t("one-off payment. No subscription, no account.")) + "</p>" +
+          (ios.ready ? '<button type="button" class="btn btn-red" id="pro-ios">' + esc(t("Get Pro for {price}, once", { price: shopPrice() })) + "</button>"
+            : '<p class="pro-soon">' + esc(t("Apple’s payment system isn’t available right now. Please try again later.")) + "</p>") +
+          '<p class="pro-small">' + esc(t("Secure payment by Apple. Pro switches on as soon as you’ve paid. On a new iPhone, tap “Restore purchase” with the same Apple Account.")) + "</p>" +
+          '<button type="button" class="btn btn-line" id="pro-restore">' + esc(t("Restore purchase")) + '</button><p class="form-err" id="pro-ios-msg" role="alert" hidden></p></div>';
+      } else if (st === "locked") {
         buy = '<div class="pro-buy"><p class="pro-price"><strong>' + esc((inPlayApp() && play.price) || CONFIG.price) + "</strong> " + esc(t("one-off payment. No subscription, no account.")) + "</p>" +
           (inPlayApp() ? (play.ready ? '<button type="button" class="btn btn-red" id="pro-play">' + esc(t("Get Pro for {price}, once", { price: play.price || CONFIG.price })) + "</button>" : '<p class="pro-soon">' + esc(t("Coming soon.")) + "</p>") : CONFIG.payLink ? '<a class="btn btn-red" id="pro-buy" href="' + esc(CONFIG.payLink) + '">' + esc(t("Get Pro")) + "</a>" : '<p class="pro-soon">' + esc(t("Coming soon.")) + "</p>") +
           '<p class="pro-small">' + esc(inPlayApp() ? t("Secure payment by Google Play. Pro switches on as soon as you’ve paid, and comes back if you reinstall the app on the same Google account.") : t("Secure payment by Stripe. Pro switches on as soon as you’ve paid. Not right for you? Email us within 14 days for a full refund.")) + "</p></div>";
       }
       if (st !== "bought" && (get("mme-pro-pending") || get("mme-pro-playpending"))) state += '<div class="pro-pending" role="alert"><p>' + esc(t("We couldn’t confirm your payment yet. Your payment is safe. Tap “Try again”, or email us and we’ll sort it out.")) + "</p>" +
         (lastError ? '<p class="pro-small">(' + esc(lastError) + ")</p>" : "") + '<button type="button" class="btn btn-navy" id="pro-retry">' + esc(t("Try again")) + "</button></div>";
-      var have = st === "bought" || st === "preview" || st === "playapp" || st === "iosapp" ? "" :
+      var have = st === "bought" || st === "preview" || st === "playapp" || inIosApp() ? "" :
         '<details class="pro-have"><summary>' + esc(t("Already bought Pro?")) + "</summary>" +
         '<form id="pro-code-f" class="pro-f"><label for="pro-code">' + esc(t("Enter your unlock code")) + '</label><input id="pro-code" autocomplete="off" autocapitalize="characters" placeholder="MME-XXXXX-XXXXXX"><button class="btn btn-navy" type="submit">' + esc(t("Switch on Pro")) + "</button></form>" +
         '<form id="pro-mail-f" class="pro-f"><label for="pro-mail">' + esc(t("Or the email address you paid with")) + '</label><input id="pro-mail" type="email" autocomplete="email"><button class="btn btn-line" type="submit">' + esc(t("Find my purchase")) + "</button></form>" +
@@ -168,6 +220,21 @@
         if (window.MMEStats) window.MMEStats.track("Pro Play checkout opened");
         buyOnPlay().then(function () { window.dispatchEvent(new Event("mme-pro")); });
       });
+      var ib = root.querySelector("#pro-ios");
+      if (ib) ib.addEventListener("click", function () {
+        ib.disabled = true;
+        if (window.MMEStats) window.MMEStats.track("Pro Apple checkout opened");
+        buyOnIos().then(function () { window.dispatchEvent(new Event("mme-pro")); });
+      });
+      var rb = root.querySelector("#pro-restore");
+      if (rb) rb.addEventListener("click", function () {
+        rb.disabled = true;
+        restoreOnIos().then(function (ok) {
+          if (ok) { window.dispatchEvent(new Event("mme-pro")); return; }
+          rb.disabled = false;
+          var m = root.querySelector("#pro-ios-msg"); m.hidden = false; m.textContent = t("No Pro purchase was found on this Apple Account.");
+        });
+      });
       var b = root.querySelector("#pro-buy");
       if (b) b.addEventListener("click", function () { if (window.MMEStats) window.MMEStats.track("Pro checkout opened"); });
     }
@@ -182,7 +249,7 @@
     box.innerHTML = '<button type="button" class="pt-x" aria-label="' + esc(t("No thanks")) + '">×</button>' +
       '<div class="pl-head">' + badge() + "<strong>" + esc(t("Enjoying the app?")) + "</strong></div>" +
       "<p>" + esc(t("Pro adds restaurants, bars and museums with the step-free way there, sightseeing walks, cruise mode and the offline map.")) + "</p>" +
-      '<div class="pt-actions"><a class="btn btn-red" href="#/pro">' + esc((inPlayApp() && !play.ready) || inIosApp() ? t("What’s included, and how to get it") : t("Get Pro for {price}, once", { price: play.price || CONFIG.price })) + "</a>" +
+      '<div class="pt-actions"><a class="btn btn-red" href="#/pro">' + esc((inPlayApp() && !play.ready) || (inIosApp() && !ios.ready) ? t("What’s included, and how to get it") : t("Get Pro for {price}, once", { price: shopPrice() })) + "</a>" +
       '<button type="button" class="btn btn-line pt-no">' + esc(t("No thanks")) + "</button></div>";
     var ref = body.querySelector(".route-fb");
     if (ref) ref.parentNode.insertBefore(box, ref); else body.appendChild(box);
@@ -225,5 +292,6 @@
   }
 
   playInit();
+  iosInit();
   window.MMEPro = { CONFIG: CONFIG, inPlayApp: inPlayApp, inSamsungApp: inSamsungApp, status: status, isPro: isPro, lockCard: lockCard, badge: badge, screen: screen, tipAfterRoute: tipAfterRoute, checkReturn: checkReturn, retryPending: retryPending, previewSwitch: previewSwitch };
 })();
