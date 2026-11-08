@@ -19,6 +19,8 @@ function copy(dir, rel) {
 }
 copy(SRC, "");
 fs.copyFileSync(path.join(__dirname, "native.js"), path.join(OUT, "native.js"));
+// Capacitor's own script (adds registerPlugin, which native.js uses for the iPhone's location permission).
+fs.copyFileSync(require.resolve("@capacitor/core/dist/capacitor.js"), path.join(OUT, "capacitor.js"));
 // SHOTS=1: the cloud Mac's test build, which steps through the main screens for screenshots.
 const SHOTS = process.env.SHOTS === "1";
 if (SHOTS) fs.copyFileSync(path.join(__dirname, "shots.js"), path.join(OUT, "shots.js"));
@@ -32,7 +34,7 @@ let pages = 0;
     if (!e.name.endsWith(".html")) continue;
     let h = fs.readFileSync(f, "utf8");
     const depth = path.relative(OUT, dir).split(path.sep).filter(Boolean).length;
-    h = h.replace(/<meta charset="utf-8">/i, (m) => m + '\n  <script src="' + "../".repeat(depth) + 'native.js"></script>');
+    h = h.replace(/<meta charset="utf-8">/i, (m) => m + '\n  <script src="' + "../".repeat(depth) + 'capacitor.js"></script>\n  <script src="' + "../".repeat(depth) + 'native.js"></script>');
     if (SHOTS && e.name === "index.html" && depth === 0) h = h.replace("native.js\"></script>", "native.js\"></script>\n  <script src=\"shots.js\"></script>");
     h = h.replace(/\s*<script[^>]*src="\/_vercel\/insights\/script\.js"><\/script>/g, "");
     fs.writeFileSync(f, h);
