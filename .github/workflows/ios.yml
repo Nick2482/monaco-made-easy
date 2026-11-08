@@ -33,6 +33,7 @@ jobs:
           grep -E "error:|BUILD (SUCCEEDED|FAILED)" "$GITHUB_WORKSPACE/build.log" | head -50
           test -d build/Build/Products/Debug-iphonesimulator/App.app
       - name: Run it and take screenshots
+        timeout-minutes: 15
         run: bash ios-app/simshots.sh
       - name: Publish the results
         if: always()
