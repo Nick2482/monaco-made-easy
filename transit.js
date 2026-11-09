@@ -492,7 +492,21 @@
     }
     if (anyLine) {   // the right bus exists, but not in the next couple of hours
       var g = cbLeg(anyLine.p, 0, anyLine.i, anyLine.j);
-      return { generic: true, r: g.r, legs: [g], walkTo: anyLine.wA, walkFrom: anyLine.wZ };
+      // What the timetable says for this line between these two stops: a bus later tonight, or none until tomorrow.
+      var tom = (function () { var d = new Date(Date.UTC(+now.ymd.slice(0, 4), +now.ymd.slice(4, 6) - 1, +now.ymd.slice(6, 8) + 1)); return { ymd: d.toISOString().slice(0, 10).replace(/-/g, ""), wd: (now.wd + 1) % 7, min: 0 }; })();
+      var today = [], tomorrow = [];
+      CB.pats.forEach(function (p) {
+        if (p[0] !== g.r) return;
+        var ia = -1, iz = -1;
+        p[2].forEach(function (si, k) { if (ia < 0 && CB.stops[si][0] === g.from) ia = k; else if (ia >= 0 && iz < 0 && CB.stops[si][0] === g.to) iz = k; });
+        if (ia < 0 || iz < 0) return;
+        p[4].forEach(function (tr) { var m = tr[1] + p[3][ia]; if (cbRuns(tr[0], now)) today.push(m); if (cbRuns(tr[0], tom)) tomorrow.push(m); });
+      });
+      var later = today.filter(function (m) { return m > now.min; }).sort(function (a, b) { return a - b; })[0];
+      var past = today.filter(function (m) { return m <= now.min; }).sort(function (a, b) { return b - a; })[0];
+      var first = tomorrow.filter(function (m) { return m >= 240; }).sort(function (a, b) { return a - b; })[0];
+      return { generic: true, r: g.r, legs: [g], walkTo: anyLine.wA, walkFrom: anyLine.wZ,
+        known: today.length > 0 || tomorrow.length > 0, later: later != null ? later : null, last: past != null ? past : null, first: first != null ? first : null };
     }
     return null;
   }
