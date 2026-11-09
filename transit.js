@@ -852,5 +852,5 @@
   }
   setTimeout(refreshBus, 300);
 
-  window.MMETransit = { tonight: tonight, stationPt: stationPt, bikeScreen: bikeScreen, refreshBus: refreshBus, inMonaco: inMonaco, taxiScreen: taxiScreen, busOption: busOption, trainOption: trainOption, coastOption: coastOption, coastLive: coastLive, departures: departures, monacoNow: monacoNow, hhmm: hhmm, badge: badge, stopName: function (i) { return B.stops[i][0]; }, stopPt: stopPt, transportScreen: transportScreen, lineScreen: lineScreen, airportScreen: airportScreen, ready: !!B };
+  window.MMETransit = { ranks: function () { return RANKS; }, tonight: tonight, stationPt: stationPt, bikeScreen: bikeScreen, refreshBus: refreshBus, inMonaco: inMonaco, taxiScreen: taxiScreen, busOption: busOption, trainOption: trainOption, coastOption: coastOption, coastLive: coastLive, departures: departures, monacoNow: monacoNow, hhmm: hhmm, badge: badge, stopName: function (i) { return B.stops[i][0]; }, stopPt: stopPt, transportScreen: transportScreen, lineScreen: lineScreen, airportScreen: airportScreen, ready: !!B };
 })();

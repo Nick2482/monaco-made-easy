@@ -212,6 +212,8 @@
         '<a class="back" href="#/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.4 5.4 14 4l-8 8 8 8 1.4-1.4L8.8 12z"/></svg>' + esc(t("Change")) + "</a>" +
         '<ol class="pl-ends"><li><span class="pl-dot pl-from"></span><div><small>' + esc(t("From")) + '</small><strong id="plan-from">' + esc(fromLabel) + "</strong></div></li>" +
         '<li><span class="pl-dot pl-to"></span><div><small>' + esc(t("To")) + "</small><strong>" + esc(lbl(state.to)) + "</strong></div></li></ol>" +
+        (state.leg && state.leg.stop === state.to ? '<div class="leg-banner"><p>' + esc(state.leg.then) + '</p><button type="button" class="btn-small" id="leg-back">' +
+          esc(t("Back to all the ways to {place}", { place: lbl(state.leg.back) })) + "</button></div>" : "") +
         '<div class="map plan-map" id="plan-map"></div>' +
         '<div id="plan-body"><p class="lede-dark" role="status">' + esc(state.from ? t("Working out the easiest way…") : t("Finding where you are…")) + "</p></div></section>";
     },
@@ -223,6 +225,19 @@
       L.marker([to.lat, to.lng], { icon: L.divIcon({ className: "", html: '<span class="mk-end mk-to"></span>', iconSize: [26, 26], iconAnchor: [13, 13] }) }).addTo(map);
 
       var lastNote = null, blockedKey = "", tracked = false, voiceList = [];
+      var replan = function () { location.replace(location.hash === "#/plan" ? "#/plan/" : "#/plan"); };
+      var back0 = root.querySelector("#leg-back");
+      if (back0) back0.addEventListener("click", function () { state.to = state.leg.back; state.leg = null; replan(); });
+      root.addEventListener("click", function (e) {
+        var b = e.target.closest(".leg-go");
+        if (!b) return;
+        var stop = { label: b.getAttribute("data-place"), lat: +b.getAttribute("data-lat"), lng: +b.getAttribute("data-lng"), kind: "stop" };
+        state.leg = { back: state.leg && state.leg.stop === state.to ? state.leg.back : state.to, stop: stop, then: b.getAttribute("data-then") };
+        state.to = stop;
+        if (window.MMEStats) window.MMEStats.track("Way to the stop");
+        replan();
+        window.scrollTo(0, 0);
+      });
       function draw(from, note) {
         fromPt = from; lastNote = note;
         if (window.MMEEventDay) window.MMEEventDay.apply();   // event-day closures (Pro) for this route
@@ -297,6 +312,11 @@
           if (!r.stepFree) h += '<aside class="note"><strong>' + esc(t("Steps on this route")) + "</strong><p>" + esc(t("This is the easiest way we can find, but it still has some steps. A taxi may be easier with heavy bags.")) + "</p></aside>";
           if (outside) h += '<aside class="note"><strong>' + esc(t("Beyond our map")) + "</strong><p>" + esc(t("Part of this journey is outside the area we cover (from Èze to Menton and the villages above). Use Google Maps for that part.")) + "</p></aside>";
           var T = window.MMETransit, bus = T && T.ready ? T.busOption(from, to) : null;
+          // "Show the way to the stop": opens the walk to where you catch it, with the rest of the journey kept at the top.
+          var legBtn = function (pt, place, then) {
+            return '<button type="button" class="btn btn-line leg-go" data-lat="' + pt.lat + '" data-lng="' + pt.lng + '" data-place="' + esc(place) + '" data-then="' + esc(then) + '">' +
+              esc(t("Show the way to {place}", { place: place })) + "</button>";
+          };
           if (bus && (bus.minutes + 2 < r.minutes || (r.climbed > 30 && bus.minutes < r.minutes + 8) || (!r.stepFree && bus.minutes < r.minutes + 8))) {
             var now = T.monacoNow();
             var B_ = function (x) { return "<b>" + esc(x) + "</b>"; };
@@ -304,7 +324,8 @@
               "<p>" + esc(t("Walk {a} min to {stop}.", { a: Math.max(1, bus.walkTo), stop: "\u0001" })).replace("\u0001", B_(T.stopName(bus.from))) + " " +
               esc(t("Next bus towards {dest} at {time} ({wait}).", { dest: bus.p.h, time: "\u0002", wait: bus.wait <= 0 ? t("now") : t("in {n} min", { n: bus.wait }) })).replace("\u0002", B_(T.hhmm(bus.dep))) + " " +
               esc(t("Ride {r} min to {stop}, then walk {w} min.", { r: bus.ride, stop: "\u0003", w: Math.max(1, bus.walkFrom) })).replace("\u0003", B_(T.stopName(bus.to))) + "</p>" +
-              "<small>" + esc(now.ymd > window.MMEBus.valid[1] ? t("Times from the Monaco bus timetable (may have changed).") : t("Times from the Monaco bus timetable.")) + "</small></div>";
+              "<small>" + esc(now.ymd > window.MMEBus.valid[1] ? t("Times from the Monaco bus timetable (may have changed).") : t("Times from the Monaco bus timetable.")) + "</small>" +
+              legBtn(T.stopPt(bus.from), T.stopName(bus.from), t("Then bus {r} at {time}, {ride} min to {stop}.", { r: window.MMEBus.routes[bus.p.r].n, time: T.hhmm(bus.dep), ride: bus.ride, stop: T.stopName(bus.to) })) + "</div>";
             var a = T.stopPt(bus.from), z = T.stopPt(bus.to);
             [a, z].forEach(function (p) { L.circleMarker([p.lat, p.lng], { radius: 9, color: "#fff", weight: 3, fillColor: window.MMEBus.routes[bus.p.r].c, fillOpacity: 1 }).addTo(layer); });
           }
@@ -331,7 +352,8 @@
             }
             opts += '<div class="bus-opt cb-opt"' + (cb.generic && L1.net === "ZOU!" ? ' id="cb-live"' : "") + '><div class="bus-opt-top">' + badgeOf(L1) + (L2 ? badgeOf(L2) : "") + "<span>" + esc(head) + "</span></div><p>" + body + "</p>" +
               (!cb.generic && (cb.hurry || cb.after) ? '<p class="opt-more">' + esc([cb.hurry ? t("If you hurry: {time}", { time: T.hhmm(cb.hurry) }) : "", cb.after ? t("The one after: {time}", { time: T.hhmm(cb.after) }) : ""].filter(Boolean).join(" · ")) + "</p>" : "") +
-              "<small>" + esc((cb.generic ? "" : t("About {n} min door to door, including the walks and the wait for the bus.", { n: cb.minutes }) + " ") + t("{net} timetable. Live times are in the {net} app. Pay on board.", { net: nets }) + (hasCam ? " " + t("Monaco city buses: CAM timetable.") : "")) + "</small></div>";
+              "<small>" + esc((cb.generic ? "" : t("About {n} min door to door, including the walks and the wait for the bus.", { n: cb.minutes }) + " ") + t("{net} timetable. Live times are in the {net} app. Pay on board.", { net: nets }) + (hasCam ? " " + t("Monaco city buses: CAM timetable.") : "")) + "</small>" +
+              legBtn(L1.fromPt, L1.from, cb.generic ? t("Then bus {r} towards {dest}, to {stop}.", { r: L1.r, dest: L1.dest, stop: L1.to }) : t("Then bus {r} at {time}, {ride} min to {stop}.", { r: L1.r, time: T.hhmm(L1.dep), ride: L1.arr - L1.dep, stop: L1.to })) + "</div>";
             cb.legs.forEach(function (L) { [L.fromPt, L.toPt].forEach(function (pt) { window.L.circleMarker([pt.lat, pt.lng], { radius: 9, color: "#fff", weight: 3, fillColor: L.c, fillOpacity: 1 }).addTo(layer); }); });
           }
           var tr = T && T.trainOption && r.minutes >= 25 ? T.trainOption(from, to) : null;
@@ -344,7 +366,8 @@
               "<p>" + esc(t("Walk {a} min to {stop}.", { a: Math.max(1, tr.walkTo), stop: "\u0001" })).replace("\u0001", Bt(t(tr.from))) + " " +
               esc(t("Train at {time} ({wait}), {r} min to {stop}, then walk {w} min.", { time: "\u0002", wait: tr.wait <= 0 ? t("now") : t("in {n} min", { n: tr.wait }), r: tr.ride, stop: "\u0003", w: Math.max(1, tr.walkFrom) })).replace("\u0002", Bt(T.hhmm(tr.dep))).replace("\u0003", Bt(t(tr.to))) + "</p>" +
               (tr.hurry != null || tr.after != null ? '<p class="opt-more">' + esc([tr.hurry != null ? t("If you hurry: {time}", { time: T.hhmm(tr.hurry) }) : "", tr.after != null ? t("The one after: {time}", { time: T.hhmm(tr.after) }) : ""].filter(Boolean).join(" · ")) + "</p>" : "") +
-              "<small>" + esc(t("About {n} min door to door, including the walks and the wait for the train.", { n: tr.minutes })) + " " + esc(t("Planned SNCF timetable. Check the SNCF Connect app for delays.")) + "</small></div>";
+              "<small>" + esc(t("About {n} min door to door, including the walks and the wait for the train.", { n: tr.minutes })) + " " + esc(t("Planned SNCF timetable. Check the SNCF Connect app for delays.")) + "</small>" +
+              legBtn(tr.fromPt, t(tr.from), t("Then the train at {time}, {r} min to {stop}.", { time: T.hhmm(tr.dep), r: tr.ride, stop: t(tr.to) })) + "</div>";
             [tr.fromPt, tr.toPt].forEach(function (p) { L.circleMarker([p.lat, p.lng], { radius: 9, color: "#fff", weight: 3, fillColor: "#0b2545", fillOpacity: 1 }).addTo(layer); });
           }
           // Long journeys: lead with the train, bus and taxi, and put the walk last.
@@ -352,7 +375,13 @@
             if (opts && window.MMEGetHome) opts += '<a class="gh-link" href="#/get-home">' + icon("clock") + "<span><strong>" + esc(t("Countdown to your train home")) + "</strong><small>" +
               esc(t("When to leave, and the last train or bus tonight")) + "</small></span>" + (window.MMEPro && !window.MMEPro.isPro() ? window.MMEPro.badge() : "") + "</a>";
             opts += '<div class="bus-opt tx-opt"><div class="bus-opt-top"><span class="bus-badge" style="background:#5b4b8a;color:#fff">' + esc(t("Taxi")) + "</span><span>" + esc(t("Or take a taxi")) + "</span></div><p>" +
-              esc(t("The easiest way with bags. Monaco taxis can take you anywhere but only pick up in Monaco; in France, book a local taxi.")) + ' <a href="#/taxis">' + esc(t("Taxi numbers and ranks")) + "</a></p></div>";
+              esc(t("The easiest way with bags. Monaco taxis can take you anywhere but only pick up in Monaco; in France, book a local taxi.")) + ' <a href="#/taxis">' + esc(t("Taxi numbers and ranks")) + "</a></p>" +
+              (function () {   // the nearest Monaco taxi rank, when you're in Monaco
+                if (!T || !T.ranks || !T.inMonaco(from)) return "";
+                var best = null;
+                T.ranks().forEach(function (k) { var d = M().distance(from, { lat: k[1], lng: k[2] }); if (!best || d < best.d) best = { k: k, d: d }; });
+                return best ? legBtn({ lat: best.k[1], lng: best.k[2] }, t(best.k[0]), t("Then a taxi to {place}.", { place: lbl(to) })) : "";
+              })() + "</div>";
             h = h.slice(0, walkAt) + (opts ? '<h2 class="steps-h">' + esc(t("Best ways to get there")) + "</h2>" + opts : "") +
               '<h2 class="steps-h">' + esc(t("Or walk all the way")) + "</h2>" + h.slice(walkAt);
           } else h += opts;
