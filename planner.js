@@ -225,6 +225,7 @@
       var lastNote = null, blockedKey = "", tracked = false, voiceList = [];
       function draw(from, note) {
         fromPt = from; lastNote = note;
+        if (window.MMEEventDay) window.MMEEventDay.apply();   // event-day closures (Pro) for this route
         layer.clearLayers();
         var isStation = !!(from && from.kind === "station");
         var X = window.MMEExtras, blocked = X ? X.Reports.blockedPoints() : [];
@@ -248,6 +249,7 @@
           });
         }
         var h = note ? '<p class="summary">' + note + "</p>" : "";
+        if (window.MMEEventDay) h += window.MMEEventDay.routeNote();
         h += '<label class="wc-toggle"><input type="checkbox" id="wc-on"' + (wc ? " checked" : "") + '><span class="wc-sw" aria-hidden="true"></span><span>' + esc(t("Wheelchair or pushchair")) + "<small>" + esc(t("Lifts and level paths only: no steps or escalators")) + "</small></span></label>";
         var outside = r && (r.startGap > 300 || r.endGap > 300), opts = "";
         if (!r) {

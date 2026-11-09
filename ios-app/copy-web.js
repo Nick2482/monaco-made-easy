@@ -5,7 +5,7 @@ const path = require("path");
 
 const SRC = path.resolve(__dirname, "..");
 const OUT = path.join(__dirname, "www");
-const SKIP_DIRS = new Set(["ios-app", "api", ".git", ".github", "screenshots", "node_modules", "__pycache__"]);
+const SKIP_DIRS = new Set(["ios-app", "tests", "api", ".git", ".github", "screenshots", "node_modules", "__pycache__"]);
 const SKIP_FILES = /(\.py|\.pyc|\.md)$|^(requirements\.txt|vercel\.json|assetlinks\.json|robots\.txt|sitemap\.xml|test\.html|sea-test\.html|google[0-9a-f]+\.html|sw\.js|\.vercelignore|\.gitignore)$/;
 
 fs.rmSync(OUT, { recursive: true, force: true });

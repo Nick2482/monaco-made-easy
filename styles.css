@@ -1280,3 +1280,15 @@ html.festive .xm-mk { background: var(--fest-gold); border-color: #fff; }
 .gh-last.gone { border-left-color: #888; background: rgba(0, 0, 0, .04); }
 .gh-or { margin: 0 0 16px; }
 .gh-change { display: inline-block; margin-top: 10px; color: var(--red, #c8102e); font-weight: 600; }
+
+/* ---------- Event day ---------- */
+.ev-card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; margin: 4px 0 16px; }
+.ev-card.on { border-color: #c8102e; box-shadow: inset 0 0 0 1px #c8102e; }
+.ev-card h2 { margin: 2px 0 8px; }
+.ev-days { margin: 0; padding-left: 18px; }
+.ev-map { height: 300px; border-radius: 14px; overflow: hidden; margin: 6px 0 14px; }
+.ev-notes { padding-left: 18px; margin: 0 0 18px; }
+.ev-notes li { margin: 0 0 10px; line-height: 1.45; }
+.ev-note a { font-weight: 700; }
+.ev-warn { border-left: 4px solid #c8102e; padding-left: 10px; }
+.sl-event .sl-ico { background: #c8102e !important; }

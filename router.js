@@ -47,12 +47,13 @@
     var x = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(aLat * r) * Math.cos(bLat * r) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
     return 2 * R * Math.asin(Math.sqrt(x));
   }
-  function nearest(p) {
+  function nearest(p, ok) {
     var gy = Math.floor(p.lat / CELL), gx = Math.floor(p.lng / CELL), best = -1, bd = Infinity;
     for (var ring = 1; ring <= 4 && best < 0; ring++) {
       for (var y = gy - ring; y <= gy + ring; y++) for (var x = gx - ring; x <= gx + ring; x++) {
         (grid[y + ":" + x] || []).forEach(function (n) {
           if (liftAt[n] || island[n]) return; // never start inside a lift, or on a bit of path that leads nowhere
+          if (ok && !ok[n]) return;           // on an event day: only points you can actually walk from
           var d = metres(p.lat, p.lng, lat[n], lng[n]) + (stepsOnly[n] ? 30 : 0);
           if (d < bd) { bd = d; best = n; }
         });
@@ -142,12 +143,88 @@
     return { secs: secs, cost: cost };
   }
   var LIFT_WAIT = 45;
+
+  // ---------- Event-day closures (Grand Prix and the like) ----------
+  // spec: { id, bbox: [minLat, maxLat, minLng, maxLng], streets: [[name, clip?]] } where clip is a box the street is closed within.
+  // Closes the named streets, the pavements beside them and the crossings over them. Footbridges and underpasses stay open
+  // (they don't join the street), as do lifts and escalators.
+  var closedCache = {}, activeClosed = null;
+  function setClosed(arr) { activeClosed = arr || null; }
+  // Points still joined to the main walking network when some streets are closed (so a route never starts or ends
+  // somewhere fenced off, such as Casino Square on race day: it ends as close as you can get instead).
+  function openNodes(closed) {
+    if (closed.ok) return closed.ok;
+    var par = new Int32Array(N), x;
+    for (x = 0; x < N; x++) par[x] = x;
+    var rootOf = function (a) { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; };
+    G.e.forEach(function (e, k) { if (!closed[k]) par[rootOf(e[0])] = rootOf(e[1]); });
+    var size = {}, big = -1, bigN = 0;
+    for (x = 0; x < N; x++) { var r = rootOf(x); size[r] = (size[r] || 0) + 1; if (size[r] > bigN) { bigN = size[r]; big = r; } }
+    var ok = new Uint8Array(N);
+    for (x = 0; x < N; x++) ok[x] = rootOf(x) === big ? 1 : 0;
+    closed.ok = ok;
+    return ok;
+  }
+  function edgePts(e) {
+    var p = [[lat[e[0]], lng[e[0]]]], g = e[8] || [];
+    for (var q = 0; q + 1 < g.length; q += 2) p.push([g[q] / 1e6, g[q + 1] / 1e6]);
+    p.push([lat[e[1]], lng[e[1]]]);
+    return p;
+  }
+  function closures(spec) {
+    if (!spec) return null;
+    if (closedCache[spec.id]) return closedCache[spec.id];
+    var E = G.e.length, out = new Uint8Array(E), bb = spec.bbox, byName = {};
+    spec.streets.forEach(function (s) { byName[s[0]] = s[1] || bb; });
+    var inBox = function (p, b) { return p[0] >= b[0] && p[0] <= b[1] && p[1] >= b[2] && p[1] <= b[3]; };
+    var segs = [], cell = {}, CS = 0.0003, roadNode = new Uint8Array(N), kx = Math.cos(43.74 * Math.PI / 180);
+    G.e.forEach(function (e, k) {
+      var nm = G.names[e[4]], clip = nm && byName[nm];
+      if (!clip || e[3] === 3 || e[3] === 4) return;
+      var p = edgePts(e), mid = p[Math.floor(p.length / 2)];
+      if (!inBox(mid, clip)) return;
+      out[k] = 1; roadNode[e[0]] = 1; roadNode[e[1]] = 1;
+      for (var q = 0; q + 1 < p.length; q++) {
+        var s = [p[q], p[q + 1]], id = segs.length; segs.push(s);
+        var a0 = Math.floor(Math.min(s[0][0], s[1][0]) / CS) - 1, a1 = Math.floor(Math.max(s[0][0], s[1][0]) / CS) + 1;
+        var b0 = Math.floor(Math.min(s[0][1], s[1][1]) / CS) - 1, b1 = Math.floor(Math.max(s[0][1], s[1][1]) / CS) + 1;
+        for (var x = a0; x <= a1; x++) for (var y = b0; y <= b1; y++) (cell[x + "," + y] = cell[x + "," + y] || []).push(id);
+      }
+    });
+    function dist(pt) {   // metres to the nearest closed street, or Infinity if none close
+      var list = cell[Math.floor(pt[0] / CS) + "," + Math.floor(pt[1] / CS)], best = Infinity;
+      if (!list) return best;
+      list.forEach(function (id) {
+        var s = segs[id], ax = s[0][1] * kx, ay = s[0][0], bx = s[1][1] * kx, by = s[1][0], px = pt[1] * kx, py = pt[0];
+        var dx = bx - ax, dy = by - ay, L2 = dx * dx + dy * dy, t = L2 ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / L2)) : 0;
+        var ex = ax + t * dx - px, ey = ay + t * dy - py, d = Math.sqrt(ex * ex + ey * ey) * 111320;
+        if (d < best) best = d;
+      });
+      return best;
+    }
+    // Whole areas inside the circuit (quays with no street name).
+    (spec.areas || []).forEach(function (b) {
+      G.e.forEach(function (e, k) { if (e[3] !== 3 && e[3] !== 4 && edgePts(e).every(function (p) { return inBox(p, b); })) out[k] = 1; });
+    });
+    var underK = {}; (G.tun || []).forEach(function (k) { underK[k] = 1; });
+    G.e.forEach(function (e, k) {
+      if (out[k] || e[3] === 3 || e[3] === 4 || underK[k]) return;
+      var p = edgePts(e);
+      if (!inBox(p[0], bb) && !inBox(p[p.length - 1], bb)) return;
+      var far = 0; for (var q = 0; q < p.length; q++) far = Math.max(far, dist(p[q]));
+      var touches = roadNode[e[0]] || roadNode[e[1]];
+      if ((touches && far <= 16) || (!touches && far <= 9)) out[k] = 1;   // a crossing, or the pavement alongside
+    });
+    closedCache[spec.id] = out;
+    return out;
+  }
   function fw0(k) { return k >= 0 ? k : -k - 1; }
 
   function route(from, to, opts) {
     opts = opts || {};
-    var avoid = opts.avoidSteps !== false;
-    var s = nearest(from), g = nearest(to);
+    var avoid = opts.avoidSteps !== false, closed = opts.closed !== undefined ? opts.closed : activeClosed;
+    var okN = closed ? openNodes(closed) : null;
+    var s = nearest(from, okN), g = nearest(to, okN);
     if (!s || !g) return null;
     // Lifts and escalators that visitors have reported out of order are left out.
     var blockN = null, blockE = null;
@@ -183,6 +260,7 @@
         var v = fwd ? e[1] : e[0];
         if (seen[v]) continue;
         if (blockN && (blockN[v] || blockE[fw0(k)])) continue;
+        if (closed && closed[fw0(k)]) continue;
         // Wheelchair or pushchair: no steps, no escalators, no lifts marked as not wheelchair-accessible.
         if (opts.wheelchair && (e[3] === 2 || e[3] === 3 || (liftAt[v] && liftAt[v].wheelchair === "no"))) continue;
         var c = legCost(e, fwd, avoid).cost + (liftAt[v] ? LIFT_WAIT : 0);
@@ -343,8 +421,8 @@
   // Same preferences as route(): lifts and escalators first, steps avoided where there's a sensible way round.
   function timesFrom(from, opts) {
     opts = opts || {};
-    var avoid = opts.avoidSteps !== false;
-    var s = nearest(from);
+    var avoid = opts.avoidSteps !== false, okN = activeClosed ? openNodes(activeClosed) : null;
+    var s = nearest(from, okN);
     if (!s) return null;
     var dist = new Float64Array(N).fill(Infinity), secsA = new Float64Array(N), mA = new Float64Array(N), seen = new Uint8Array(N);
     dist[s.node] = 0;
@@ -362,6 +440,7 @@
         var k = list[j], fwd = k >= 0, e = G.e[fwd ? k : -k - 1];
         var v = fwd ? e[1] : e[0];
         if (seen[v]) continue;
+        if (activeClosed && activeClosed[fwd ? k : -k - 1]) continue;
         if (opts.wheelchair && (e[3] === 2 || e[3] === 3 || (liftAt[v] && liftAt[v].wheelchair === "no"))) continue;
         var lc = legCost(e, fwd, avoid), c = lc.cost + (liftAt[v] ? LIFT_WAIT : 0), sec = lc.secs + (liftAt[v] ? LIFT_WAIT : 0);
         if (e[3] !== 3 && e[3] !== 4) { var up = climb(u, v); if (up > 0) { c += up * (avoid ? 12 : 7); sec += up * 4; } }
@@ -371,7 +450,7 @@
     var pre = s.d > 40 ? s.d : 0;
     // Returns { minutes, metres } to a place, or null when it can't be reached on foot.
     return function (to) {
-      var g = nearest(to);
+      var g = nearest(to, okN);
       if (!g || !isFinite(dist[g.node])) return null;
       var post = g.d > 40 ? g.d : 0;
       return { minutes: Math.max(1, Math.round((secsA[g.node] + (pre + post) / WALK) / 60)), metres: Math.round(mA[g.node] + pre + post) };
@@ -380,5 +459,5 @@
 
   function heightAt(p) { var n = nearest(p); return height && n ? Math.round(height[n.node]) : null; }
 
-  window.MMERouter = { route: route, timesFrom: timesFrom, fromStation: fromStation, nearest: nearest, ready: ready, heightAt: heightAt };
+  window.MMERouter = { closures: closures, setClosed: setClosed, closedNow: function () { return activeClosed; }, edgePts: function (k) { return edgePts(G.e[k]); }, route: route, timesFrom: timesFrom, fromStation: fromStation, nearest: nearest, ready: ready, heightAt: heightAt };
 })();
