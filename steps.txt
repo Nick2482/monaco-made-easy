@@ -1,0 +1,52 @@
+20:22:49 xcrun simctl boot 309F4F0C-F632-4F5C-BB25-BD783E57455C
+  -> 0
+20:23:00 xcrun simctl bootstatus 309F4F0C-F632-4F5C-BB25-BD783E57455C -b
+Monitoring boot status for iPhone 16 (309F4F0C-F632-4F5C-BB25-BD783E57455C).
+Device already booted, nothing to do.
+
+  -> 0
+20:24:17 xcrun simctl status_bar 309F4F0C-F632-4F5C-BB25-BD783E57455C override --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4
+  -> 0
+20:24:41 xcrun simctl location 309F4F0C-F632-4F5C-BB25-BD783E57455C set 43.7393,7.4278
+  -> 0
+20:25:35 xcrun simctl install 309F4F0C-F632-4F5C-BB25-BD783E57455C ios-app/ios/App/build/Build/Products/Debug-iphonesimulator/App.app
+  -> 0
+20:25:53 xcrun simctl privacy 309F4F0C-F632-4F5C-BB25-BD783E57455C grant location com.monacomadeeasy.app
+  -> 0
+20:25:57 xcrun simctl launch --terminate-running-process 309F4F0C-F632-4F5C-BB25-BD783E57455C com.monacomadeeasy.app
+com.monacomadeeasy.app: 6207
+  -> 0
+20:26:08 xcrun simctl io 309F4F0C-F632-4F5C-BB25-BD783E57455C screenshot shots/0-after-launch.png
+Detected file type 'PNG' from extension
+Wrote screenshot to: shots/0-after-launch.png
+  -> 0
+6207	0	UIKitApplication:com.monacomadeeasy.app[5126][rb-legacy]
+20:26:36 xcrun simctl io 309F4F0C-F632-4F5C-BB25-BD783E57455C screenshot shots/1-home.png
+Detected file type 'PNG' from extension
+Wrote screenshot to: shots/1-home.png
+  -> 0
+20:26:48 xcrun simctl io 309F4F0C-F632-4F5C-BB25-BD783E57455C screenshot shots/2-map.png
+Detected file type 'PNG' from extension
+Wrote screenshot to: shots/2-map.png
+  -> 0
+20:27:02 xcrun simctl io 309F4F0C-F632-4F5C-BB25-BD783E57455C screenshot shots/3-transport.png
+Detected file type 'PNG' from extension
+Wrote screenshot to: shots/3-transport.png
+  -> 0
+20:27:20 xcrun simctl io 309F4F0C-F632-4F5C-BB25-BD783E57455C screenshot shots/4-guide-eat.png
+Detected file type 'PNG' from extension
+Wrote screenshot to: shots/4-guide-eat.png
+  -> 0
+20:27:34 xcrun simctl io 309F4F0C-F632-4F5C-BB25-BD783E57455C screenshot shots/5-villages.png
+Detected file type 'PNG' from extension
+Wrote screenshot to: shots/5-villages.png
+  -> 0
+20:27:47 xcrun simctl io 309F4F0C-F632-4F5C-BB25-BD783E57455C screenshot shots/6-info.png
+Detected file type 'PNG' from extension
+Wrote screenshot to: shots/6-info.png
+  -> 0
+20:27:53 xcrun simctl io 309F4F0C-F632-4F5C-BB25-BD783E57455C screenshot shots/7-pro.png
+Detected file type 'PNG' from extension
+Wrote screenshot to: shots/7-pro.png
+  -> 0
+Retired
