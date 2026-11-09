@@ -230,7 +230,7 @@
         var X = window.MMEExtras, blocked = X ? X.Reports.blockedPoints() : [];
         blockedKey = blocked.map(function (b) { return b.id; }).join(",");
         var wc = wheelchairOn();
-        var R0 = window.MMERouter, exit0 = isStation && R0 ? R0.fromStation(to, { avoidSteps: avoidSteps, blocked: blocked, wheelchair: wc }) : null;
+        var R0 = window.MMERouter, exit0 = isStation && R0 ? R0.fromStation(to, { avoidSteps: avoidSteps, blocked: blocked, wheelchair: wc }, from) : null;
         if (exit0) from = { lat: exit0.exit.lat, lng: exit0.exit.lng };
         L.marker([from.lat, from.lng], { icon: L.divIcon({ className: "", html: '<span class="mk-end mk-from"></span>', iconSize: [26, 26], iconAnchor: [13, 13] }) }).addTo(layer);
         var R = window.MMERouter, exit = null, r = null;

@@ -324,10 +324,14 @@
     };
   }
 
-  // Best station exit for a destination: try each exit, keep the easiest.
-  function fromStation(to, opts) {
+  // Best exit of one station for a destination: try each of that station's exits, keep the easiest.
+  // The map has exits for every station on the coast (Cap-d'Ail to Menton), so only the exits close to the
+  // station you're starting from count (Monaco's station is long and underground, so allow 700 m).
+  function fromStation(to, opts, at) {
     var best = null;
+    at = at || { lat: 43.7393, lng: 7.4199 };   // Monaco Monte-Carlo station
     (G.station || []).forEach(function (x) {
+      if (Math.abs(x.lat - at.lat) * 111000 > 700 || Math.abs(x.lng - at.lng) * 80500 > 700) return;
       var r = route({ lat: x.lat, lng: x.lng }, to, opts);
       if (r && (!best || r.minutes + (r.steps ? 4 : 0) < best.r.minutes + (best.r.steps ? 4 : 0))) best = { exit: x, r: r };
     });

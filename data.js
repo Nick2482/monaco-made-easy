@@ -12,7 +12,7 @@ window.MME = {
     palace:    { name: "Prince's Palace", short: "Palace", area: "Monaco-Ville (the Rock)", height: 60, x: 21, label: "a", lat: 43.7313, lng: 7.4199 },
     museum:    { name: "Oceanographic Museum", short: "Museum", area: "Monaco-Ville (the Rock)", height: 55, x: 29, label: "r", lat: 43.7307, lng: 7.4253 },
     larvotto:  { name: "Larvotto Beach", short: "Larvotto", area: "Larvotto", height: 2, x: 91, label: "b", lat: 43.7443, lng: 7.4338 },
-    exotic:    { name: "Exotic Garden", short: "Exotic Garden", area: "Moneghetti", height: 100, x: 5, label: "r", lat: 43.7311, lng: 7.4108 },
+    exotic:    { name: "Exotic Garden", short: "Exotic Garden", area: "Moneghetti", height: 100, x: 5, label: "r", lat: 43.73124, lng: 7.41393 },
     fontvieille:{ name: "Fontvieille", short: "Fontvieille", area: "Fontvieille", height: 4, x: 13, label: "r", lat: 43.7286, lng: 7.4162 },
     beausoleil:{ name: "Beausoleil, Place de la Libération", short: "Beausoleil", area: "Beausoleil (France)", height: 80, x: 62, label: "r", lat: 43.7428, lng: 7.4228 }
   },
