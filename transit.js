@@ -202,6 +202,61 @@
     return best;
   }
 
+  // ---------- Get me home: every train (and the regional bus) home from here, with the time to leave ----------
+  // dest: { lat, lng, st? } where st names a station to ride to (e.g. "Nice-Ville" for people staying in Nice).
+  // Returns { trains: [{ leave, dep, arr, home, fromSt, toSt, walkTo, walkFrom }], last, bus, walkHome, now }.
+  var TR_EXTRA = { "Nice-Ville": [43.70455, 7.26193, "Nice-Ville station"], "Nice Saint-Augustin": [43.67289, 7.21343, "Nice Saint-Augustin station"] };
+  function stationPt(name) { var c = TR_ST[name] || TR_EXTRA[name]; return c ? { lat: c[0], lng: c[1], label: c[2] } : null; }
+  function tonight(from, dest, now) {
+    now = now || monacoNow();
+    var out = { now: now, trains: [], last: null, bus: null, walkHome: null };
+    if (!dest.st && metres(from, dest) < 2500) { out.walkHome = walkMins(from, dest); }
+    if (!TR || !TR.dep) return out;
+    var board = TR.home.map(function (i) { var p = stationPt(TR.places[i]); return p ? { i: i, pt: p, d: metres(from, p) } : null; })
+      .filter(function (s) { return s && s.d <= 1800; }).sort(function (a, b) { return a.d - b.d; }).slice(0, 2);
+    var alight = dest.st ? [{ k: TR.places.indexOf(dest.st), pt: stationPt(dest.st), d: 0 }]
+      : TR.keys.map(function (k) { var p = stationPt(TR.places[k]); return p ? { k: k, pt: p, d: metres(p, dest) } : null; })
+        .filter(function (s) { return s && s.d <= 1800; }).sort(function (a, b) { return a.d - b.d; }).slice(0, 2);
+    var end = now.min < 240 ? 300 : 1440 + 240;   // "tonight" runs until 4am
+    var seen = {}, all = [];
+    board.forEach(function (a) {
+      var wa = walkMins(from, a.pt).m;
+      alight.forEach(function (b) {
+        if (b.k < 0 || b.k === a.i) return;
+        var wz = dest.st ? 0 : walkMins(b.pt, dest).m;
+        var list = trNext(function (o) { return o[0] === a.i && o[5][b.k] > o[1] ? o[1] : null; }, now) || [];
+        list.forEach(function (x) {
+          if (x.at >= end) return;
+          var key = x.at + ">" + x.o[3] + ">" + a.i;
+          var leave = x.at - wa - 3, arr = x.at + (x.o[5][b.k] - x.o[1]);
+          if (seen[key] && seen[key].arr + seen[key].walkFrom <= arr + wz) return;
+          var row = { leave: leave, dep: x.at, arr: arr, home: arr + wz, fromSt: a.pt.label, fromPt: a.pt, toSt: b.pt.label, toward: TR.places[x.o[3]], walkTo: wa, walkFrom: wz };
+          seen[key] = row; all.push(row);
+        });
+      });
+    });
+    // One row per train (the best station pair), soonest first.
+    var uniq = {}; all.forEach(function (r) { var k = r.dep + ">" + r.toward + ">" + r.fromSt; if (!uniq[k] || r.home < uniq[k].home) uniq[k] = r; });
+    all = Object.keys(uniq).map(function (k) { return uniq[k]; }).sort(function (a, b) { return a.leave - b.leave || a.home - b.home; });
+    out.last = all.length ? all.reduce(function (m, r) { return r.dep > m.dep ? r : m; }, all[0]) : null;
+    out.trains = all.filter(function (r) { return r.leave >= now.min - 1; });
+    if (!dest.st && CB) {
+      var cb = coastOption(from, dest, now);
+      if (cb && !cb.generic) {
+        var L0 = cb.legs[0], times = [];
+        if (cb.legs.length === 1) CB.pats.forEach(function (p) {   // every bus on this line between these stops today, for the last one
+          var ia = -1, iz = -1;
+          p[2].forEach(function (si, k) { if (ia < 0 && CB.stops[si][0] === L0.from) ia = k; else if (ia >= 0 && iz < 0 && CB.stops[si][0] === L0.to) iz = k; });
+          if (ia < 0 || iz < 0 || p[0] !== L0.r) return;
+          p[4].forEach(function (tr) { if (cbRuns(tr[0], now)) times.push(tr[1] + p[3][ia]); });
+        });
+        out.bus = { L: L0, legs: cb.legs, dep: cb.dep, leave: cb.dep - cb.walkTo - 1, walkTo: cb.walkTo, arrive: cb.arrive, after: cb.after,
+          last: times.length ? Math.max.apply(null, times) : null };
+      }
+    }
+    return out;
+  }
+
   // Regional buses (coastbus.js): ZOU! along the coast and up to La Turbie and Èze, and Zest around Menton,
   // Roquebrune, Beausoleil and up to the villages. Finds the best journey with one bus, or two with a change.
   var CB = window.MMECoast, CBX = null;
@@ -795,5 +850,5 @@
   }
   setTimeout(refreshBus, 300);
 
-  window.MMETransit = { bikeScreen: bikeScreen, refreshBus: refreshBus, inMonaco: inMonaco, taxiScreen: taxiScreen, busOption: busOption, trainOption: trainOption, coastOption: coastOption, coastLive: coastLive, departures: departures, monacoNow: monacoNow, hhmm: hhmm, badge: badge, stopName: function (i) { return B.stops[i][0]; }, stopPt: stopPt, transportScreen: transportScreen, lineScreen: lineScreen, airportScreen: airportScreen, ready: !!B };
+  window.MMETransit = { tonight: tonight, stationPt: stationPt, bikeScreen: bikeScreen, refreshBus: refreshBus, inMonaco: inMonaco, taxiScreen: taxiScreen, busOption: busOption, trainOption: trainOption, coastOption: coastOption, coastLive: coastLive, departures: departures, monacoNow: monacoNow, hhmm: hhmm, badge: badge, stopName: function (i) { return B.stops[i][0]; }, stopPt: stopPt, transportScreen: transportScreen, lineScreen: lineScreen, airportScreen: airportScreen, ready: !!B };
 })();

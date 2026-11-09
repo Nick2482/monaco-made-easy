@@ -158,6 +158,7 @@
     ["Walks", "Sightseeing walks that use the lifts, and coastal walks from Cap d’Ail and round Cap Martin."],
     ["Biggest yachts in port today", "The biggest yachts in Monaco’s harbours right now, with their length and flag, updated every 10 minutes."],
     ["Cruise day", "Set your all-aboard time and we’ll tell you when to head back."],
+    ["Get me home", "A countdown to your train or bus home tonight, with the last one of the night and a reminder when it’s time to leave."],
     ["Use it without mobile data", "Save the map on your phone for when roaming is off."]
   ];
 

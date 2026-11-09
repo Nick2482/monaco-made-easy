@@ -1261,3 +1261,22 @@ html.festive .sl-season .sl-ico { background: var(--fest-gold) !important; borde
 html.festive .sl-season { box-shadow: inset 0 0 0 1px var(--fest-gold); }
 html.festive .xmas-page h1::after { content: " ✦"; color: var(--fest-gold); font-size: .7em; vertical-align: .15em; }
 html.festive .xm-mk { background: var(--fest-gold); border-color: #fff; }
+
+/* ---------- Get me home ---------- */
+.gethome .gh-pick { margin: 0 0 18px; }
+.gethome .gh-pick-h { font-weight: 700; margin: 0 0 8px; }
+.gethome .dest.on { background: var(--navy, #0b2545); color: #fff; border-color: var(--navy, #0b2545); }
+.gh-big { background: var(--card, #fff); border: 1px solid var(--line, #e3ded3); border-radius: 16px; padding: 18px 18px 16px; margin: 0 0 14px; }
+.gh-big .gh-kicker { margin: 0; font-size: .9rem; color: var(--muted, #5f6b7a); }
+.gh-big .gh-count { margin: 2px 0 8px; font-size: 2.3rem; line-height: 1.1; font-weight: 800; color: var(--navy, #0b2545); font-variant-numeric: tabular-nums; }
+.gh-big .gh-what { margin: 0 0 14px; line-height: 1.45; }
+.gh-big.gh-soon { border-color: #c8102e; box-shadow: inset 0 0 0 1px #c8102e; }
+.gh-big.gh-soon .gh-count { color: #c8102e; }
+[data-theme="dark"] .gh-big .gh-count { color: #f1f4f8; }
+[data-theme="dark"] .gh-big.gh-soon .gh-count { color: #ff6b7d; }
+.gh-remind { margin: 0 0 18px; }
+.gh-later small { display: block; color: var(--muted, #5f6b7a); }
+.gh-last { margin: 10px 0; padding: 10px 12px; border-left: 4px solid #c8102e; background: rgba(200, 16, 46, .06); border-radius: 0 10px 10px 0; }
+.gh-last.gone { border-left-color: #888; background: rgba(0, 0, 0, .04); }
+.gh-or { margin: 0 0 16px; }
+.gh-change { display: inline-block; margin-top: 10px; color: var(--red, #c8102e); font-weight: 600; }

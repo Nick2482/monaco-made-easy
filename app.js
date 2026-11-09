@@ -40,6 +40,7 @@
     phone: '<path d="M6.6 2.5 9.4 6a1.5 1.5 0 0 1-.1 2l-1.6 1.5a12 12 0 0 0 6.8 6.8l1.5-1.6a1.5 1.5 0 0 1 2-.1l3.5 2.8a1.5 1.5 0 0 1 .2 2.1l-1.4 1.7A3 3 0 0 1 17.5 22 15.5 15.5 0 0 1 2 6.5a3 3 0 0 1 .8-2.8l1.7-1.4a1.5 1.5 0 0 1 2.1.2z"/>',
     calendar: '<path d="M7 2h2v2h6V2h2v2h2.5A1.5 1.5 0 0 1 21 5.5v14a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 19.5v-14A1.5 1.5 0 0 1 4.5 4H7zM5 9v10h14V9zm2 2h4v4H7z"/>',
     star: '<path d="M12 2.5l2.6 6.4 6.9.5-5.3 4.4 1.7 6.7L12 16.8l-5.9 3.7 1.7-6.7-5.3-4.4 6.9-.5z"/>',
+    clock: '<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7z"/>',
     suitcase: '<path d="M9 2.5h6A1.5 1.5 0 0 1 16.5 4v2h3A1.5 1.5 0 0 1 21 7.5v11a1.5 1.5 0 0 1-1.5 1.5H19v1.5h-2V20H7v1.5H5V20h-.5A1.5 1.5 0 0 1 3 18.5v-11A1.5 1.5 0 0 1 4.5 6h3V4A1.5 1.5 0 0 1 9 2.5zm.5 2V6h5V4.5zM8 9v8h2V9zm6 0v8h2V9z"/>',
     hotel: '<path d="M2 5h2v8h7V8h8.5A2.5 2.5 0 0 1 22 10.5V20h-2v-3H4v3H2zm5.5 3.5a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/>',
     house: '<path d="M12 3 2 11.5h3V21h5.5v-6h3v6H19v-9.5h3z"/>',
@@ -212,6 +213,7 @@
       stayRow("#/arrive", "suitcase", t("Just arrived?"), t("The easiest way to where you’re staying, with your bags")) +
       (h ? stayRow("#/home-route", "house", t("Back to {name}", { name: t(h.label) }), t("The easiest way from where you are now")) :
         stayRow("#/stay", "house", t("Where are you staying?"), t("Save it once, then one tap gets you back from anywhere."))) +
+      stayRow("#/get-home", "clock", t("Get me home"), t("When to leave for your last train or bus tonight, counting down")) +
       (X.xmasSeason() ? stayRow("#/christmas", "star", t("Christmas in Monaco"), t("The Christmas village, the ice rink, the lights and New Year’s Eve, and the easy way between them."), "sl-season") : "") +
       stayRow("#/info", "info", t("Know before you go: phone roaming, dress rules and the Casino"), "") +
       "</ul>" + (h ? '<a class="home-change" href="#/stay">' + esc(t("Change where I’m staying")) + "</a>" : "");
@@ -285,6 +287,7 @@
     else if (parts[0] === "whats-on" && X) { screen = X.whatsOnScreen; tab = "info"; }
     else if (parts[0] === "yachts" && X) { screen = X.yachtsScreen; tab = "info"; }
     else if (parts[0] === "christmas" && X) { screen = X.xmasScreen; tab = "info"; }
+    else if (parts[0] === "get-home" && window.MMEGetHome) { screen = window.MMEGetHome.screen; tab = "transport"; }
     else if (parts[0] === "above" && X) { screen = X.aboveScreen; tab = "transport"; }
     else if (parts[0] === "villages" && X) { screen = X.villagesScreen; tab = "transport"; }
     else if (parts[0] === "guide") { screen = window.MMEGuide.screen; tab = "guide"; }
