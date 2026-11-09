@@ -142,11 +142,20 @@
     return { secs: secs, cost: cost };
   }
   var LIFT_WAIT = 45;
+  // How much climbing on foot suits you (set once in the planner, used for every route):
+  // 0 = as flat as possible (knees, heat, tired legs), 1 = some is fine (the usual), 2 = happy with hills.
+  function climbPref() { try { var v = parseInt(localStorage.getItem("mme-climb"), 10); return v === 0 || v === 2 ? v : 1; } catch (e) { return 1; } }
+  // Cost of each metre climbed on foot, and of steep downhill (hard on knees) for "as flat as possible".
+  function climbCost(up, len, lvl, avoid) {
+    if (lvl === 0) { var c = up > 0 ? up * 32 : 0; if (len > 0 && up < 0 && -up / len > 0.08) c += len * (-up / len - 0.08) * 120; return c; }
+    if (lvl === 2) return up > 0 ? up * 3 : 0;
+    return up > 0 ? up * (avoid ? 12 : 7) : 0;
+  }
   function fw0(k) { return k >= 0 ? k : -k - 1; }
 
   function route(from, to, opts) {
     opts = opts || {};
-    var avoid = opts.avoidSteps !== false;
+    var avoid = opts.avoidSteps !== false, lvl = opts.climb != null ? opts.climb : climbPref();
     var s = nearest(from), g = nearest(to);
     if (!s || !g) return null;
     // Lifts and escalators that visitors have reported out of order are left out.
@@ -189,7 +198,7 @@
         // Climbing on foot (not by lift or escalator) costs about 10 seconds a metre for an easy walker.
         if (e[3] !== 3 && e[3] !== 4) {
           var up = climb(u, v);
-          if (up > 0) c += up * (avoid ? 12 : 7);
+          c += climbCost(up, e[2], lvl, avoid);
           // Wheelchair or pushchair: steep streets are the real obstacle, uphill and downhill. Keep to the gentle ones and the lifts.
           if (opts.wheelchair && e[2] > 0) { var grade = Math.abs(up) / e[2]; if (up > 0) c += up * 25; if (grade > 0.05) c += e[2] * (grade - 0.05) * 400; }
         }
@@ -343,7 +352,7 @@
   // Same preferences as route(): lifts and escalators first, steps avoided where there's a sensible way round.
   function timesFrom(from, opts) {
     opts = opts || {};
-    var avoid = opts.avoidSteps !== false;
+    var avoid = opts.avoidSteps !== false, lvl = opts.climb != null ? opts.climb : climbPref();
     var s = nearest(from);
     if (!s) return null;
     var dist = new Float64Array(N).fill(Infinity), secsA = new Float64Array(N), mA = new Float64Array(N), seen = new Uint8Array(N);
@@ -364,7 +373,7 @@
         if (seen[v]) continue;
         if (opts.wheelchair && (e[3] === 2 || e[3] === 3 || (liftAt[v] && liftAt[v].wheelchair === "no"))) continue;
         var lc = legCost(e, fwd, avoid), c = lc.cost + (liftAt[v] ? LIFT_WAIT : 0), sec = lc.secs + (liftAt[v] ? LIFT_WAIT : 0);
-        if (e[3] !== 3 && e[3] !== 4) { var up = climb(u, v); if (up > 0) { c += up * (avoid ? 12 : 7); sec += up * 4; } }
+        if (e[3] !== 3 && e[3] !== 4) { var up = climb(u, v); c += climbCost(up, e[2], lvl, avoid); if (up > 0) sec += up * 4; }
         if (dist[u] + c < dist[v]) { dist[v] = dist[u] + c; secsA[v] = secsA[u] + sec; mA[v] = mA[u] + e[2]; push([dist[v], v]); }
       }
     }
@@ -380,5 +389,5 @@
 
   function heightAt(p) { var n = nearest(p); return height && n ? Math.round(height[n.node]) : null; }
 
-  window.MMERouter = { route: route, timesFrom: timesFrom, fromStation: fromStation, nearest: nearest, ready: ready, heightAt: heightAt };
+  window.MMERouter = { climbPref: climbPref, route: route, timesFrom: timesFrom, fromStation: fromStation, nearest: nearest, ready: ready, heightAt: heightAt };
 })();

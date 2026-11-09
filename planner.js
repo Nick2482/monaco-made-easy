@@ -249,6 +249,14 @@
         }
         var h = note ? '<p class="summary">' + note + "</p>" : "";
         h += '<label class="wc-toggle"><input type="checkbox" id="wc-on"' + (wc ? " checked" : "") + '><span class="wc-sw" aria-hidden="true"></span><span>' + esc(t("Wheelchair or pushchair")) + "<small>" + esc(t("Lifts and level paths only: no steps or escalators")) + "</small></span></label>";
+        // How much climbing on foot suits you. Not shown with the wheelchair setting, which already keeps to the gentlest way.
+        if (!wc) {
+          var lv = window.MMERouter ? window.MMERouter.climbPref() : 1;
+          h += '<div class="climb-pick" role="radiogroup" aria-label="' + esc(t("How much climbing?")) + '"><span class="climb-h">' + esc(t("How much climbing?")) + "</span>" +
+            [[0, "As flat as possible"], [1, "Some is fine"], [2, "Happy with hills"]].map(function (o) {
+              return '<button type="button" role="radio" data-climb="' + o[0] + '" aria-checked="' + (lv === o[0]) + '"' + (lv === o[0] ? ' class="on"' : "") + ">" + esc(t(o[1])) + "</button>";
+            }).join("") + "</div>";
+        }
         var outside = r && (r.startGap > 300 || r.endGap > 300), opts = "";
         if (!r) {
           h += '<p class="summary">' + esc(wc ? t("We couldn’t find a way between these two places without steps or escalators. A taxi is the easiest option.") : t("We couldn’t find a walking route between these two places on our Monaco map.")) + "</p>";
@@ -385,6 +393,13 @@
         var vg = body.querySelector("#voice-go");
         if (vg) vg.addEventListener("click", function () { Voice.start(voiceList, body.querySelector("ol.steps")); });
         if (r && window.MMEPro) window.MMEPro.tipAfterRoute(body);
+        body.querySelectorAll("[data-climb]").forEach(function (b) {
+          b.addEventListener("click", function () {
+            try { localStorage.setItem("mme-climb", b.getAttribute("data-climb")); } catch (e) {}
+            if (window.MMEStats) window.MMEStats.track("Climb setting", { level: b.getAttribute("data-climb") });
+            draw0(fromPt, lastNote);
+          });
+        });
         var wcBox = body.querySelector("#wc-on");
         if (wcBox) wcBox.addEventListener("change", function () { setWheelchair(wcBox.checked); avoidSteps = true; draw0(fromPt, lastNote); });
         if (!tracked) { tracked = true; if (r && window.MMEInstall && window.MMEInstall.routeUsed) window.MMEInstall.routeUsed(); if (window.MMEStats) window.MMEStats.track("Route planned", { wheelchair: wc ? "yes" : "no", found: r ? "yes" : "no" }); }

@@ -1280,3 +1280,10 @@ html.festive .xm-mk { background: var(--fest-gold); border-color: #fff; }
 .gh-last.gone { border-left-color: #888; background: rgba(0, 0, 0, .04); }
 .gh-or { margin: 0 0 16px; }
 .gh-change { display: inline-block; margin-top: 10px; color: var(--red, #c8102e); font-weight: 600; }
+
+/* How much climbing? (planner) */
+.climb-pick { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0 4px; padding: 10px 12px; border-radius: 12px; background: var(--stone); }
+.climb-pick .climb-h { width: 100%; font-weight: 700; font-size: .95rem; margin-bottom: 2px; }
+.climb-pick button { flex: 1 1 auto; min-height: 40px; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: inherit; font: inherit; font-size: .9rem; cursor: pointer; }
+.climb-pick button.on { background: var(--navy); border-color: var(--navy); color: #fff; font-weight: 700; }
+[data-theme="dark"] .climb-pick button.on { background: #f1f4f8; border-color: #f1f4f8; color: #18222e; }

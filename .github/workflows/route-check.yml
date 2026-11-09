@@ -1,0 +1,35 @@
+# Route checks that need the internet (elevation tiles). Results go to the "test-results" branch.
+name: Route check
+on:
+  push:
+    branches: [main, "preview/**"]
+    paths: ["tests/**", "router.js", "planner.js", ".github/workflows/route-check.yml"]
+permissions:
+  contents: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run
+        run: |
+          npm i --no-save playwright@1 >/dev/null 2>&1 && npx playwright install --with-deps chromium >/dev/null 2>&1
+          (python3 -m http.server 8765 >/dev/null 2>&1 &) ; sleep 2
+          NODE_PATH=$PWD/node_modules node tests/route-check.js > route-check.txt 2>&1 || true
+          cat route-check.txt
+      - name: Publish
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/r" && cp route-check.txt "$RUNNER_TEMP/r/" && cd "$RUNNER_TEMP/r"
+          echo '{"git":{"deploymentEnabled":false}}' > vercel.json
+          echo "${{ github.sha }}" > commit.txt
+          git init -q && git checkout -q -b test-results
+          git -c user.name="Route check" -c user.email="actions@github.com" add -A
+          git -c user.name="Route check" -c user.email="actions@github.com" commit -qm "Route check for ${{ github.sha }}"
+          git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" test-results
