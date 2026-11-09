@@ -214,7 +214,6 @@
       stayRow("#/arrive", "suitcase", t("Just arrived?"), t("The easiest way to where you’re staying, with your bags")) +
       (h ? stayRow("#/home-route", "house", t("Back to {name}", { name: t(h.label) }), t("The easiest way from where you are now")) :
         stayRow("#/stay", "house", t("Where are you staying?"), t("Save it once, then one tap gets you back from anywhere."))) +
-      stayRow("#/get-home", "clock", t("Get me home"), t("When to leave for your last train or bus tonight, counting down")) +
       (window.MMEEventDay && window.MMEEventDay.upcoming(7) ? stayRow("#/event-day", "flag", t("{event}: getting around", { event: t(window.MMEEventDay.upcoming(7).short) }), t("What’s closed and when, and routes that plan round it"), "sl-event") : "") +
       (X.xmasSeason() ? stayRow("#/christmas", "star", t("Christmas in Monaco"), t("The Christmas village, the ice rink, the lights and New Year’s Eve, and the easy way between them."), "sl-season") : "") +
       stayRow("#/info", "info", t("Know before you go: phone roaming, dress rules and the Casino"), "") +

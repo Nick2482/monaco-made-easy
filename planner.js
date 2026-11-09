@@ -349,6 +349,8 @@
           }
           // Long journeys: lead with the train, bus and taxi, and put the walk last.
           if (r.minutes >= 40) {
+            if (opts && window.MMEGetHome) opts += '<a class="gh-link" href="#/get-home">' + icon("clock") + "<span><strong>" + esc(t("Countdown to your train home")) + "</strong><small>" +
+              esc(t("When to leave, and the last train or bus tonight")) + "</small></span>" + (window.MMEPro && !window.MMEPro.isPro() ? window.MMEPro.badge() : "") + "</a>";
             opts += '<div class="bus-opt tx-opt"><div class="bus-opt-top"><span class="bus-badge" style="background:#5b4b8a;color:#fff">' + esc(t("Taxi")) + "</span><span>" + esc(t("Or take a taxi")) + "</span></div><p>" +
               esc(t("The easiest way with bags. Monaco taxis can take you anywhere but only pick up in Monaco; in France, book a local taxi.")) + ' <a href="#/taxis">' + esc(t("Taxi numbers and ranks")) + "</a></p></div>";
             h = h.slice(0, walkAt) + (opts ? '<h2 class="steps-h">' + esc(t("Best ways to get there")) + "</h2>" + opts : "") +

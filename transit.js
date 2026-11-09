@@ -568,6 +568,8 @@
       var esc = ui().esc, now = monacoNow();
       return '<section class="page transport"><h1>' + tb("Getting around") + "</h1>" +
         '<a class="tr-card tr-airport tr-has-photo" href="#/airport"><img class="tr-photo" src="img/airport-t1.jpg" width="1200" height="675" loading="lazy" alt=""><strong>' + tb("From Nice airport") + "</strong><span>" + tb("Train, bus, taxi or helicopter, and how long each takes") + "</span></a>" +
+        '<a class="tr-card tr-gethome" href="#/get-home"><strong>' + (window.MMEPro ? window.MMEPro.badge() : "") + tb("Get me home") + "</strong><span>" + tb("When to leave for your last train or bus tonight, counting down") + "</span></a>" +
+        '<a class="tr-card tr-event" href="#/event-day"><strong>' + (window.MMEPro ? window.MMEPro.badge() : "") + tb("Event day") + "</strong><span>" + tb("What’s closed and when, and routes that plan round it") + "</span></a>" +
         '<a class="tr-card tr-cruise" href="#/cruise"><strong>' + tb("On a cruise?") + "</strong><span>" + tb("Set your all-aboard time and we’ll tell you when to head back.") + "</span></a>" +
         '<a class="tr-card tr-above" href="#/above"><strong>' + tb("Above Monaco") + "</strong><span>" + tb("La Turbie, Èze and the best viewpoints over Monaco, and how to get up there") + "</span></a>" +
         '<a class="tr-card tr-above" href="#/villages"><strong>' + tb("Villages above Menton") + "</strong><span>" + tb("Sainte-Agnès, Gorbio and Castellar, and the buses up from Menton") + "</span></a>" +

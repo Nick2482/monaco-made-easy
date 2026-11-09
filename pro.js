@@ -157,9 +157,9 @@
     ["Yachting", "Chandleries, yacht brokers, clubs and harbour offices around the ports."],
     ["Walks", "Sightseeing walks that use the lifts, and coastal walks from Cap d’Ail and round Cap Martin."],
     ["Biggest yachts in port today", "The biggest yachts in Monaco’s harbours right now, with their length and flag, updated every 10 minutes."],
-    ["Cruise day", "Set your all-aboard time and we’ll tell you when to head back."],
-    ["Event day", "On Grand Prix days and National Day, routes plan round the closed streets, with what’s shut and when."],
-    ["Get me home", "A countdown to your train or bus home tonight, with the last one of the night and a reminder when it’s time to leave."],
+    ["Cruise day", "Set your all-aboard time and we’ll tell you when to head back.", "#/cruise"],
+    ["Event day", "On Grand Prix days and National Day, routes plan round the closed streets, with what’s shut and when.", "#/event-day"],
+    ["Get me home", "A countdown to your train or bus home tonight, with the last one of the night and a reminder when it’s time to leave.", "#/get-home"],
     ["Use it without mobile data", "Save the map on your phone for when roaming is off."]
   ];
 
@@ -173,7 +173,10 @@
         (inIosApp() ? "" : '<p class="pro-code">' + esc(t("Your unlock code: {code}", { code: get("mme-pro") })) + "</p>");
       else if (st === "playapp") state = '<p class="pro-ok">' + esc(t("Pro is free in the Google Play version of the app for now.")) + "</p>";
       else if (st === "preview") state = '<p class="pro-ok">' + esc(t("Pro is free for everyone while the app is in preview.")) + "</p>";
-      var list = '<ul class="pro-list">' + FEATURES.map(function (f) { return "<li><strong>" + esc(t(f[0])) + "</strong><span>" + esc(t(f[1])) + "</span></li>"; }).join("") + "</ul>";
+      var list = '<ul class="pro-list">' + FEATURES.map(function (f) {
+        var inner = "<strong>" + esc(t(f[0])) + "</strong><span>" + esc(t(f[1])) + "</span>";
+        return "<li>" + (f[2] ? '<a class="pro-feat" href="' + f[2] + '">' + inner + "</a>" : inner) + "</li>";
+      }).join("") + "</ul>";
       var buy = "";
       if (st === "locked" && inIosApp()) {
         buy = '<div class="pro-buy"><p class="pro-price"><strong>' + esc(shopPrice()) + "</strong> " + esc(t("one-off payment. No subscription, no account.")) + "</p>" +

@@ -1292,3 +1292,12 @@ html.festive .xm-mk { background: var(--fest-gold); border-color: #fff; }
 .ev-note a { font-weight: 700; }
 .ev-warn { border-left: 4px solid #c8102e; padding-left: 10px; }
 .sl-event .sl-ico { background: #c8102e !important; }
+.pro-list li .pro-feat { display: grid; gap: 2px; color: inherit; text-decoration: none; }
+.pro-list li .pro-feat strong::after { content: " ›"; color: var(--red); }
+.gh-link { display: flex; align-items: center; gap: 12px; margin: 10px 0; padding: 12px 14px; border-radius: 12px; background: var(--stone); color: inherit; text-decoration: none; }
+.gh-link > svg { width: 26px; height: 26px; flex: none; fill: var(--navy); }
+[data-theme="dark"] .gh-link > svg { fill: #f1f4f8; }
+.gh-link > span:not(.pro-badge) { display: grid; flex: 1; }
+.gh-link .pro-badge { flex: none; }
+.gh-link small { color: var(--grey); }
+.tr-card strong .pro-badge { display: inline-flex; width: auto; margin: 0 6px 0 0; padding: 1px 7px; font-size: .75rem; vertical-align: 3px; border: 0; }
