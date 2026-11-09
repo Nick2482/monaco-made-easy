@@ -333,7 +333,7 @@
     var f = e.target.closest("[data-filter]");
     if (f) { filter = f.dataset.filter; render(); return; }
     var p = e.target.closest("[data-place]");
-    if (p) { placeFilter = placeFilter === p.dataset.place ? null : p.dataset.place; render(); return; }
+    if (p && D.places[p.dataset.place]) { placeFilter = placeFilter === p.dataset.place ? null : p.dataset.place; render(); return; }
     if (e.target.closest("[data-allroutes]")) { allRoutes = true; render(); return; }
     if (e.target.closest("[data-allcats]")) { allCats = true; var y = window.scrollY; render(); window.scrollTo(0, y); return; }
     if (e.target.closest("[data-clear]")) { placeFilter = null; render(); }

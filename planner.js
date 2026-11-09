@@ -250,7 +250,7 @@
       root.addEventListener("click", function (e) {
         var b = e.target.closest(".leg-go");
         if (!b) return;
-        var stop = { label: b.getAttribute("data-place"), lat: +b.getAttribute("data-lat"), lng: +b.getAttribute("data-lng"), kind: "stop" };
+        var stop = { label: b.getAttribute("data-stop"), lat: +b.getAttribute("data-lat"), lng: +b.getAttribute("data-lng"), kind: "stop" };
         state.leg = { back: state.leg && state.leg.stop === state.to ? state.leg.back : state.to, stop: stop, then: b.getAttribute("data-then") };
         state.to = stop;
         if (window.MMEStats) window.MMEStats.track("Way to the stop");
@@ -334,7 +334,7 @@
           var T = window.MMETransit, bus = T && T.ready ? T.busOption(from, to) : null;
           // "Show the way to the stop": opens the walk to where you catch it, with the rest of the journey kept at the top.
           var legBtn = function (pt, place, then) {
-            return '<button type="button" class="btn btn-line leg-go" data-lat="' + pt.lat + '" data-lng="' + pt.lng + '" data-place="' + esc(place) + '" data-then="' + esc(then) + '">' +
+            return '<button type="button" class="btn btn-line leg-go" data-lat="' + pt.lat + '" data-lng="' + pt.lng + '" data-stop="' + esc(place) + '" data-then="' + esc(then) + '">' +
               esc(t("Show the way to {place}", { place: place })) + "</button>";
           };
           if (bus && (bus.minutes + 2 < r.minutes || (r.climbed > 30 && bus.minutes < r.minutes + 8) || (!r.stepFree && bus.minutes < r.minutes + 8))) {
