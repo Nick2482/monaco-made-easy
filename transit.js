@@ -218,6 +218,8 @@
       : TR.keys.map(function (k) { var p = stationPt(TR.places[k]); return p ? { k: k, pt: p, d: metres(p, dest) } : null; })
         .filter(function (s) { return s && s.d <= 1800; }).sort(function (a, b) { return a.d - b.d; }).slice(0, 2);
     var end = now.min < 240 ? 300 : 1440 + 240;   // "tonight" runs until 4am
+    var day0 = trDay(now.ymd);
+    out.noneToday = !TR.dep.some(function (o) { return trRuns(o[4], day0); });   // engineering works or a strike
     var seen = {}, all = [];
     board.forEach(function (a) {
       var wa = walkMins(from, a.pt).m;
@@ -275,7 +277,12 @@
       if (o[1] >= 240 && trRuns(o[4], base + 1) && (first === null || o[1] < first)) first = o[1];
     });
     var later = TR.dep.some(function (o) { var m = o[1] < 240 ? o[1] + 1440 : o[1]; return o[0] === a.i && o[5][b.k] > o[1] && m > nowAbs && trRuns(o[4], o[1] < 240 ? base + 1 : base); });
-    if (later || last === null) return null;
+    if (later) return null;
+    if (last === null) {   // nothing at all today on this line: works or a strike
+      var any = TR.dep.some(function (o) { return trRuns(o[4], base); });
+      if (any) return null;
+      return { from: a.label, to: b.label, last: null, first: first, noneToday: true };
+    }
     return { from: a.label, to: b.label, last: last % 1440, first: first };
   }
 

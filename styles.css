@@ -1335,3 +1335,11 @@ html.festive .xm-mk { background: var(--fest-gold); border-color: #fff; }
 .mk-end { box-shadow: 0 1px 4px rgba(40, 30, 10, 0.28); }
 .mk-from { background: #fffdf8; border: 5px solid var(--navy); }
 .mk-to { background: var(--red); border: 4px solid #fffdf8; box-shadow: 0 0 0 1.5px #b8923f, 0 1px 4px rgba(40, 30, 10, 0.28); }
+
+/* Top bar with large phone text: the name gives way (scales down, then trims) so the night-mode and language buttons always fit. */
+.brand { min-width: 0; flex: 1 1 auto; }
+.brand-name { min-width: 0; white-space: normal; line-height: 1.08; }
+.brand > :first-child { flex: none; }   /* the red arrow mark never squashes */
+.bar .theme-btn, .lang-wrap { flex: none; }
+.bar .theme-btn { margin-left: 0; }
+.gh-big .gh-count.gh-count-sm { font-size: 1.7rem; }

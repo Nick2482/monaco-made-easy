@@ -96,8 +96,19 @@
         esc(t("Remind me 5 minutes before I need to leave")) + "<small>" + esc(t("Keep this screen open: your phone will buzz and say when it’s time.")) + "</small></span></label>";
       if (remindOn() && mins <= REMIND && !reminded[x.leave]) { reminded[x.leave] = 1; alertNow(t(mins <= 0 ? "Time to leave for your train home." : "Leave in {n} minutes for your way home.", { n: mins })); }
     } else {
-      h += '<div class="gh-big gh-none"><p class="gh-kicker">' + esc(t("No more trains or buses tonight")) + '</p><p class="gh-what">' + esc(t("A taxi is the way home now. Monaco’s taxi ranks are at the station, Casino Square and the port.")) + "</p>" +
-        '<a class="btn btn-red" href="#/taxis">' + esc(t("Taxis")) + "</a></div>";
+      var inMc = T().inMonaco ? T().inMonaco(start) : true;
+      var taxi = inMc ? t("Monaco’s taxi ranks are at the station, Casino Square and the port.") : t("Monaco taxis can’t pick up in France, so call a local taxi.");
+      var hr = Math.floor(now.min / 60);
+      if (d.st && hr >= 6 && hr < 21) {
+        // Nice with no train: the 600 bus runs along the coast road. Its timetable towards Nice isn't published in full, so point to the live times.
+        h += '<div class="gh-big"><p class="gh-kicker">' + esc(t(R.noneToday ? "No trains today" : "No more trains today")) + '</p><p class="gh-count gh-count-sm">' + esc(t("Take bus 600 to Nice")) + "</p>" +
+          '<p class="gh-what">' + esc(t("It runs along the coast road, about an hour to Nice. Catch it at Place d’Armes or Monte Carlo Casino; the next times are in the ZOU! app.")) + " " +
+          (R.noneToday ? esc(t("SNCF has no trains planned today, which usually means engineering works or a strike.")) : "") + "</p>" +
+          '<a class="btn btn-line" href="#/taxis">' + esc(t("Or a taxi")) + "</a></div>";
+      } else {
+        h += '<div class="gh-big gh-none"><p class="gh-kicker">' + esc(t(R.noneToday ? "No trains today, and no more buses" : "No more trains or buses tonight")) + '</p><p class="gh-what">' + esc(t("A taxi is the way home now.")) + " " + esc(taxi) + "</p>" +
+          '<a class="btn btn-red" href="#/taxis">' + esc(t("Taxis")) + "</a></div>";
+      }
     }
     // The other way home: the bus when the train is first, or the train when the bus is.
     if (next && next.kind === "train" && bus) h += '<p class="gh-or">' + tb("**Or bus {r} at {t}** from {stop}. Leave by {l}.", { r: bus.L.r, t: hhmm(bus.dep), stop: bus.L.from, l: hhmm(bus.leave) }) + "</p>";

@@ -387,6 +387,7 @@
           // Towards Nice the published 600 timetable is thin, so leave a slot for the next live 600 (filled in after the page draws).
           if (r.minutes >= 20 && to.lng < from.lng - 0.01 && !(cb && cb.generic && cb.legs[0].net === "ZOU!") && T && T.coastLive) opts += '<div class="bus-opt cb-opt" id="cb-live" hidden></div>';
           var busBest = cb && !cb.generic ? cb.minutes : null;
+          if (tr && tr.wait > 120) tr = null;   // the next train is hours away (overnight): the "no more trains tonight" card says so instead
           if (tr && (tr.minutes + 5 < r.minutes || r.minutes >= 40) && tr.walkTo + tr.walkFrom <= 45 && !(busBest !== null && tr.minutes > busBest + 30)) {
             var Bt = function (x) { return "<b>" + esc(x) + "</b>"; };
             opts += '<div class="bus-opt tr-opt"><div class="bus-opt-top"><span class="bus-badge" style="background:#0b2545;color:#fff">' + esc(t("Train")) + "</span><span>" + esc(t("Train: {r} min to {stop}", { r: tr.ride, stop: t(tr.to) })) + "</span></div>" +
@@ -400,8 +401,8 @@
           // No train left tonight on a journey trains usually serve: say so, rather than leaving people wondering.
           if (!(tr && (tr.minutes + 5 < r.minutes || r.minutes >= 40)) && r.minutes >= 25 && T && T.trainsGone) {
             var gone = T.trainsGone(from, to);
-            if (gone) opts += '<div class="bus-opt tr-opt tr-gone"><div class="bus-opt-top"><span class="bus-badge" style="background:#0b2545;color:#fff">' + esc(t("Train")) + "</span><span>" + esc(t("No more trains tonight")) + "</span></div><p>" +
-              esc(t("The last train from {st} left at {t}.", { st: t(gone.from), t: T.hhmm(gone.last) })) + " " + esc(gone.first != null ? t("First train tomorrow: {t}.", { t: T.hhmm(gone.first) }) : t("SNCF has no trains planned on this line tomorrow, which usually means engineering works or a strike. Check the SNCF Connect app for replacement buses.")) + "</p></div>";
+            if (gone) opts += '<div class="bus-opt tr-opt tr-gone"><div class="bus-opt-top"><span class="bus-badge" style="background:#0b2545;color:#fff">' + esc(t("Train")) + "</span><span>" + esc(t(gone.noneToday ? "No trains today" : "No more trains tonight")) + "</span></div><p>" +
+              (gone.noneToday ? esc(t("SNCF has no trains planned today, which usually means engineering works or a strike.")) : esc(t("The last train from {st} left at {t}.", { st: t(gone.from), t: T.hhmm(gone.last) }))) + " " + esc(gone.first != null ? t("First train tomorrow: {t}.", { t: T.hhmm(gone.first) }) : t("SNCF has no trains planned on this line tomorrow, which usually means engineering works or a strike. Check the SNCF Connect app for replacement buses.")) + "</p></div>";
           }
           // Long journeys: lead with the train, bus and taxi, and put the walk last.
           if (r.minutes >= 40) {
