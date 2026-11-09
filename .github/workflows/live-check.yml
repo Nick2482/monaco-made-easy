@@ -1,0 +1,26 @@
+name: Live data check
+on:
+  push:
+    branches: ["preview/live"]
+permissions:
+  contents: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fetch
+        run: |
+          date -u > live.txt
+          curl -sS --max-time 90 "https://www.monacomadeeasy.com/api/bus" -o bus.json || echo "bus fetch failed" >> live.txt
+          python3 -c "import json;d=json.load(open('bus.json'));print('bus valid',d.get('valid'),'patterns',len(d.get('patterns',[])),'routes',len(d.get('routes',[])))" >> live.txt 2>&1 || head -c 300 bus.json >> live.txt
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/r" && cp live.txt bus.json "$RUNNER_TEMP/r/" 2>/dev/null; cd "$RUNNER_TEMP/r"
+          echo '{"git":{"deploymentEnabled":false}}' > vercel.json
+          git init -q && git checkout -q -b test-results
+          git -c user.name="Live check" -c user.email="actions@github.com" add -A
+          git -c user.name="Live check" -c user.email="actions@github.com" commit -qm "Live data check"
+          git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" test-results
