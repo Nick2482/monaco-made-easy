@@ -147,7 +147,7 @@
   function climbPref() { try { var v = parseInt(localStorage.getItem("mme-climb"), 10); return v === 0 || v === 2 ? v : 1; } catch (e) { return 1; } }
   // Cost of each metre climbed on foot, and of steep downhill (hard on knees) for "as flat as possible".
   function climbCost(up, len, lvl, avoid) {
-    if (lvl === 0) { var c = up > 0 ? up * 32 : 0; if (len > 0 && up < 0 && -up / len > 0.08) c += len * (-up / len - 0.08) * 120; return c; }
+    if (lvl === 0) { var c = up > 0 ? up * 24 : 0; if (len > 0 && up < 0 && -up / len > 0.12) c += len * (-up / len - 0.12) * 30; return c; }
     if (lvl === 2) return up > 0 ? up * 3 : 0;
     return up > 0 ? up * (avoid ? 12 : 7) : 0;
   }
