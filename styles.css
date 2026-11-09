@@ -1301,3 +1301,11 @@ html.festive .xm-mk { background: var(--fest-gold); border-color: #fff; }
 .gh-link .pro-badge { flex: none; }
 .gh-link small { color: var(--grey); }
 .tr-card strong .pro-badge { display: inline-flex; width: auto; margin: 0 6px 0 0; padding: 1px 7px; font-size: .75rem; vertical-align: 3px; border: 0; }
+
+/* Route option cards: badges never shrink or clip (large text settings), and a little more room inside. */
+.bus-opt { padding: 16px 18px 18px; margin-top: 16px; }
+.bus-opt-top { align-items: flex-start; gap: 12px; line-height: 1.3; }
+.bus-opt-top > span:not(.bus-badge) { flex: 1; min-width: 0; }
+.bus-badge { flex: none; white-space: nowrap; height: auto; min-height: 30px; padding: 3px 9px; line-height: 1.5; }
+.bus-opt-top .bus-badge { margin-top: 1px; }
+.bus-opt p { margin-top: 10px; line-height: 1.5; }
