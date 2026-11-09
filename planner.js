@@ -195,7 +195,26 @@
   // ---------- The plan screen ----------
   var avoidSteps = true;
   var KIND = { walk: "walk", lift: "lift", escalator: "escalator", steps: "steps" };
-  var LINE = { walk: { color: "#0b2545", weight: 5 }, lift: { color: "#ce1126", weight: 8 }, escalator: { color: "#1d6fa5", weight: 7 }, steps: { color: "#d9480f", weight: 6, dashArray: "4 6" } };
+  // Route lines: a fine ivory edge under each, rounded ends. Navy for walking, Monaco red for lifts, champagne gold for
+  // escalators, and a dotted amber for steps.
+  var LINE = { walk: { color: "#0a1f3c", weight: 4.5 }, lift: { color: "#ce1126", weight: 6.5 }, escalator: { color: "#b8923f", weight: 6 }, steps: { color: "#b5542a", weight: 4.5, dashArray: "1 8" } };
+  // All the ivory edges go down first, then the coloured lines, so the joins between sections stay unbroken.
+  function drawRoute(lines, layer) {
+    var dark = document.documentElement.getAttribute("data-theme") === "dark";
+    lines.forEach(function (ln) { var st = LINE[ln.kind] || LINE.walk; L.polyline(ln.pts, { color: dark ? "#18222e" : "#fffdf8", weight: st.weight + 5, opacity: 0.95, lineCap: "round", lineJoin: "round", interactive: false }).addTo(layer); });
+    ["walk", "steps", "escalator", "lift"].forEach(function (k) {
+      lines.forEach(function (ln) {
+        if (ln.kind !== k) return;
+        var st = LINE[k];
+        L.polyline(ln.pts, { color: dark && k === "walk" ? "#e9edf2" : st.color, weight: st.weight, dashArray: st.dashArray, opacity: 1, lineCap: "round", lineJoin: "round", interactive: false }).addTo(layer);
+      });
+    });
+  }
+  // Where you catch the bus or train: a small dot in its colour with an ivory ring.
+  function stopDot(p, fill, layer) {
+    L.circleMarker([p.lat, p.lng], { radius: 7, color: "#fffdf8", weight: 3, fillColor: fill, fillOpacity: 1, interactive: false }).addTo(layer);
+    L.circleMarker([p.lat, p.lng], { radius: 10.5, color: "#b8923f", weight: 1.2, fill: false, interactive: false }).addTo(layer);
+  }
   var STEP_LABEL = { walk: "Walk", lift: "Lift", escalator: "Escalator", steps: "Steps", arrive: "Arrive" };
 
   function curatedFor(fromLbl, to) {
@@ -271,9 +290,10 @@
           h += '<p class="summary">' + esc(wc ? t("We couldn’t find a way between these two places without steps or escalators. A taxi is the easiest option.") : t("We couldn’t find a walking route between these two places on our Monaco map.")) + "</p>";
           L.polyline([[from.lat, from.lng], [to.lat, to.lng]], { color: "#0b2545", weight: 3, dashArray: "6 8" }).addTo(layer);
         } else {
-          r.lines.forEach(function (ln) { L.polyline(ln.pts, LINE[ln.kind]).addTo(layer); });
-          if (r.startGap > 40) L.polyline([[from.lat, from.lng], r.start], { color: "#0b2545", weight: 3, dashArray: "2 8" }).addTo(layer);
-          if (r.endGap > 40) L.polyline([r.end, [to.lat, to.lng]], { color: "#0b2545", weight: 3, dashArray: "2 8" }).addTo(layer);
+          // Casings first, then the lines, so a lift or escalator always sits on top of the walk either side.
+          drawRoute(r.lines, layer);
+          if (r.startGap > 40) L.polyline([[from.lat, from.lng], r.start], { color: "#b8923f", weight: 3, dashArray: "1 7", lineCap: "round" }).addTo(layer);
+          if (r.endGap > 40) L.polyline([r.end, [to.lat, to.lng]], { color: "#b8923f", weight: 3, dashArray: "1 7", lineCap: "round" }).addTo(layer);
           var vert = r.heights
             ? "<li><strong>" + esc(r.climbed < 5 ? t("Hardly any climb") : t("{n} m climb", { n: r.climbed })) + "</strong><span>" + esc(r.saved > 4 ? t("lifts do {n} m for you", { n: r.saved }) : r.lifts ? t(r.lifts === 1 ? "1 lift on the way" : "{n} lifts on the way", { n: r.lifts }) : t("on foot")) + "</span></li>"
             : "<li><strong>" + esc(t(r.lifts === 1 ? "1 lift" : "{n} lifts", { n: r.lifts })) + "</strong><span>" + esc(r.escalators ? t(r.escalators === 1 ? "and 1 escalator" : "and {n} escalators", { n: r.escalators }) : t("on the way")) + "</span></li>";
@@ -327,7 +347,7 @@
               "<small>" + esc(now.ymd > window.MMEBus.valid[1] ? t("Times from the Monaco bus timetable (may have changed).") : t("Times from the Monaco bus timetable.")) + "</small>" +
               legBtn(T.stopPt(bus.from), T.stopName(bus.from), t("Then bus {r} at {time}, {ride} min to {stop}.", { r: window.MMEBus.routes[bus.p.r].n, time: T.hhmm(bus.dep), ride: bus.ride, stop: T.stopName(bus.to) })) + "</div>";
             var a = T.stopPt(bus.from), z = T.stopPt(bus.to);
-            [a, z].forEach(function (p) { L.circleMarker([p.lat, p.lng], { radius: 9, color: "#fff", weight: 3, fillColor: window.MMEBus.routes[bus.p.r].c, fillOpacity: 1 }).addTo(layer); });
+            [a, z].forEach(function (p) { stopDot(p, window.MMEBus.routes[bus.p.r].c, layer); });
           }
           var cb = T && T.coastOption && r.minutes >= 20 ? T.coastOption(from, to) : null;
           if (cb && (cb.generic || cb.minutes + 5 < r.minutes || r.minutes >= 40)) {
@@ -354,7 +374,7 @@
               (!cb.generic && (cb.hurry || cb.after) ? '<p class="opt-more">' + esc([cb.hurry ? t("If you hurry: {time}", { time: T.hhmm(cb.hurry) }) : "", cb.after ? t("The one after: {time}", { time: T.hhmm(cb.after) }) : ""].filter(Boolean).join(" · ")) + "</p>" : "") +
               "<small>" + esc((cb.generic ? "" : t("About {n} min door to door, including the walks and the wait for the bus.", { n: cb.minutes }) + " ") + t("{net} timetable. Live times are in the {net} app. Pay on board.", { net: nets }) + (hasCam ? " " + t("Monaco city buses: CAM timetable.") : "")) + "</small>" +
               legBtn(L1.fromPt, L1.from, cb.generic ? t("Then bus {r} towards {dest}, to {stop}.", { r: L1.r, dest: L1.dest, stop: L1.to }) : t("Then bus {r} at {time}, {ride} min to {stop}.", { r: L1.r, time: T.hhmm(L1.dep), ride: L1.arr - L1.dep, stop: L1.to })) + "</div>";
-            cb.legs.forEach(function (L) { [L.fromPt, L.toPt].forEach(function (pt) { window.L.circleMarker([pt.lat, pt.lng], { radius: 9, color: "#fff", weight: 3, fillColor: L.c, fillOpacity: 1 }).addTo(layer); }); });
+            cb.legs.forEach(function (Lg) { [Lg.fromPt, Lg.toPt].forEach(function (pt) { stopDot(pt, Lg.c, layer); }); });
           }
           var tr = T && T.trainOption && r.minutes >= 25 ? T.trainOption(from, to) : null;
           // Towards Nice the published 600 timetable is thin, so leave a slot for the next live 600 (filled in after the page draws).
@@ -368,7 +388,13 @@
               (tr.hurry != null || tr.after != null ? '<p class="opt-more">' + esc([tr.hurry != null ? t("If you hurry: {time}", { time: T.hhmm(tr.hurry) }) : "", tr.after != null ? t("The one after: {time}", { time: T.hhmm(tr.after) }) : ""].filter(Boolean).join(" · ")) + "</p>" : "") +
               "<small>" + esc(t("About {n} min door to door, including the walks and the wait for the train.", { n: tr.minutes })) + " " + esc(t("Planned SNCF timetable. Check the SNCF Connect app for delays.")) + "</small>" +
               legBtn(tr.fromPt, t(tr.from), t("Then the train at {time}, {r} min to {stop}.", { time: T.hhmm(tr.dep), r: tr.ride, stop: t(tr.to) })) + "</div>";
-            [tr.fromPt, tr.toPt].forEach(function (p) { L.circleMarker([p.lat, p.lng], { radius: 9, color: "#fff", weight: 3, fillColor: "#0b2545", fillOpacity: 1 }).addTo(layer); });
+            [tr.fromPt, tr.toPt].forEach(function (p) { stopDot(p, "#0a1f3c", layer); });
+          }
+          // No train left tonight on a journey trains usually serve: say so, rather than leaving people wondering.
+          if (!(tr && (tr.minutes + 5 < r.minutes || r.minutes >= 40)) && r.minutes >= 25 && T && T.trainsGone) {
+            var gone = T.trainsGone(from, to);
+            if (gone) opts += '<div class="bus-opt tr-opt tr-gone"><div class="bus-opt-top"><span class="bus-badge" style="background:#0b2545;color:#fff">' + esc(t("Train")) + "</span><span>" + esc(t("No more trains tonight")) + "</span></div><p>" +
+              esc(t("The last train from {st} left at {t}.", { st: t(gone.from), t: T.hhmm(gone.last) })) + " " + esc(gone.first != null ? t("First train tomorrow: {t}.", { t: T.hhmm(gone.first) }) : t("SNCF has no trains planned on this line tomorrow, which usually means engineering works or a strike. Check the SNCF Connect app for replacement buses.")) + "</p></div>";
           }
           // Long journeys: lead with the train, bus and taxi, and put the walk last.
           if (r.minutes >= 40) {

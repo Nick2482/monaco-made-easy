@@ -257,6 +257,28 @@
     return out;
   }
 
+  // When there's no train left tonight on a journey trains normally serve: the last one that left, and tomorrow's first.
+  function trainsGone(from, to, now) {
+    if (!TR || !TR.dep) return null;
+    now = now || monacoNow();
+    var st = TR.home.map(function (i) { var n = TR.places[i], c = TR_ST[n]; return c ? { i: i, pt: { lat: c[0], lng: c[1] }, label: c[2], k: TR.keys.indexOf(i) } : null; }).filter(Boolean);
+    var a = st.filter(function (s) { return metres(from, s.pt) <= 1800; }).sort(function (x, y) { return metres(from, x.pt) - metres(from, y.pt); })[0];
+    var b = st.filter(function (s) { return s !== a && s.k >= 0 && metres(s.pt, to) <= 1800; }).sort(function (x, y) { return metres(x.pt, to) - metres(y.pt, to); })[0];
+    if (!a || !b) return null;
+    var day = trDay(now.ymd), last = null, first = null;
+    // "Tonight" ends at 4am: before then, yesterday's late trains count.
+    var base = now.min < 240 ? day - 1 : day, nowAbs = now.min < 240 ? now.min + 1440 : now.min;
+    TR.dep.forEach(function (o) {
+      if (o[0] !== a.i || !(o[5][b.k] > o[1])) return;
+      var m = o[1] < 240 ? o[1] + 1440 : o[1];          // after midnight belongs to the evening before
+      if (trRuns(o[4], o[1] < 240 ? base + 1 : base) && m <= nowAbs && (last === null || m > last)) last = m;
+      if (o[1] >= 240 && trRuns(o[4], base + 1) && (first === null || o[1] < first)) first = o[1];
+    });
+    var later = TR.dep.some(function (o) { var m = o[1] < 240 ? o[1] + 1440 : o[1]; return o[0] === a.i && o[5][b.k] > o[1] && m > nowAbs && trRuns(o[4], o[1] < 240 ? base + 1 : base); });
+    if (later || last === null) return null;
+    return { from: a.label, to: b.label, last: last % 1440, first: first };
+  }
+
   // Regional buses (coastbus.js): ZOU! along the coast and up to La Turbie and Èze, and Zest around Menton,
   // Roquebrune, Beausoleil and up to the villages. Finds the best journey with one bus, or two with a change.
   var CB = window.MMECoast, CBX = null;
@@ -852,5 +874,5 @@
   }
   setTimeout(refreshBus, 300);
 
-  window.MMETransit = { ranks: function () { return RANKS; }, tonight: tonight, stationPt: stationPt, bikeScreen: bikeScreen, refreshBus: refreshBus, inMonaco: inMonaco, taxiScreen: taxiScreen, busOption: busOption, trainOption: trainOption, coastOption: coastOption, coastLive: coastLive, departures: departures, monacoNow: monacoNow, hhmm: hhmm, badge: badge, stopName: function (i) { return B.stops[i][0]; }, stopPt: stopPt, transportScreen: transportScreen, lineScreen: lineScreen, airportScreen: airportScreen, ready: !!B };
+  window.MMETransit = { trainsGone: trainsGone, ranks: function () { return RANKS; }, tonight: tonight, stationPt: stationPt, bikeScreen: bikeScreen, refreshBus: refreshBus, inMonaco: inMonaco, taxiScreen: taxiScreen, busOption: busOption, trainOption: trainOption, coastOption: coastOption, coastLive: coastLive, departures: departures, monacoNow: monacoNow, hhmm: hhmm, badge: badge, stopName: function (i) { return B.stops[i][0]; }, stopPt: stopPt, transportScreen: transportScreen, lineScreen: lineScreen, airportScreen: airportScreen, ready: !!B };
 })();
