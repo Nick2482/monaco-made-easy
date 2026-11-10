@@ -110,8 +110,14 @@
     if (get("mme-lastday") !== today) { set("mme-lastday", today); set("mme-days", String((+get("mme-days") || 0) + 1)); }
   })();
   function routeUsed() { set("mme-routes", String((+get("mme-routes") || 0) + 1)); }
+  // Closed testing on Google Play: show a feedback card every day (× hides it until tomorrow),
+  // with clear steps, because testers can't leave public reviews yet. Ends by itself on TEST_UNTIL.
+  var TEST_UNTIL = "20261215";
+  function ymd() { var d = new Date(); return "" + d.getFullYear() + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0"); }
+  function testing() { return ymd() < TEST_UNTIL; }
   function rateDue() {
     if (!(window.MMEPro && window.MMEPro.inPlayApp && window.MMEPro.inPlayApp())) return false;
+    if (testing()) return get("mme-fb-hidden") !== ymd();
     if (get("mme-rate-done")) return false;
     if ((+get("mme-days") || 0) < 2 || (+get("mme-routes") || 0) < 3) return false;
     var later = +get("mme-rate-later") || 0;
@@ -120,6 +126,10 @@
   var STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>';
   function rateCard() {
     if (!rateDue()) return "";
+    if (testing()) return '<aside class="install-card rate-card fb-card"><button type="button" class="ic-x fb-hide" aria-label="' + esc(t("Hide until tomorrow")) + '">×</button>' +
+      '<span class="ic-ico">' + STAR + "</span><div><strong>" + esc(t("Thank you for testing")) + "</strong>" +
+      "<p>" + esc(t("Your feedback really helps. Tap the button, scroll down to “You’re a tester” and tap “Write feedback”. A line or two is plenty.")) + "</p>" +
+      '<div class="rt-actions"><a class="btn btn-red fb-go" href="market://details?id=' + PLAY_ID + '">' + esc(t("Open Google Play")) + "</a></div></div></aside>";
     return '<aside class="install-card rate-card"><button type="button" class="ic-x rt-later" aria-label="' + esc(t("Not now")) + '">×</button>' +
       '<span class="ic-ico">' + STAR + "</span><div><strong>" + esc(t("Finding Monaco Made Easy useful?")) + "</strong>" +
       "<p>" + esc(t("A quick review on Google Play helps other visitors find the app. It only takes a minute.")) + "</p>" +
@@ -127,7 +137,15 @@
       '<button type="button" class="btn btn-line rt-no">' + esc(t("No thanks")) + "</button></div></div></aside>";
   }
   function mountRate(root) {
-    root.querySelectorAll(".rate-card").forEach(function (c) {
+    root.querySelectorAll(".fb-card").forEach(function (c) {
+      c.querySelector(".fb-hide").addEventListener("click", function () { set("mme-fb-hidden", ymd()); c.remove(); });
+      c.querySelector(".fb-go").addEventListener("click", function () {
+        set("mme-fb-hidden", ymd());
+        if (window.MMEStats) window.MMEStats.track("Tester feedback tapped");
+        setTimeout(function () { c.innerHTML = '<p class="off-ok">' + esc(t("Thank you!")) + "</p>"; }, 400);
+      });
+    });
+    root.querySelectorAll(".rate-card:not(.fb-card)").forEach(function (c) {
       if (window.MMEStats) window.MMEStats.track("Rate prompt shown");
       c.querySelector(".rt-later").addEventListener("click", function () { set("mme-rate-later", String(Date.now())); c.remove(); });
       c.querySelector(".rt-no").addEventListener("click", function () { set("mme-rate-done", "no"); c.remove(); if (window.MMEStats) window.MMEStats.track("Rate prompt", { answer: "no" }); });
