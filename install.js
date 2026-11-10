@@ -129,7 +129,7 @@
     if (testing()) return '<aside class="install-card rate-card fb-card"><button type="button" class="ic-x fb-hide" aria-label="' + esc(t("Hide until tomorrow")) + '">×</button>' +
       '<span class="ic-ico">' + STAR + "</span><div><strong>" + esc(t("Thank you for testing")) + "</strong>" +
       "<p>" + esc(t("Your feedback really helps. Tap the button, scroll down to “You’re a tester” and tap “Write feedback”. A line or two is plenty.")) + "</p>" +
-      '<div class="rt-actions"><a class="btn btn-red fb-go" href="market://details?id=' + PLAY_ID + '">' + esc(t("Open Google Play")) + "</a></div></div></aside>";
+      '<div class="rt-actions"><a class="btn btn-red fb-go" href="https://play.google.com/store/apps/details?id=' + PLAY_ID + '" target="_blank" rel="noopener">' + esc(t("Open Google Play")) + "</a></div></div></aside>";
     return '<aside class="install-card rate-card"><button type="button" class="ic-x rt-later" aria-label="' + esc(t("Not now")) + '">×</button>' +
       '<span class="ic-ico">' + STAR + "</span><div><strong>" + esc(t("Finding Monaco Made Easy useful?")) + "</strong>" +
       "<p>" + esc(t("A quick review on Google Play helps other visitors find the app. It only takes a minute.")) + "</p>" +
@@ -142,7 +142,6 @@
       c.querySelector(".fb-go").addEventListener("click", function () {
         set("mme-fb-hidden", ymd());
         if (window.MMEStats) window.MMEStats.track("Tester feedback tapped");
-        setTimeout(function () { c.innerHTML = '<p class="off-ok">' + esc(t("Thank you!")) + "</p>"; }, 400);
       });
     });
     root.querySelectorAll(".rate-card:not(.fb-card)").forEach(function (c) {
