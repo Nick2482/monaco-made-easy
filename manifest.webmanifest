@@ -27,7 +27,7 @@
     }
   ],
   "id": "/",
-  "orientation": "portrait",
+  "orientation": "any",
   "categories": [
     "travel",
     "navigation"
