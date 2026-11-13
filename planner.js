@@ -199,21 +199,30 @@
   // escalators, and a dotted amber for steps.
   var LINE = { walk: { color: "#0a1f3c", weight: 4.5 }, lift: { color: "#ce1126", weight: 6.5 }, escalator: { color: "#b8923f", weight: 6 }, steps: { color: "#b5542a", weight: 4.5, dashArray: "1 8" } };
   // All the ivory edges go down first, then the coloured lines, so the joins between sections stay unbroken.
-  function drawRoute(lines, layer) {
+  // faint: long journeys, where the walk is the last resort and the bus and train stops are what matter.
+  function drawRoute(lines, layer, faint) {
     var dark = document.documentElement.getAttribute("data-theme") === "dark";
-    lines.forEach(function (ln) { var st = LINE[ln.kind] || LINE.walk; L.polyline(ln.pts, { color: dark ? "#18222e" : "#fffdf8", weight: st.weight + 5, opacity: 0.95, lineCap: "round", lineJoin: "round", interactive: false }).addTo(layer); });
+    if (!faint) lines.forEach(function (ln) { var st = LINE[ln.kind] || LINE.walk; L.polyline(ln.pts, { color: dark ? "#18222e" : "#fffdf8", weight: st.weight + 5, opacity: 0.95, lineCap: "round", lineJoin: "round", interactive: false }).addTo(layer); });
     ["walk", "steps", "escalator", "lift"].forEach(function (k) {
       lines.forEach(function (ln) {
         if (ln.kind !== k) return;
         var st = LINE[k];
-        L.polyline(ln.pts, { color: dark && k === "walk" ? "#e9edf2" : st.color, weight: st.weight, dashArray: st.dashArray, opacity: 1, lineCap: "round", lineJoin: "round", interactive: false }).addTo(layer);
+        L.polyline(ln.pts, { color: dark && k === "walk" ? "#e9edf2" : st.color, weight: st.weight, dashArray: faint ? (st.dashArray || "2 9") : st.dashArray, opacity: faint ? 0.45 : 1, lineCap: "round", lineJoin: "round", interactive: false }).addTo(layer);
       });
     });
   }
   // Where you catch the bus or train: a small dot in its colour with an ivory ring.
-  function stopDot(p, fill, layer) {
+  // label: a small name tag beside it ("Train: Monaco station"), so the map explains itself. One tag per spot.
+  function stopDot(p, fill, layer, label) {
     L.circleMarker([p.lat, p.lng], { radius: 7, color: "#fffdf8", weight: 3, fillColor: fill, fillOpacity: 1, interactive: false }).addTo(layer);
-    L.circleMarker([p.lat, p.lng], { radius: 10.5, color: "#b8923f", weight: 1.2, fill: false, interactive: false }).addTo(layer);
+    var ring = L.circleMarker([p.lat, p.lng], { radius: 10.5, color: "#b8923f", weight: 1.2, fill: false, interactive: false }).addTo(layer);
+    if (!label) return;
+    var key = p.lat.toFixed(4) + "," + p.lng.toFixed(4);
+    layer._mmeTags = layer._mmeTags || {};
+    if (layer._mmeTags[key]) return;
+    layer._mmeTags[key] = 1;
+    var away = layer._mmeTo ? (p.lng < layer._mmeTo.lng ? "left" : "right") : "auto";   // the tag points away from the destination pin
+    ring.bindTooltip(label, { permanent: true, direction: away, offset: [away === "left" ? -10 : away === "right" ? 10 : 0, 0], className: "stop-tag", interactive: false });
   }
   var STEP_LABEL = { walk: "Walk", lift: "Lift", escalator: "Escalator", steps: "Steps", arrive: "Arrive" };
 
@@ -260,7 +269,7 @@
       function draw(from, note) {
         fromPt = from; lastNote = note;
         if (window.MMEEventDay) window.MMEEventDay.apply();   // event-day closures (Pro) for this route
-        layer.clearLayers();
+        layer.clearLayers(); layer._mmeTags = {}; layer._mmeTo = to;
         var isStation = !!(from && from.kind === "station");
         var X = window.MMEExtras, blocked = X ? X.Reports.blockedPoints() : [];
         blockedKey = blocked.map(function (b) { return b.id; }).join(",");
@@ -285,13 +294,13 @@
         var h = note ? '<p class="summary">' + note + "</p>" : "";
         if (window.MMEEventDay) h += window.MMEEventDay.routeNote();
         h += '<label class="wc-toggle"><input type="checkbox" id="wc-on"' + (wc ? " checked" : "") + '><span class="wc-sw" aria-hidden="true"></span><span>' + esc(t("Wheelchair or pushchair")) + "<small>" + esc(t("Lifts and level paths only: no steps or escalators")) + "</small></span></label>";
-        var outside = r && (r.startGap > 300 || r.endGap > 300), opts = "";
+        var outside = r && (r.startGap > 300 || r.endGap > 300), opts = "", timed = [];   // timed: bus and train options, shown fastest first
         if (!r) {
           h += '<p class="summary">' + esc(wc ? t("We couldn’t find a way between these two places without steps or escalators. A taxi is the easiest option.") : t("We couldn’t find a walking route between these two places on our Monaco map.")) + "</p>";
           L.polyline([[from.lat, from.lng], [to.lat, to.lng]], { color: "#0b2545", weight: 3, dashArray: "6 8" }).addTo(layer);
         } else {
           // Casings first, then the lines, so a lift or escalator always sits on top of the walk either side.
-          drawRoute(r.lines, layer);
+          drawRoute(r.lines, layer, r.minutes >= 40);
           if (r.startGap > 40) L.polyline([[from.lat, from.lng], r.start], { color: "#b8923f", weight: 3, dashArray: "1 7", lineCap: "round" }).addTo(layer);
           if (r.endGap > 40) L.polyline([r.end, [to.lat, to.lng]], { color: "#b8923f", weight: 3, dashArray: "1 7", lineCap: "round" }).addTo(layer);
           var vert = r.heights
@@ -340,14 +349,14 @@
           if (bus && (bus.minutes + 2 < r.minutes || (r.climbed > 30 && bus.minutes < r.minutes + 8) || (!r.stepFree && bus.minutes < r.minutes + 8))) {
             var now = T.monacoNow();
             var B_ = function (x) { return "<b>" + esc(x) + "</b>"; };
-            opts += '<div class="bus-opt"><div class="bus-opt-top">' + T.badge(bus.p.r) + "<span>" + esc(t("Or take the bus: about {n} min in total", { n: bus.minutes })) + "</span></div>" +
+            timed.push({ m: bus.minutes, h: '<div class="bus-opt"><div class="bus-opt-top">' + T.badge(bus.p.r) + "<span>" + esc(t("Or take the bus: about {n} min in total", { n: bus.minutes })) + "</span></div>" +
               "<p>" + esc(t("Walk {a} min to {stop}.", { a: Math.max(1, bus.walkTo), stop: "\u0001" })).replace("\u0001", B_(T.stopName(bus.from))) + " " +
               esc(t("Next bus towards {dest} at {time} ({wait}).", { dest: bus.p.h, time: "\u0002", wait: bus.wait <= 0 ? t("now") : t("in {n} min", { n: bus.wait }) })).replace("\u0002", B_(T.hhmm(bus.dep))) + " " +
               esc(t("Ride {r} min to {stop}, then walk {w} min.", { r: bus.ride, stop: "\u0003", w: Math.max(1, bus.walkFrom) })).replace("\u0003", B_(T.stopName(bus.to))) + "</p>" +
               "<small>" + esc(now.ymd > window.MMEBus.valid[1] ? t("Times from the Monaco bus timetable (may have changed).") : t("Times from the Monaco bus timetable.")) + "</small>" +
-              legBtn(T.stopPt(bus.from), T.stopName(bus.from), t("Then bus {r} at {time}, {ride} min to {stop}.", { r: window.MMEBus.routes[bus.p.r].n, time: T.hhmm(bus.dep), ride: bus.ride, stop: T.stopName(bus.to) })) + "</div>";
+              legBtn(T.stopPt(bus.from), T.stopName(bus.from), t("Then bus {r} at {time}, {ride} min to {stop}.", { r: window.MMEBus.routes[bus.p.r].n, time: T.hhmm(bus.dep), ride: bus.ride, stop: T.stopName(bus.to) })) + "</div>" });
             var a = T.stopPt(bus.from), z = T.stopPt(bus.to);
-            [a, z].forEach(function (p) { stopDot(p, window.MMEBus.routes[bus.p.r].c, layer); });
+            [[a, bus.from], [z, bus.to]].forEach(function (q) { stopDot(q[0], window.MMEBus.routes[bus.p.r].c, layer, t("Bus {r}: {stop}", { r: window.MMEBus.routes[bus.p.r].n, stop: T.stopName(q[1]) })); });
           }
           var cb = T && T.coastOption && r.minutes >= 20 ? T.coastOption(from, to) : null;
           if (cb && (cb.generic || cb.minutes + 5 < r.minutes || r.minutes >= 40)) {
@@ -377,11 +386,12 @@
                 .replace("\u0002", Bc(T.hhmm(L2.dep))).replace("\u0003", Bc(L2.to)) + " ";
               body += esc(t("Then walk {w} min.", { w: Math.max(1, cb.walkFrom) }));
             }
-            opts += '<div class="bus-opt cb-opt' + (noneTonight ? " tr-gone" : "") + '"' + (cb.generic && L1.net === "ZOU!" ? ' id="cb-live"' : "") + '><div class="bus-opt-top">' + badgeOf(L1) + (L2 ? badgeOf(L2) : "") + "<span>" + esc(head) + "</span></div><p>" + body + "</p>" +
+            timed.push({ m: cb.generic ? 9999 : cb.minutes, h: '<div class="bus-opt cb-opt' + (noneTonight ? " tr-gone" : "") + '"' + (cb.generic && L1.net === "ZOU!" ? ' id="cb-live"' : "") + '><div class="bus-opt-top">' + badgeOf(L1) + (L2 ? badgeOf(L2) : "") + "<span>" + esc(head) + "</span></div><p>" + body + "</p>" +
               (!cb.generic && (cb.hurry || cb.after) ? '<p class="opt-more">' + esc([cb.hurry ? t("If you hurry: {time}", { time: T.hhmm(cb.hurry) }) : "", cb.after ? t("The one after: {time}", { time: T.hhmm(cb.after) }) : ""].filter(Boolean).join(" · ")) + "</p>" : "") +
               "<small>" + esc((cb.generic ? "" : t("About {n} min door to door, including the walks and the wait for the bus.", { n: cb.minutes }) + " ") + t("{net} timetable. Live times are in the {net} app. Pay on board.", { net: nets }) + (hasCam ? " " + t("Monaco city buses: CAM timetable.") : "")) + "</small>" +
-              (noneTonight ? "" : legBtn(L1.fromPt, L1.from, cb.generic ? t("Then bus {r} towards {dest}, to {stop}.", { r: L1.r, dest: L1.dest, stop: L1.to }) : t("Then bus {r} at {time}, {ride} min to {stop}.", { r: L1.r, time: T.hhmm(L1.dep), ride: L1.arr - L1.dep, stop: L1.to }))) + "</div>";
-            cb.legs.forEach(function (Lg) { [Lg.fromPt, Lg.toPt].forEach(function (pt) { stopDot(pt, Lg.c, layer); }); });
+              (noneTonight ? "" : legBtn(L1.fromPt, L1.from, cb.generic ? t("Then bus {r} towards {dest}, to {stop}.", { r: L1.r, dest: L1.dest, stop: L1.to }) : t("Then bus {r} at {time}, {ride} min to {stop}.", { r: L1.r, time: T.hhmm(L1.dep), ride: L1.arr - L1.dep, stop: L1.to }))) + "</div>" });
+            // Tags only where you get on the first bus and off the last one; the change between them is in the text.
+            cb.legs.forEach(function (Lg, k) { [[Lg.fromPt, Lg.from, k === 0], [Lg.toPt, Lg.to, k === cb.legs.length - 1]].forEach(function (q) { stopDot(q[0], Lg.c, layer, q[2] ? t("Bus {r}: {stop}", { r: Lg.r, stop: q[1] }) : null); }); });
           }
           var tr = T && T.trainOption && r.minutes >= 25 ? T.trainOption(from, to) : null;
           // Towards Nice the published 600 timetable is thin, so leave a slot for the next live 600 (filled in after the page draws).
@@ -390,13 +400,13 @@
           if (tr && tr.wait > 120) tr = null;   // the next train is hours away (overnight): the "no more trains tonight" card says so instead
           if (tr && (tr.minutes + 5 < r.minutes || r.minutes >= 40) && tr.walkTo + tr.walkFrom <= 45 && !(busBest !== null && tr.minutes > busBest + 30)) {
             var Bt = function (x) { return "<b>" + esc(x) + "</b>"; };
-            opts += '<div class="bus-opt tr-opt"><div class="bus-opt-top"><span class="bus-badge" style="background:#0b2545;color:#fff">' + esc(t("Train")) + "</span><span>" + esc(t("Train: {r} min to {stop}", { r: tr.ride, stop: t(tr.to) })) + "</span></div>" +
+            timed.push({ m: tr.minutes, h: '<div class="bus-opt tr-opt"><div class="bus-opt-top"><span class="bus-badge" style="background:#0b2545;color:#fff">' + esc(t("Train")) + "</span><span>" + esc(t("Train: {r} min to {stop}", { r: tr.ride, stop: t(tr.to) })) + "</span></div>" +
               "<p>" + esc(t("Walk {a} min to {stop}.", { a: Math.max(1, tr.walkTo), stop: "\u0001" })).replace("\u0001", Bt(t(tr.from))) + " " +
               esc(t("Train at {time} ({wait}), {r} min to {stop}, then walk {w} min.", { time: "\u0002", wait: tr.wait <= 0 ? t("now") : t("in {n} min", { n: tr.wait }), r: tr.ride, stop: "\u0003", w: Math.max(1, tr.walkFrom) })).replace("\u0002", Bt(T.hhmm(tr.dep))).replace("\u0003", Bt(t(tr.to))) + "</p>" +
               (tr.hurry != null || tr.after != null ? '<p class="opt-more">' + esc([tr.hurry != null ? t("If you hurry: {time}", { time: T.hhmm(tr.hurry) }) : "", tr.after != null ? t("The one after: {time}", { time: T.hhmm(tr.after) }) : ""].filter(Boolean).join(" · ")) + "</p>" : "") +
               "<small>" + esc(t("About {n} min door to door, including the walks and the wait for the train.", { n: tr.minutes })) + " " + esc(t("Planned SNCF timetable. Check the SNCF Connect app for delays.")) + "</small>" +
-              legBtn(tr.fromPt, t(tr.from), t("Then the train at {time}, {r} min to {stop}.", { time: T.hhmm(tr.dep), r: tr.ride, stop: t(tr.to) })) + "</div>";
-            [tr.fromPt, tr.toPt].forEach(function (p) { stopDot(p, "#0a1f3c", layer); });
+              legBtn(tr.fromPt, t(tr.from), t("Then the train at {time}, {r} min to {stop}.", { time: T.hhmm(tr.dep), r: tr.ride, stop: t(tr.to) })) + "</div>" });
+            [[tr.fromPt, tr.from], [tr.toPt, tr.to]].forEach(function (q) { stopDot(q[0], "#0a1f3c", layer, t("Train: {stop}", { stop: q[1] === "Monaco Monte-Carlo station" ? t("Monaco station") : t(q[1]) })); });
           }
           // No train left tonight on a journey trains usually serve: say so, rather than leaving people wondering.
           if (!(tr && (tr.minutes + 5 < r.minutes || r.minutes >= 40)) && r.minutes >= 25 && T && T.trainsGone) {
@@ -404,6 +414,8 @@
             if (gone) opts += '<div class="bus-opt tr-opt tr-gone"><div class="bus-opt-top"><span class="bus-badge" style="background:#0b2545;color:#fff">' + esc(t("Train")) + "</span><span>" + esc(t(gone.noneToday ? "No trains today" : "No more trains tonight")) + "</span></div><p>" +
               (gone.noneToday ? esc(t("SNCF has no trains planned today, which usually means engineering works or a strike.")) : esc(t("The last train from {st} left at {t}.", { st: t(gone.from), t: T.hhmm(gone.last) }))) + " " + esc(gone.first != null ? t("First train tomorrow: {t}.", { t: T.hhmm(gone.first) }) : t("SNCF has no trains planned on this line tomorrow, which usually means engineering works or a strike. Check the SNCF Connect app for replacement buses.")) + "</p></div>";
           }
+          // The bus and train options, fastest door to door first (a "how often" card without times goes after them).
+          opts = timed.sort(function (x, y) { return x.m - y.m; }).map(function (x) { return x.h; }).join("") + opts;
           // Long journeys: lead with the train, bus and taxi, and put the walk last.
           if (r.minutes >= 40) {
             if (opts && window.MMEGetHome) opts += '<a class="gh-link" href="#/get-home">' + icon("clock") + "<span><strong>" + esc(t("Countdown to your train home")) + "</strong><small>" +
@@ -425,7 +437,27 @@
           if (cur && cur.tip) h += '<aside class="note"><strong>' + esc(t("Tip")) + "</strong><p>" + esc(t(cur.tip)) + "</p></aside>";
           var b = L.latLngBounds([[from.lat, from.lng], [to.lat, to.lng]]);
           r.lines.forEach(function (ln) { ln.pts.forEach(function (p) { b.extend(p); }); });
-          map.fitBounds(b.pad(0.12));
+          layer.eachLayer(function (m) { if (m.getLatLng) b.extend(m.getLatLng()); });   // the bus and train stops too
+          // Too long to fit on the phone (e.g. from Menton): show the arrival end, with the stops there, rather than a random middle.
+          var bp = b.pad(0.12), z0 = map.getMinZoom(), span = map.project(bp.getNorthEast(), z0).subtract(map.project(bp.getSouthWest(), z0)), sz = map.getSize();
+          if (Math.abs(span.x) > sz.x || Math.abs(span.y) > sz.y) {
+            b = L.latLngBounds([[to.lat, to.lng], [to.lat, to.lng]]);
+            layer.eachLayer(function (m) { if (m.getLatLng && M().distance(m.getLatLng(), to) < 1500) b.extend(m.getLatLng()); });
+            if (M().distance(from, to) >= 1500) b = b.pad(0.4);
+          }
+          map.fitBounds(b.pad(0.12), { animate: false });
+          // A stop's name tag that would run off the edge of the map goes on the other side of its dot instead.
+          layer.eachLayer(function (m) {
+            var tip = m.getTooltip && m.getTooltip(), el = tip && tip.getElement && tip.getElement();
+            if (!el) return;
+            var x = map.latLngToContainerPoint(m.getLatLng()).x, w = el.offsetWidth + 14, dir = tip.options.direction;
+            var W = map.getSize().x, off = (dir === "left" && x - w < 0) || (dir === "right" && x + w > W);
+            if (!off) return;
+            // Below the dot if it fits there, otherwise on the other side.
+            var flip = x - w / 2 > 0 && x + w / 2 < W ? "bottom" : dir === "left" ? "right" : "left";
+            var txt = tip.getContent(); m.unbindTooltip();
+            m.bindTooltip(txt, { permanent: true, direction: flip, offset: flip === "bottom" ? [0, 10] : [flip === "left" ? -10 : 10, 0], className: "stop-tag", interactive: false });
+          });
         }
         var canSave = window.MMEExtras && to.kind !== "ship" && to.kind !== "home" && !window.MMEExtras.Home.is(to);
         h += '<div class="actions">' + (canSave ? '<button type="button" class="btn btn-line save-home" id="save-home">' + esc(t("Save as where I’m staying")) + "</button>" : "") + '<a class="btn btn-line" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&travelmode=walking&origin=' + from.lat + "," + from.lng + "&destination=" + to.lat + "," + to.lng + '">' + esc(t("Compare in Google Maps")) + "</a></div>" +

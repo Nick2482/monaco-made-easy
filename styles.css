@@ -1343,3 +1343,8 @@ html.festive .xm-mk { background: var(--fest-gold); border-color: #fff; }
 .bar .theme-btn, .lang-wrap { flex: none; }
 .bar .theme-btn { margin-left: 0; }
 .gh-big .gh-count.gh-count-sm { font-size: 1.7rem; }
+
+/* Name tags beside the bus and train stops on the route map ("Train: Monaco station") */
+.leaflet-tooltip.stop-tag { background: #fffdf8; color: #0a1f3c; border: 1px solid #b8923f; border-radius: 999px; padding: 2px 8px; font: 600 12px/1.3 "Atkinson Hyperlegible", system-ui, sans-serif; box-shadow: 0 1px 3px rgba(10, 31, 60, .18); white-space: nowrap; }
+.leaflet-tooltip.stop-tag::before { display: none; }
+[data-theme="dark"] .leaflet-tooltip.stop-tag { background: #18222e; color: #f2ede3; border-color: #b8923f; }
