@@ -1,7 +1,7 @@
 # Builds the real iPhone app on one of GitHub's Macs, signs it with Nick's Apple account
 # (using the App Store Connect API key kept in this repository's secrets) and uploads it to
-# App Store Connect. It signs straight away for the App Store ("Apple Distribution"), with certificates
-# Apple manages in the cloud, so no test iPhone has to be registered first. Then uploads it to
+# App Store Connect. The archive is built unsigned; the export step then signs it for the App Store with
+# certificates Apple manages in the cloud, so no test iPhone has to be registered. Then uploads it to
 # App Store Connect, where it appears in TestFlight. Runs when ios-app/RELEASE changes, or by hand.
 # The build log (never the key) goes to the "ios-release-results" branch.
 name: iPhone app to TestFlight
@@ -61,8 +61,8 @@ jobs:
           set -o pipefail
           xcodebuild -project App.xcodeproj -scheme App -configuration Release \
             -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/App.xcarchive" \
-            DEVELOPMENT_TEAM="$TEAM_ID" CODE_SIGN_STYLE=Automatic CODE_SIGN_IDENTITY="Apple Distribution" CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
-            -allowProvisioningUpdates -authenticationKeyPath "$KEY" -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            DEVELOPMENT_TEAM="$TEAM_ID" CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
             archive >> "$GITHUB_WORKSPACE/build.log" 2>&1 || { grep -E "error:|ARCHIVE FAILED" "$GITHUB_WORKSPACE/build.log" | head -40; exit 1; }
           grep -E "ARCHIVE SUCCEEDED" "$GITHUB_WORKSPACE/build.log"
       - name: Upload to App Store Connect
