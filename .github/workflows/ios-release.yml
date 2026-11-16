@@ -1,0 +1,93 @@
+# Builds the real iPhone app on one of GitHub's Macs, signs it with Nick's Apple account
+# (using the App Store Connect API key kept in this repository's secrets) and uploads it to
+# App Store Connect, where it appears in TestFlight. Runs when ios-app/RELEASE changes, or by hand.
+# The build log (never the key) goes to the "ios-release-results" branch.
+name: iPhone app to TestFlight
+on:
+  push:
+    branches: [main]
+    paths: ["ios-app/RELEASE"]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: ios-release
+  cancel-in-progress: false
+jobs:
+  testflight:
+    runs-on: macos-15
+    timeout-minutes: 60
+    env:
+      TEAM_ID: 47K8SB7N8T
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check the Apple key is there
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          missing=""
+          [ -n "$ASC_KEY_ID" ] || missing="$missing ASC_KEY_ID"
+          [ -n "$ASC_ISSUER_ID" ] || missing="$missing ASC_ISSUER_ID"
+          [ -n "$ASC_KEY_P8" ] || missing="$missing ASC_KEY_P8"
+          if [ -n "$missing" ]; then echo "Missing secrets:$missing" | tee "$GITHUB_WORKSPACE/build.log"; exit 1; fi
+          mkdir -p "$RUNNER_TEMP/keys"
+          printf '%s\n' "$ASC_KEY_P8" > "$RUNNER_TEMP/keys/AuthKey_${ASC_KEY_ID}.p8"
+          grep -q "BEGIN PRIVATE KEY" "$RUNNER_TEMP/keys/AuthKey_${ASC_KEY_ID}.p8" || { echo "ASC_KEY_P8 does not look like a .p8 key (no BEGIN PRIVATE KEY line)" | tee "$GITHUB_WORKSPACE/build.log"; exit 1; }
+      - name: Prepare the app
+        working-directory: ios-app
+        run: npm ci && npm run sync
+      - name: Build and sign
+        working-directory: ios-app/ios/App
+        run: |
+          KEY="$RUNNER_TEMP/keys/AuthKey_${ASC_KEY_ID}.p8"
+          xcodebuild -version | tee "$GITHUB_WORKSPACE/build.log"
+          set -o pipefail
+          xcodebuild -project App.xcodeproj -scheme App -configuration Release \
+            -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            DEVELOPMENT_TEAM="$TEAM_ID" CODE_SIGN_STYLE=Automatic CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
+            -allowProvisioningUpdates -authenticationKeyPath "$KEY" -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            archive >> "$GITHUB_WORKSPACE/build.log" 2>&1 || { grep -E "error:|ARCHIVE FAILED" "$GITHUB_WORKSPACE/build.log" | head -40; exit 1; }
+          grep -E "ARCHIVE SUCCEEDED" "$GITHUB_WORKSPACE/build.log"
+      - name: Upload to App Store Connect
+        run: |
+          KEY="$RUNNER_TEMP/keys/AuthKey_${ASC_KEY_ID}.p8"
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>${TEAM_ID}</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+            <key>uploadSymbols</key><true/>
+          </dict></plist>
+          EOF
+          set -o pipefail
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/App.xcarchive" -exportPath "$RUNNER_TEMP/export" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -allowProvisioningUpdates -authenticationKeyPath "$KEY" -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            >> "$GITHUB_WORKSPACE/build.log" 2>&1 || { grep -iE "error|failed" "$GITHUB_WORKSPACE/build.log" | tail -40; exit 1; }
+          grep -E "EXPORT SUCCEEDED|Upload succeeded|Uploaded" "$GITHUB_WORKSPACE/build.log" | head
+      - name: Remove the key
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/keys"
+      - name: Publish the log
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/r" && cd "$RUNNER_TEMP/r"
+          tail -c 80000 "$GITHUB_WORKSPACE/build.log" > build-log-tail.txt 2>/dev/null || true
+          grep -iE "error:|warning: .*sign|failed" "$GITHUB_WORKSPACE/build.log" | head -100 > build-errors.txt 2>/dev/null || true
+          echo '{"git":{"deploymentEnabled":false}}' > vercel.json
+          echo "${{ github.sha }} build ${{ github.run_number }} ${{ job.status }}" > commit.txt
+          git init -q && git checkout -q -b ios-release-results
+          git -c user.name="iPhone release" -c user.email="actions@github.com" add -A
+          git -c user.name="iPhone release" -c user.email="actions@github.com" commit -qm "iPhone release build ${{ github.run_number }}"
+          git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" ios-release-results
