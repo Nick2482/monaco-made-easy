@@ -17,7 +17,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   testflight:
-    runs-on: macos-26   # Apple only accepts apps built with Xcode 26 / the iOS 26 SDK or later
+    runs-on: macos-15   # picks Xcode 26 below: Apple only accepts apps built with the iOS 26 SDK or later
     timeout-minutes: 60
     env:
       TEAM_ID: 47K8SB7N8T
