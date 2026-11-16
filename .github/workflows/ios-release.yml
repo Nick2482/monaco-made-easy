@@ -37,7 +37,17 @@ jobs:
           if [ -n "$missing" ]; then echo "Missing secrets:$missing" | tee "$GITHUB_WORKSPACE/build.log"; exit 1; fi
           mkdir -p "$RUNNER_TEMP/keys"
           printf '%s\n' "$ASC_KEY_P8" > "$RUNNER_TEMP/keys/AuthKey_${ASC_KEY_ID}.p8"
-          grep -q "BEGIN PRIVATE KEY" "$RUNNER_TEMP/keys/AuthKey_${ASC_KEY_ID}.p8" || { echo "ASC_KEY_P8 does not look like a .p8 key (no BEGIN PRIVATE KEY line)" | tee "$GITHUB_WORKSPACE/build.log"; exit 1; }
+          F="$RUNNER_TEMP/keys/AuthKey_${ASC_KEY_ID}.p8"
+          # If only the middle lines were pasted, put the BEGIN/END lines back around them.
+          if ! grep -q "BEGIN PRIVATE KEY" "$F"; then
+            body=$(tr -d ' \r\n\t' < "$F")
+            { echo "-----BEGIN PRIVATE KEY-----"; echo "$body" | fold -w 64; echo "-----END PRIVATE KEY-----"; } > "$F"
+            echo "Note: ASC_KEY_P8 had no BEGIN line; wrapped the ${#body}-character key body." | tee "$GITHUB_WORKSPACE/build.log"
+          fi
+          # Shape check only (never prints the key): a .p8 body is base64 of roughly 200 characters.
+          n=$(grep -v "PRIVATE KEY" "$F" | tr -d ' \r\n' | wc -c | tr -d ' ')
+          echo "Key body length: $n characters" | tee -a "$GITHUB_WORKSPACE/build.log"
+          openssl pkey -in "$F" -noout 2>/dev/null && echo "Key reads as a valid private key" | tee -a "$GITHUB_WORKSPACE/build.log" || { echo "ASC_KEY_P8 is not a valid private key (body $n characters)" | tee -a "$GITHUB_WORKSPACE/build.log"; exit 1; }
       - name: Prepare the app
         working-directory: ios-app
         run: npm ci && npm run sync
