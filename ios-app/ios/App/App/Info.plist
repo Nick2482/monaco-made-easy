@@ -24,6 +24,8 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Your location is used to plan the route from where you are, using the lifts, buses and trains. The app only uses it while you have it open.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Your location is used to plan the route from where you are, using the lifts, buses and trains.</string>
 	<key>CFBundleAllowMixedLocalizations</key>
