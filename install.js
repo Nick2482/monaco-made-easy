@@ -35,9 +35,18 @@
   var ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 1h10a2 2 0 0 1 2 2v18a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2zm0 3v14h10V4zm5 15.2a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4zM11 6h2v5h2.5L12 14.5 8.5 11H11z"/></svg>';
 
   // where: "home" (can be closed for good) or "info" (always shown until installed).
+  function appStoreLive() { return !!(window.MMEStores && window.MMEStores.appStore && window.MMEStores.appStore.live) && !window.MMENative; }
   function card(where) {
     if (installed()) return "";
     if (where === "home" && get("mme-install-x")) return "";
+    // Once the iPhone app is in the App Store, iPhone visitors are sent there instead.
+    if (isIOS() && appStoreLive()) {
+      return '<aside class="install-card" data-where="' + where + '">' +
+        (where === "home" ? '<button type="button" class="ic-x" aria-label="' + esc(t("Not now")) + '">×</button>' : "") +
+        '<span class="ic-ico">' + ICON + "</span><div><strong>" + esc(t("Get the iPhone app")) + "</strong>" +
+        "<p>" + esc(t("Monaco Made Easy is now in the App Store: free, with the same routes, map and guide.")) + "</p>" +
+        '<a class="btn btn-navy ic-store" href="' + esc(window.MMEStores.appStore.url) + '" target="_blank" rel="noopener">' + esc(t("Open the App Store")) + "</a></div></aside>";
+    }
     var steps = isIOS() ? t("On iPhone: tap the Share button (the square with an arrow) at the bottom of Safari, then “Add to Home Screen”.")
       : t("Open your browser’s menu (⋮ or ⋯) and choose “Install app” or “Add to Home screen”.");
     return '<aside class="install-card" data-where="' + where + '">' +
@@ -51,6 +60,8 @@
     root.querySelectorAll(".install-card:not(.rate-card)").forEach(function (c) {
       var x = c.querySelector(".ic-x");
       if (x) x.addEventListener("click", function () { set("mme-install-x", "1"); c.remove(); });
+      var store = c.querySelector(".ic-store");
+      if (store) { store.addEventListener("click", function () { if (window.MMEStats) window.MMEStats.track("App Store opened", { where: c.dataset.where }); }); return; }
       var go = c.querySelector(".ic-go");
       function refresh() {
         if (!document.body.contains(c)) { window.removeEventListener("mme-install", refresh); return; }
