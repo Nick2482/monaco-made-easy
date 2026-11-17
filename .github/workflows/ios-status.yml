@@ -1,0 +1,79 @@
+# Read-only status check of the iPhone app in App Store Connect (review state, builds,
+# in-app purchase, certificates, API keys in use). Changes nothing. Runs when ios-app/STATUS changes.
+# Results (no secrets) go to the "ios-status-results" branch.
+name: iPhone app status
+on:
+  push:
+    branches: [main]
+    paths: ["ios-app/STATUS"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  status:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Ask App Store Connect
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          pip install -q pyjwt cryptography requests
+          python3 - <<'PY' > status.txt 2>&1 || true
+          import os, time, jwt, requests, json
+          key = os.environ["ASC_KEY_P8"]
+          if "BEGIN PRIVATE KEY" not in key:
+              body = "".join(key.split())
+              key = "-----BEGIN PRIVATE KEY-----\n" + "\n".join(body[i:i+64] for i in range(0, len(body), 64)) + "\n-----END PRIVATE KEY-----\n"
+          tok = jwt.encode({"iss": os.environ["ASC_ISSUER_ID"], "iat": int(time.time()), "exp": int(time.time()) + 900, "aud": "appstoreconnect-v1"}, key, algorithm="ES256", headers={"kid": os.environ["ASC_KEY_ID"]})
+          H = {"Authorization": "Bearer " + tok}
+          B = "https://api.appstoreconnect.apple.com/v1/"
+          def get(path):
+              r = requests.get(B + path, headers=H, timeout=30)
+              if r.status_code >= 400: return {"error": r.status_code, "body": r.text[:500]}
+              return r.json()
+          apps = get("apps?limit=20")
+          if "error" in apps: print("API ERROR", apps); raise SystemExit
+          print("== Apps in the account")
+          for a in apps["data"]:
+              at = a["attributes"]; print("-", at["name"], "|", at["bundleId"], "| id", a["id"])
+          for a in apps["data"]:
+              aid = a["id"]; print("\n== App:", a["attributes"]["name"])
+              v = get(f"apps/{aid}/appStoreVersions?limit=5")
+              for x in v.get("data", []):
+                  at = x["attributes"]; print("  version", at.get("versionString"), "| state:", at.get("appStoreState") or at.get("appVersionState"), "| release:", at.get("releaseType"), "| created", at.get("createdDate"))
+                  bld = get(f"appStoreVersions/{x['id']}/build")
+                  if bld.get("data"): print("    build attached:", bld["data"]["attributes"].get("version"), bld["data"]["attributes"].get("processingState"))
+              s = get(f"apps/{aid}/reviewSubmissions?limit=5")
+              for x in s.get("data", []):
+                  at = x["attributes"]; print("  review submission:", at.get("state"), "| platform", at.get("platform"), "| submitted", at.get("submittedDate"))
+              b = get(f"builds?filter[app]={aid}&limit=10&sort=-uploadedDate")
+              for x in b.get("data", []):
+                  at = x["attributes"]; print("  build", at.get("version"), "|", at.get("processingState"), "| expired" if at.get("expired") else "", "| uploaded", at.get("uploadedDate"))
+              i = get(f"apps/{aid}/inAppPurchasesV2?limit=10")
+              for x in i.get("data", []):
+                  at = x["attributes"]; print("  in-app purchase", at.get("productId"), "|", at.get("state"))
+          print("\n== Bundle IDs")
+          for x in get("bundleIds?limit=50").get("data", []):
+              at = x["attributes"]; print("-", at.get("identifier"), "|", at.get("name"), "|", at.get("platform"))
+          print("\n== Certificates")
+          for x in get("certificates?limit=50").get("data", []):
+              at = x["attributes"]; print("-", at.get("certificateType"), "|", at.get("displayName") or at.get("name"), "| expires", at.get("expirationDate"), "| activated", at.get("activated"))
+          print("\n== Profiles")
+          for x in get("profiles?limit=50").get("data", []):
+              at = x["attributes"]; print("-", at.get("name"), "|", at.get("profileType"), "|", at.get("profileState"))
+          PY
+          cat status.txt
+      - name: Publish
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p r && cp status.txt r/ 2>/dev/null || echo "no output" > r/status.txt
+          cd r && echo '{"git":{"deploymentEnabled":false}}' > vercel.json
+          git init -q && git checkout -q -b ios-status-results
+          git -c user.name="status" -c user.email="actions@github.com" add -A
+          git -c user.name="status" -c user.email="actions@github.com" commit -qm "status ${{ github.run_number }}"
+          git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" ios-status-results
