@@ -44,6 +44,13 @@ jobs:
               v = get(f"apps/{aid}/appStoreVersions?limit=5")
               for x in v.get("data", []):
                   at = x["attributes"]; print("  version", at.get("versionString"), "| state:", at.get("appStoreState") or at.get("appVersionState"), "| release:", at.get("releaseType"), "| created", at.get("createdDate"))
+                  rd = get(f"appStoreVersions/{x['id']}/appStoreReviewDetail")
+                  if rd.get("data"):
+                      ra = rd["data"]["attributes"]; notes = (ra.get("notes") or "")
+                      print("    review notes:", len(notes), "chars, starts:", notes[:60].replace("\n", " "), "| sign-in required:", ra.get("demoAccountRequired"), "| contact set:", bool(ra.get("contactEmail")))
+                      att = get(f"appStoreReviewDetails/{rd['data']['id']}/appStoreReviewAttachments")
+                      for y in att.get("data", []):
+                          ya = y["attributes"]; print("    review attachment:", ya.get("fileName"), ya.get("fileSize"), "bytes |", (ya.get("assetDeliveryState") or {}).get("state"))
                   bld = get(f"appStoreVersions/{x['id']}/build")
                   if bld.get("data"): print("    build attached:", bld["data"]["attributes"].get("version"), bld["data"]["attributes"].get("processingState"))
               s = get(f"apps/{aid}/reviewSubmissions?limit=5")
