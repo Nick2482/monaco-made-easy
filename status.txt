@@ -1,0 +1,23 @@
+== Apps in the account
+- Monaco Made Easy | com.monacomadeeasy.app | id 6835533503
+
+== App: Monaco Made Easy
+  version 1.0 | state: WAITING_FOR_REVIEW | release: AFTER_APPROVAL | created 2026-11-16T09:08:44-08:00
+    review notes: 2134 chars, starts: 1. SCREEN RECORDING: attached to this submission (Attachment | sign-in required: False | contact set: True
+    review attachment: monaco-made-easy-app-review.mp4 7116013 bytes | COMPLETE
+    build attached: 10 VALID
+  review submission: WAITING_FOR_REVIEW | platform IOS | submitted 2026-11-18T10:42:59.446Z
+  review submission: COMPLETE | platform IOS | submitted 2026-11-18T10:31:08.19Z
+  review submission: COMPLETE | platform IOS | submitted 2026-11-18T10:16:24.204Z
+  build 10 | VALID  | uploaded 2026-11-16T12:12:08-08:00
+  build 9 | VALID  | uploaded 2026-11-16T11:49:12-08:00
+  in-app purchase pro_unlock | WAITING_FOR_REVIEW
+
+== Bundle IDs
+- com.fictionstudios.geaphylax | Geaphylax | UNIVERSAL
+- com.monacomadeeasy.app | Monaco Made Easy | UNIVERSAL
+
+== Certificates
+- DEVELOPMENT | Created via API | expires 2027-11-16T18:44:06.000+00:00 | activated None
+
+== Profiles
