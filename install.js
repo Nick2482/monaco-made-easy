@@ -123,7 +123,7 @@
   function routeUsed() { set("mme-routes", String((+get("mme-routes") || 0) + 1)); }
   // Closed testing on Google Play: show a feedback card on the home screen all the time,
   // with clear steps, because testers can't leave public reviews yet. Ends by itself on TEST_UNTIL.
-  var TEST_UNTIL = "20261215";
+  var TEST_UNTIL = "20261126";
   function ymd() { var d = new Date(); return "" + d.getFullYear() + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0"); }
   function testing() { return ymd() < TEST_UNTIL; }
   function rateDue() {
