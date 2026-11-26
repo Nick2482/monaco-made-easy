@@ -1,0 +1,14 @@
+2026-11-26 09:08:16.862 Df App[6556:6277] [com.apple.BoardServices:XPCErrors] [C:1] Alloc com.apple.frontboard.systemappservices
+2026-11-26 09:08:17.303 Df App[6556:625b] [com.apple.BoardServices:XPCErrors] [C:2] Alloc com.apple.backboard.hid-services.xpc
+2026-11-26 09:08:17.839 E  App[6556:6283] [com.apple.extensionkit:default] Failed to resolve host network app id to config: bundleID: com.apple.WebKit.Networking instance ID: Optional([_EXExtensionInstanceIdentifier: 9B457103-4E4B-4A1F-8598-D58AA2561212])
+2026-11-26 09:08:19.336 Df App[6556:625b] [com.apple.BoardServices:XPCErrors] [C:3] Alloc com.apple.inputservice.input-ui-host
+2026-11-26 09:08:19.959 Df App[6556:6283] [com.apple.xpc:connection] [0x104d1d680] Re-initialization successful; calling out to event handler with XPC_ERROR_CONNECTION_INTERRUPTED
+2026-11-26 09:08:22.194 Df App[6556:6283] [com.apple.AppSSO:SOClient] configurationWithCompletion: success = YES, error = (null)
+2026-11-26 09:08:25.436 E  App[6556:625b] [com.apple.WebKit:ResourceLoadStatistics] Failed to request storage access quirks from WebPrivacy.
+2026-11-26 09:08:25.436 E  App[6556:625b] [com.apple.WebKit:ResourceLoadStatistics] Failed to request storage access user agent string quirks from WebPrivacy.
+2026-11-26 09:08:25.437 E  App[6556:625b] [com.apple.WebKit:ResourceLoadStatistics] Failed to request query parameters from WebPrivacy.
+2026-11-26 09:08:25.440 E  App[6556:625b] [com.apple.WebKit:ResourceLoadStatistics] Failed to request known fingerprinting scripts from WebPrivacy: Error Domain=WebPrivacyErrorDomain Code=1001 "List data not found" UserInfo={NSLocalizedDescription=List data not found}
+2026-11-26 09:08:29.698 E  App[6556:62a4] [com.apple.TextInputUI:CandidateGeneration] Attempted to update accumulator from source type: 0, after completion has already been called for token:[2A390193]. This is an error and will be ignored.
+2026-11-26 09:08:36.611 E  App[6556:625b] [com.apple.WebKit:ResourceLoadStatistics] Failed to request allowed query parameters from WebPrivacy.
+2026-11-26 09:08:37.455 E  App[6556:62ca] [com.apple.imageio:com.apple.WebKit.WebContent] WebContent[6566] makeImagePlus:3798: *** ERROR: 'WEBP'-_reader->initImage[0] failed err=-50
+2026-11-26 09:08:41.671 E  App[6556:625b] [com.apple.WebKit:ResourceLoadStatistics] Failed to request restricted opener domains from WebPrivacy
