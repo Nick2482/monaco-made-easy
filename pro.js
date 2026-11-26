@@ -22,7 +22,7 @@
   function status() {
     if (get("mme-pro-test") === "locked") return "locked";   // lets us see the paid version during the preview
     if (get("mme-pro")) return "bought";
-    if (inPlayApp() && !play.ready) return "playapp";   // Play app without Google's payment system (older version): Pro stays free
+    // Play app: Pro is never free. Until Google Play payments are ready it stays locked and shows "Coming soon".
     if (!CONFIG.launch || new Date().toISOString().slice(0, 10) < CONFIG.launch) return "preview";
     return "locked";
   }
