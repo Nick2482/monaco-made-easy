@@ -271,9 +271,17 @@
           pos = inArea ? p : null;
           if (inArea) root.querySelector("#g-sub").textContent = t("Sorted by distance from where you are now.");
           draw();
+          // After a tap on "Find the nearest": show where you are and jump to the list, nearest first.
+          if (wantNearest) {
+            wantNearest = false;
+            if (inArea) map.setView([p.lat, p.lng], 16);
+            var sub = root.querySelector("#g-sub");
+            if (sub) sub.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
         });
       }
-      root.querySelector("#g-find").addEventListener("click", locate);
+      var wantNearest = false;
+      root.querySelector("#g-find").addEventListener("click", function () { wantNearest = true; if (stop) stop(); locate(); });
       locate();
       root.addEventListener("click", function (e) {
         var ar = e.target.closest("[data-area]");

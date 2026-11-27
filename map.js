@@ -19,7 +19,12 @@
   function startLocating(onError) {
     if (!("geolocation" in navigator)) { if (onError) onError(t("This phone can’t share its location."), 2); return; }
     if (onError && errFns.indexOf(onError) < 0) errFns.push(onError);
-    if (watchId !== null) { if (lastErr && onError && !here) onError(lastErr[0], lastErr[1]); return; }
+    if (watchId !== null) {
+      if (!(lastErr && !here)) return;
+      // The last try failed: try again from scratch (the person may have just switched location on).
+      try { navigator.geolocation.clearWatch(watchId); } catch (e) {}
+      watchId = null; lastErr = null;
+    }
     var triedRough = false;
     function got(pos) {
       here = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy, t: pos.timestamp };
