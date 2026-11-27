@@ -20,14 +20,31 @@
     if (!("geolocation" in navigator)) { if (onError) onError(t("This phone can’t share its location."), 2); return; }
     if (onError && errFns.indexOf(onError) < 0) errFns.push(onError);
     if (watchId !== null) { if (lastErr && onError && !here) onError(lastErr[0], lastErr[1]); return; }
-    watchId = navigator.geolocation.watchPosition(function (pos) {
+    var triedRough = false;
+    function got(pos) {
       here = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy, t: pos.timestamp };
+      lastErr = null;
+      // A position arrived, so clear any earlier "couldn't find you" message.
+      Array.prototype.forEach.call(document.querySelectorAll("#g-err, #loc-error"), function (el) { el.hidden = true; });
       watchers.forEach(function (fn) { fn(here); });
-    }, function (err) {
+    }
+    function fail(err) {
       var msg = err.code === 1 ? t("Location is switched off for this app. Turn it on in your phone’s settings to see lifts near you.") : t("We couldn’t find your location just now.");
       lastErr = [msg, err.code];
       errFns.forEach(function (fn) { fn(msg, err.code); });
       if (onError && errFns.indexOf(onError) < 0) onError(msg, err.code);
+    }
+    watchId = navigator.geolocation.watchPosition(got, function (err) {
+      if (here) return;                       // we already have a position: keep using it
+      if (err.code === 1 || triedRough) { fail(err); return; }
+      // GPS is slow or blocked (narrow streets, indoors): fall back to the phone's rougher Wi-Fi/mobile position,
+      // and keep watching with that, rather than telling the person we can't find them.
+      triedRough = true;
+      navigator.geolocation.getCurrentPosition(function (pos) {
+        got(pos);
+        try { navigator.geolocation.clearWatch(watchId); } catch (e) {}
+        watchId = navigator.geolocation.watchPosition(got, function () {}, { enableHighAccuracy: false, maximumAge: 30000, timeout: 30000 });
+      }, function () { fail(err); }, { enableHighAccuracy: false, maximumAge: 600000, timeout: 15000 });
     }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
   }
   function onLocation(fn) { watchers.push(fn); if (here) fn(here); return function () { watchers = watchers.filter(function (f) { return f !== fn; }); }; }
