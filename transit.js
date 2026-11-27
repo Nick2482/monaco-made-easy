@@ -727,6 +727,8 @@
         '<img class="way-photo" src="img/airport-tram.jpg" width="1200" height="672" loading="lazy" alt="' + tb("The tram at Nice airport") + '">' +
         "<p>" + tb("Walk about 7 minutes from Terminal 1 to **Nice Saint-Augustin** station (from Terminal 2, take the free tram one stop). Trains to Monaco Monte-Carlo usually run every 15 minutes through the day and take about 35 minutes. A regional ticket costs a few euros. Evening and Sunday services can be thinner, so check the SNCF Connect app for live times.") + "</p>" +
         (TR ? trFromAirport(monacoNow()) : "") +
+        '<img class="way-photo" src="img/nice-saint-augustin.jpg" width="1200" height="899" loading="lazy" alt="' + tb("The entrance to Nice Saint-Augustin station") + '">' +
+        "<p>" + tb("The station entrance is up a flight of steps, but there’s a large lift just to the left of them. The walk from the airport is level, so the whole way is wheelchair-friendly.") + "</p>" +
         '<p class="way-tip">' + tb("At Monaco, the app picks the best station exit for where you’re staying. Tap “Just arrived?” on the home screen.") + "</p></li>" +
         '<li class="way" id="way-bus"><div class="way-top"><strong>' + tb("Bus: ZOU! line 80") + '</strong><span class="way-tag">' + tb("Direct") + "</span></div>" +
         "<p>" + tb("From **Terminal 2**, every 30 to 50 minutes from 8:30am to 10pm, every day. About an hour to Monaco, stopping at Place d’Armes, the Casino and Larvotto. €21.40, or €21.80 bought on board (pay by tapping your card).") + " " + tb("Travelling as a group of 3 to 9? A group ticket bought on board starts at €45.80 for everyone, which is much cheaper.") + "</p>" +
