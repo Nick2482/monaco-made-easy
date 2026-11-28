@@ -40,7 +40,7 @@ button { font: inherit; color: inherit; }
 main { max-width: var(--col); margin: 0 auto; outline: none; }
 
 /* Top bar */
-.bar { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: calc(10px + env(safe-area-inset-top)) max(16px, calc((100% - var(--col)) / 2 + 16px)) 10px; background: var(--red); color: #fff; }
+.bar { position: sticky; top: 0; z-index: 1100; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: calc(10px + env(safe-area-inset-top)) max(16px, calc((100% - var(--col)) / 2 + 16px)) 10px; background: var(--red); color: #fff; }
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
 .mark { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 8px; background: var(--card); }
 .mark svg { width: 22px; height: 22px; fill: var(--red); }
