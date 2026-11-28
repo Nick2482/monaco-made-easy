@@ -328,6 +328,7 @@
       function locate() {
         var errBox = root.querySelector("#loc-error");
         startLocating(function (msg) { errBox.textContent = msg; errBox.hidden = false; });
+        var listAt = null, listT = 0;
         stop = onLocation(function (pos) {
           if (!document.body.contains(root.querySelector("#map"))) { if (stop) stop(); return; }
           if (!me) me = L.marker([pos.lat, pos.lng], { icon: meIcon, interactive: false, zIndexOffset: 1000 }).addTo(map);
@@ -338,7 +339,9 @@
           root.querySelector("#near-h").textContent = t("Nearest to you");
           root.querySelector("#near-sub").textContent = inArea ? t("Sorted by distance from where you are now.") : t("You’re not in Monaco yet. When you are, this list sorts itself by what’s closest.");
           lastPos = inArea ? pos : null;
-          drawList(lastPos);
+          // Only rebuild the list when you've moved 30 m or every 20 seconds, not on every GPS tick.
+          var nowT = Date.now();
+          if (!listAt || (lastPos && distance(pos, listAt) > 30) || nowT - listT > 20000) { listAt = pos; listT = nowT; drawList(lastPos); }
         });
       }
       root.querySelector("#find-me").addEventListener("click", locate);

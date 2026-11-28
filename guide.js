@@ -260,7 +260,7 @@
       if (s) s.addEventListener("input", function () { q = s.value.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[’']/g, "'"); draw(); });
       var ob = root.querySelector("#g-open");
       if (ob) ob.addEventListener("click", function () { onlyOpen = !onlyOpen; ob.classList.toggle("on", onlyOpen); ob.setAttribute("aria-pressed", String(onlyOpen)); draw(); if (window.MMEStats && onlyOpen) window.MMEStats.track("Open now filter"); });
-      var me = null, stop = null;
+      var me = null, stop = null, drawnAt = null, drawnT = 0;
       function locate() {
         var errBox = root.querySelector("#g-err");
         M.startLocating(function (msg) { errBox.textContent = msg; errBox.hidden = false; });
@@ -270,7 +270,10 @@
           var inArea = M.distance(p, { lat: 43.7375, lng: 7.4235 }) < 6000;
           pos = inArea ? p : null;
           if (inArea) root.querySelector("#g-sub").textContent = t("Sorted by distance from where you are now.");
-          draw();
+          // Phones send a new position every second or so. Only rebuild the list when you've actually moved
+          // (30 m) or it's been 20 seconds, so it doesn't jump about and reload its photos all the time.
+          var now = Date.now();
+          if (wantNearest || !drawnAt || (inArea && M.distance(p, drawnAt) > 30) || now - drawnT > 20000) { drawnAt = p; drawnT = now; draw(); }
           // After a tap on "Find the nearest": show where you are and jump to the list, nearest first.
           if (wantNearest) {
             wantNearest = false;
