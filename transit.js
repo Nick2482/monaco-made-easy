@@ -843,7 +843,10 @@
         '<div class="taxi-call"><a class="btn btn-red" href="tel:' + TAXI_TEL + '">' + tb("Call Taxi Monaco: {tel}", { tel: "+377 93 15 01 01" }) + "</a><p>" + tb("Day and night. There’s also the official **TAXI MONACO** app for Android and iPhone, with card payment and live tracking.") + "</p></div>" +
         '<aside class="note note-rule"><strong>' + tb("The border rule") + "</strong><p>" + tb("Monaco taxis can only pick you up in Monaco. French taxis, Uber and Bolt can drop you off in Monaco but can’t collect you there. So:") + "</p>" +
         '<ul class="rule-list"><li>' + tb("**In Monaco:** use a Monaco taxi, from a rank or by phone or app.") + "</li><li>" + tb("**In Beausoleil, Cap d’Ail or Roquebrune (France):** book a French taxi, or use Uber or Bolt, though cars can be scarce. A Monaco taxi can take you to these towns, but not collect you from them.") + "</li><li>" + tb("**From Nice airport to Monaco:** take a French taxi from the airport rank, which has a flat fare of about €95. **Going back to the airport** from Monaco, use a Monaco taxi.") + "</li></ul></aside>" +
-        '<h2 class="area-h">' + tb("Taxi ranks in Monaco") + '</h2><ul class="info-list">' +
+        '<h2 class="area-h">' + tb("Taxi ranks in Monaco") + '</h2>' +
+        '<img class="way-photo" src="img/taxi-casino-square.jpg" width="1200" height="675" loading="lazy" alt="' + tb("The taxi rank by Casino Square, with the Casino behind it") + '">' +
+        "<p>" + tb("The Casino Square rank is on Avenue de Monte-Carlo, just past the Casino. Look for the blue TAXIS sign. If no taxi is waiting, use the call box beside the rank or ring the number on the sign.") + "</p>" +
+        '<ul class="info-list">' +
         "<li>" + tb("**Casino Square** (Avenue de Monte-Carlo), 24 hours") + rankGo(0) + "</li><li>" + tb("**Monaco Monte-Carlo station**, 24 hours") + rankGo(1) + "</li><li><b>Place des Moulins</b>" + rankGo(2) + "</li><li><b>Avenue de la Costa</b></li><li><b>Fontvieille</b></li><li>" + tb("**Larvotto**, by the Méridien Beach Plaza") + rankGo(3) + "</li></ul>" +
         '<h2 class="area-h">' + tb("Taxis in Beausoleil (France)") + '</h2>' +
         '<img class="way-photo" src="img/taxi-beausoleil.jpg" width="1200" height="674" loading="lazy" alt="' + tb("The taxi rank sign in Beausoleil, with its phone number") + '">' +
