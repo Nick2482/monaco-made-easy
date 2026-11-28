@@ -13,7 +13,7 @@
     ["asian", "Asian"], ["local", "Monégasque and Niçois"], ["world", "World food"], ["beach", "Beach and sea view"], ["quick", "Burgers and quick bites"]];
   var COLOR = { hotel: "#1f3a5f", bakery: "#a0661a", shop: "#2f7a3d", tabac: "#6b4a2e", eat: "#9c3d54", cafe: "#7a5230", bar: "#8a2f6b", culture: "#0e7c86", beach: "#1c8fb8", view: "#5b7f2a", spa: "#8a5a9e", yacht: "#1f4e8c", broker: "#2b6a8f", club: "#7a4f1d", info: "#4a5d70" };
   var FREE = {};
-  var SUB = { museum: "Museum", gallery: "Art gallery", theatre: "Theatre", garden: "Garden", beach: "Beach", venue: "Exhibitions and events", chandlery: "Chandlery", harbour: "Harbour office", pub: "Pub", nightclub: "Nightclub",
+  var SUB = { motorsport: "Motorsport and souvenirs", museum: "Museum", gallery: "Art gallery", theatre: "Theatre", garden: "Garden", beach: "Beach", venue: "Exhibitions and events", chandlery: "Chandlery", harbour: "Harbour office", pub: "Pub", nightclub: "Nightclub",
     motor: "Motor club", yacht: "Yacht club", rowing: "Rowing club", tennis: "Tennis club", sailing: "Sailing club", hiking: "Hiking club", convenience: "Mini-market", pastry: "Pâtisserie", cocktail: "Cocktail bar", wine: "Wine bar", beachbar: "Beach bar",
     market: "Market", butcher: "Butcher and fine food", zoo: "Zoo", church: "Church", cemetery: "Historic cemetery", castle: "Castle", village: "Old village", tree: "Landmark", walk: "Coastal path", boats: "Boat sales and service", perfume: "Perfume house", cigars: "Cigar shop", presse: "Newsagent and tabac", bartabac: "Bar-tabac" };
   var CUISINE = { italian: "Italian", pizza: "Pizza", burger: "Burgers", mediterranean: "Mediterranean", french: "French", japanese: "Japanese", sushi: "Sushi",
@@ -110,7 +110,7 @@
     var esc = ui().esc, open = e.hx ? null : openNow(e.h), hrs = hoursLine(e);
     var webUrl = e.w && /^https?:\/\//.test(e.w) ? e.w : e.w ? "https://" + e.w : "";
     return '<li class="g-item' + (e.img ? " has-photo" : "") + '">' + (e.img ? '<img class="g-photo-item" src="' + esc(e.img) + '" width="1200" height="675" loading="lazy" alt="' + esc(t(e.n)) + '">' : "") + '<span class="step-ico" style="--c:' + COLOR[e.k] + '">' + ui().icon(e.k) + "</span><div>" +
-      "<strong>" + esc(t(e.n)) + (e.pick ? ' <b class="g-pick">★ ' + esc(t("Our pick")) + "</b>" : "") +
+      "<strong>" + esc(t(e.n)) + (e.pt ? ' <b class="g-pick">★ ' + esc(t("Partner")) + "</b>" : "") + (e.pick ? ' <b class="g-pick">★ ' + esc(t("Our pick")) + "</b>" : "") +
         (e.mich ? ' <b class="g-mich" title="' + esc(t(e.mich === 1 ? "1 Michelin star" : "{n} Michelin stars", { n: e.mich })) + '">' + new Array(e.mich + 1).join("★") + " Michelin</b>" : "") + "</strong><span>" + esc(subtitle(e)) + "</span>" +
       (e.d ? '<p class="g-desc">' + esc(t(e.d)) + "</p>" : "") +
       (hrs || open !== null ? '<span class="g-hours">' + (open === true ? '<b class="g-open">' + esc(t("Open now")) + "</b> " : open === false ? '<b class="g-shut">' + esc(t("Closed now")) + "</b> " : "") + esc(hrs) + "</span>" : "") +
@@ -234,7 +234,7 @@
           items.slice(0, 60).forEach(function (it) { if (!M.isFar(it.e)) it.w = M.walkTo(pos, it.e); });
           items.sort(function (a, b) { return (a.w ? a.w.minutes : 1e9) - (b.w ? b.w.minutes : 1e9) || a.d - b.d; });
         }
-        else items.sort(function (a, b) { return (b.e.mich || 0) - (a.e.mich || 0) || (b.e.star || 0) - (a.e.star || 0) || (b.e.hs || 0) - (a.e.hs || 0) || (b.e.d ? 1 : 0) - (a.e.d ? 1 : 0); });
+        else items.sort(function (a, b) { return (b.e.pt || 0) - (a.e.pt || 0) || (b.e.mich || 0) - (a.e.mich || 0) || (b.e.star || 0) - (a.e.star || 0) || (b.e.hs || 0) - (a.e.hs || 0) || (b.e.d ? 1 : 0) - (a.e.d ? 1 : 0); });
         // Open now: places we know are open first, then the ones whose hours we don't know (never hidden).
         if (onlyOpen) { var kn = items.filter(function (it) { return it.o === true; }), un = items.filter(function (it) { return it.o !== true; }); items = kn.concat(un); }
         // No location, no search: split by town, the best few of each, with a way to see the rest.
