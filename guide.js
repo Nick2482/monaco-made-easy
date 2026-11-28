@@ -269,7 +269,7 @@
           if (!me) me = L.marker([p.lat, p.lng], { icon: M.meIcon, interactive: false, zIndexOffset: 1000 }).addTo(map); else me.setLatLng([p.lat, p.lng]);
           var inArea = M.distance(p, { lat: 43.7375, lng: 7.4235 }) < 6000;
           pos = inArea ? p : null;
-          if (inArea) root.querySelector("#g-sub").textContent = t("Sorted by distance from where you are now.");
+          if (inArea) { var gs = root.querySelector("#g-sub"), gt = t("Sorted by distance from where you are now."); if (gs.textContent !== gt) gs.textContent = gt; }
           // Phones send a new position every second or so. Only rebuild the list when you've actually moved
           // (30 m) or it's been 20 seconds, so it doesn't jump about and reload its photos all the time.
           var now = Date.now();

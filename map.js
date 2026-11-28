@@ -336,8 +336,10 @@
           // Only jump to the person if they're actually in or near Monaco.
           var inArea = distance(pos, { lat: 43.7375, lng: 7.4235 }) < 6000;
           if (!centred && inArea) { map.setView([pos.lat, pos.lng], 17); centred = true; }
-          root.querySelector("#near-h").textContent = t("Nearest to you");
-          root.querySelector("#near-sub").textContent = inArea ? t("Sorted by distance from where you are now.") : t("You’re not in Monaco yet. When you are, this list sorts itself by what’s closest.");
+          // Only touch the text when it changes: rewriting it on every GPS tick makes it flicker (and Chrome's page translation redoes it each time).
+          var nh = root.querySelector("#near-h"), ns = root.querySelector("#near-sub"), nst = inArea ? t("Sorted by distance from where you are now.") : t("You’re not in Monaco yet. When you are, this list sorts itself by what’s closest.");
+          if (nh.textContent !== t("Nearest to you")) nh.textContent = t("Nearest to you");
+          if (ns.textContent !== nst) ns.textContent = nst;
           lastPos = inArea ? pos : null;
           // Only rebuild the list when you've moved 30 m or every 20 seconds, not on every GPS tick.
           var nowT = Date.now();
